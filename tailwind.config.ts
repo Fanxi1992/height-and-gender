@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,16 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				app: {
+					blue: '#4169E1',
+					darkBlue: '#3457CC',
+					lightBlue: '#67C6E3',
+					purple: '#9370DB',
+					darkPurple: '#7F5FCE',
+					gray: '#808080',
+					darkGray: '#505050',
+					lightGray: '#A0A0A0',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,11 +95,65 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'slide-in-right': {
+					'0%': { 
+						transform: 'translateX(100%)',
+						opacity: '0'
+					},
+					'100%': { 
+						transform: 'translateX(0)',
+						opacity: '1'
+					}
+				},
+				'slide-out-left': {
+					'0%': { 
+						transform: 'translateX(0)',
+						opacity: '1'
+					},
+					'100%': { 
+						transform: 'translateX(-100%)',
+						opacity: '0'
+					}
+				},
+				'slide-in-left': {
+					'0%': { 
+						transform: 'translateX(-100%)',
+						opacity: '0'
+					},
+					'100%': { 
+						transform: 'translateX(0)',
+						opacity: '1'
+					}
+				},
+				'slide-out-right': {
+					'0%': { 
+						transform: 'translateX(0)',
+						opacity: '1'
+					},
+					'100%': { 
+						transform: 'translateX(100%)',
+						opacity: '0'
+					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'fade-out': {
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out',
+				'slide-out-left': 'slide-out-left 0.3s ease-out',
+				'slide-in-left': 'slide-in-left 0.3s ease-out',
+				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out'
 			}
 		}
 	},

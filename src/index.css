@@ -1,11 +1,12 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -13,13 +14,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 228 62% 56%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 0 0% 50%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
     --accent: 210 40% 96.1%;
@@ -28,64 +29,19 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 30%;
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -96,6 +52,153 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-black text-white;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  input:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  .page-container {
+    @apply flex flex-col items-center justify-start min-h-screen w-full max-w-lg mx-auto px-5 py-10 relative overflow-hidden;
+  }
+  
+  .progress-dot {
+    @apply w-2 h-2 rounded-full mx-1;
+  }
+  
+  .progress-dot-active {
+    @apply w-8 h-2 rounded-full mx-1;
+  }
+
+  .progress-container {
+    @apply flex flex-row items-center justify-center mt-2 mb-4;
+  }
+  
+  .white-card {
+    @apply bg-white text-black rounded-3xl p-6 w-full flex flex-col items-center justify-center;
+  }
+  
+  .page-title {
+    @apply text-2xl font-bold mt-2 mb-4;
+  }
+  
+  .input-field {
+    @apply w-full p-4 rounded-full bg-[#303030] text-white placeholder-[#808080] mb-3 focus:ring-0 focus:ring-offset-0;
+  }
+  
+  .primary-button {
+    @apply w-full py-4 rounded-full bg-app-blue text-white font-medium transition-all duration-300 hover:bg-app-darkBlue active:scale-[0.98];
+  }
+  
+  .secondary-button {
+    @apply w-full py-4 rounded-full bg-[#505050] text-white font-medium transition-all duration-300 hover:bg-[#404040] active:scale-[0.98];
+  }
+}
+
+.page-transition-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.page-transition-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: all 300ms ease-in-out;
+}
+
+.page-transition-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: all 300ms ease-in-out;
+}
+
+.height-ruler {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ruler-marks {
+  position: absolute;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  transform-origin: center;
+  padding: 0 30px;
+}
+
+.ruler-mark {
+  position: relative;
+  width: 10px;
+  height: 1px;
+  background-color: #ccc;
+  margin: 2.5px 0;
+}
+
+.ruler-mark:nth-child(5n) {
+  width: 20px;
+}
+
+.ruler-mark:nth-child(10n) {
+  width: 30px;
+}
+
+.ruler-highlight {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 30px;
+  background-color: rgba(102, 126, 234, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.height-value {
+  position: absolute;
+  right: 30px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.ruler-selector {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #6C7AE6;
+  z-index: 2;
+}
+
+.ruler-indicator {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 24px;
+  background-color: #6C7AE6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  z-index: 3;
 }
