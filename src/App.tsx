@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import Login from "./pages/Login";
 import GenderSelection from "./pages/GenderSelection";
 import HeightSelection from "./pages/HeightSelection";
@@ -14,7 +14,6 @@ import BirthdateSelection from "./pages/BirthdateSelection";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
-import { isOnboardingCompleted } from "./utils/storage";
 
 const queryClient = new QueryClient();
 
@@ -29,17 +28,6 @@ const PageWrapper = ({ children }: { children: ReactNode }) => {
       </div>
     </PageTransition>
   );
-};
-
-// 路由守卫：检查是否已完成引导
-const RequireOnboarding = ({ children }: { children: ReactNode }) => {
-  const onboardingCompleted = isOnboardingCompleted();
-  
-  if (onboardingCompleted) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <>{children}</>;
 };
 
 const App = () => (
@@ -67,9 +55,7 @@ const App = () => (
             path="/gender" 
             element={
               <PageWrapper>
-                <RequireOnboarding>
-                  <GenderSelection />
-                </RequireOnboarding>
+                <GenderSelection />
               </PageWrapper>
             } 
           />
@@ -77,9 +63,7 @@ const App = () => (
             path="/height" 
             element={
               <PageWrapper>
-                <RequireOnboarding>
-                  <HeightSelection />
-                </RequireOnboarding>
+                <HeightSelection />
               </PageWrapper>
             } 
           />
@@ -87,9 +71,7 @@ const App = () => (
             path="/weight" 
             element={
               <PageWrapper>
-                <RequireOnboarding>
-                  <WeightSelection />
-                </RequireOnboarding>
+                <WeightSelection />
               </PageWrapper>
             } 
           />
@@ -97,9 +79,7 @@ const App = () => (
             path="/target-weight" 
             element={
               <PageWrapper>
-                <RequireOnboarding>
-                  <TargetWeightSelection />
-                </RequireOnboarding>
+                <TargetWeightSelection />
               </PageWrapper>
             } 
           />
@@ -107,9 +87,7 @@ const App = () => (
             path="/birthdate" 
             element={
               <PageWrapper>
-                <RequireOnboarding>
-                  <BirthdateSelection />
-                </RequireOnboarding>
+                <BirthdateSelection />
               </PageWrapper>
             } 
           />

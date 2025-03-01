@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGender, getHeight } from '../utils/storage';
 import StatusBar from '../components/StatusBar';
@@ -8,13 +8,6 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const gender = getGender();
   const height = getHeight();
-
-  useEffect(() => {
-    // 如果没有完成引导，重定向到登录页
-    if (!gender || !height) {
-      navigate('/login');
-    }
-  }, [gender, height, navigate]);
 
   return (
     <div className="page-container bg-black">
