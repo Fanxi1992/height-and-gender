@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
         <h1 className="text-2xl font-semibold">Hi, 李小明</h1>
       </div>
       
-      {/* Chatbot Circle */}
+      {/* Chatbot Circle - Replaced text with MessageCircle icon */}
       <div 
         ref={chatbotRef}
         className="relative w-32 h-32 mt-5 mb-2"
@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
         <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
         <div className="absolute inset-2 rounded-full border-2 border-white/50"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-blue-200">问我</span>
+          <MessageCircle size={40} className="text-blue-200" />
         </div>
       </div>
       
@@ -178,8 +178,8 @@ const HomePage: React.FC = () => {
           <p className="text-xs text-gray-400 mt-2">XXXXXXXXXXXXX</p>
         </div>
         
-        {/* Water Intake */}
-        <div className="bg-blue-400 rounded-xl p-4 flex flex-col h-48">
+        {/* Water Intake - Fixed overflow */}
+        <div className="bg-blue-400 rounded-xl p-4 flex flex-col h-48 overflow-hidden">
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-black">喝水</h3>
@@ -201,10 +201,10 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Calorie Tracking and Health Data Collection */}
+      {/* Calorie Tracking and Health Data Collection - Fixed overflows */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
         {/* Calorie Card */}
-        <div className="bg-white rounded-xl p-4 flex flex-col h-80">
+        <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden">
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-black">卡路里摄照</h3>
@@ -218,13 +218,13 @@ const HomePage: React.FC = () => {
             <p className="text-2xl font-bold text-black">300 千卡</p>
           </div>
           
-          <div className="flex-1 flex flex-col justify-center space-y-3">
+          <div className="flex-1 flex flex-col justify-center space-y-3 overflow-y-auto">
             {['早餐', '午餐', '晚餐', '小吃'].map((meal, index) => (
               <div key={index} className="flex items-center">
-                <div className="w-12 h-12 bg-gray-200 mr-3"></div>
-                <div className="flex-1">
-                  <p className="text-sm text-black">{meal}</p>
-                  <p className="text-xs text-gray-500">300 千卡</p>
+                <div className="w-12 h-12 bg-gray-200 mr-3 flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-black truncate">{meal}</p>
+                  <p className="text-xs text-gray-500 truncate">300 千卡</p>
                 </div>
               </div>
             ))}
@@ -232,7 +232,7 @@ const HomePage: React.FC = () => {
         </div>
         
         {/* Health Data Collection */}
-        <div className="bg-gray-700 rounded-xl p-4 flex flex-col h-80">
+        <div className="bg-gray-700 rounded-xl p-4 flex flex-col h-80 overflow-hidden">
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-white">健康数据采集</h3>
@@ -241,8 +241,8 @@ const HomePage: React.FC = () => {
             <ArrowRight size={16} className="text-white" />
           </div>
           
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs text-gray-400 max-w-full whitespace-normal">
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <p className="text-xs text-gray-400 w-full truncate">
               XXXXXXXXXXXXX<br />
               XXXXXXXXXXXXX<br />
               XXXXXXXXXXXXX<br />
@@ -261,14 +261,14 @@ const HomePage: React.FC = () => {
         </button>
       </div>
       
-      {/* Floating Chatbot Button */}
+      {/* Floating Chatbot Button - Updated to use MessageCircle icon */}
       {showFloatingButton && (
         <div 
           className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-purple-800 border-2 border-purple-300 flex items-center justify-center z-50"
           onTouchStart={handleChatbotPress}
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70"></div>
-          <span className="text-xs text-white z-10">问我</span>
+          <MessageCircle size={20} className="text-white z-10" />
         </div>
       )}
       
