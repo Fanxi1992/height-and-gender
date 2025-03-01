@@ -5,7 +5,7 @@ import StatusBar from '../components/StatusBar';
 import BackButton from '../components/BackButton';
 import SkipButton from '../components/SkipButton';
 import ProgressIndicator from '../components/ProgressIndicator';
-import { saveWeight } from '../utils/storage';
+import { saveWeight, getHeight } from '../utils/storage';
 
 const WeightSelection: React.FC = () => {
   const [weight, setWeight] = useState(70.0);
@@ -73,10 +73,10 @@ const WeightSelection: React.FC = () => {
   
   // 计算BMI
   const calculateBMI = () => {
-    const height = localStorage.getItem('app_user_height');
-    if (!height) return 0;
+    const height = getHeight();
+    if (!height) return "0";
     
-    const heightInMeters = parseInt(height) / 100;
+    const heightInMeters = height / 100;
     return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
   
@@ -127,7 +127,7 @@ const WeightSelection: React.FC = () => {
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">您的 BMI</span>
               <span className="font-bold flex">
-                {bmi} <span className={bmiStatusColor + " ml-2"}>{bmiStatus}</span>
+                {bmi} <span className={`${bmiStatusColor} ml-2`}>{bmiStatus}</span>
               </span>
             </div>
             
