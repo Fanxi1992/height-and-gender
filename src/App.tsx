@@ -11,6 +11,8 @@ import HeightSelection from "./pages/HeightSelection";
 import WeightSelection from "./pages/WeightSelection";
 import TargetWeightSelection from "./pages/TargetWeightSelection";
 import BirthdateSelection from "./pages/BirthdateSelection";
+import DiseaseSelection from "./pages/DiseaseSelection";
+import RiskReport from "./pages/RiskReport";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
@@ -88,6 +90,22 @@ const App = () => (
             element={
               <PageWrapper>
                 <BirthdateSelection />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/disease-selection" 
+            element={
+              <PageWrapper>
+                <DiseaseSelection />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/risk-report" 
+            element={
+              <PageWrapper>
+                <RiskReport />
               </PageWrapper>
             } 
           />

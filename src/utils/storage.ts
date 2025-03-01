@@ -1,4 +1,3 @@
-
 // 用户信息存储的键名
 export const STORAGE_KEYS = {
   GENDER: 'app_user_gender',
@@ -89,4 +88,15 @@ export const clearUserData = (): void => {
   localStorage.removeItem(STORAGE_KEYS.TARGET_WEIGHT);
   localStorage.removeItem(STORAGE_KEYS.BIRTHDATE);
   localStorage.removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+};
+
+// 保存疾病信息
+export const saveDiseases = (diseases: string[]) => {
+  localStorage.setItem('diseases', JSON.stringify(diseases));
+};
+
+// 获取疾病信息
+export const getDiseases = (): string[] => {
+  const diseases = localStorage.getItem('diseases');
+  return diseases ? JSON.parse(diseases) : [];
 };

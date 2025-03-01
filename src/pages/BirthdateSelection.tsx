@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -20,16 +19,15 @@ const BirthdateSelection: React.FC = () => {
   };
   const days = Array.from({length: getDaysInMonth(year, month)}, (_, i) => i + 1);
 
-  const handleNext = () => {
+  const handleNextClick = () => {
     saveBirthdate(year, month, day);
-    navigate('/dashboard');
+    navigate('/disease-selection');
   };
 
   const handleSkip = () => {
     navigate('/dashboard');
   };
   
-  // 计算年龄
   const calculateAge = () => {
     const birthDate = new Date(year, month - 1, day);
     const today = new Date();
@@ -129,7 +127,7 @@ const BirthdateSelection: React.FC = () => {
         </div>
 
         <button 
-          onClick={handleNext}
+          onClick={handleNextClick}
           className="mt-8 primary-button"
         >
           下一步
