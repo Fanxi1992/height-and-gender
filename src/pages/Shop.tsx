@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -438,7 +437,7 @@ const Shop: React.FC = () => {
                     <div className="flex items-center text-gray-400">
                       <span className="text-sm">
                         <img 
-                          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjggY3k9IjIxIiByPSIxIi8+PGNpcmNsZSBjeD0iMTkiIGN5PSIyMSIgcj0iMSIvPjxwYXRoIGQ9Ik0yIDJoNC4xMzRhMSAxIDAgMCAxIC44OS42bhsyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
+                          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjgiIGN5PSIyMSIgcj0iMSIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMjEiIHI9IjEiLz48cGF0aCBkPSJNMiAyaDQuMTM0YTEgMSAwIDAgMSAuODkuNmwyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
                           alt="cart"
                           className="w-4 h-4 inline-block"
                         />
@@ -540,31 +539,6 @@ const Shop: React.FC = () => {
           <span className="text-xs">我的</span>
         </div>
       </div>
-      
-      {/* CSS for vertical text */}
-      <style jsx>{`
-        .writing-vertical {
-          writing-mode: vertical-lr;
-          text-orientation: upright;
-          letter-spacing: -4px;
-        }
-        
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        .line-clamp-1 {
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };
