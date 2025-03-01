@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -61,8 +60,8 @@ const HomePage: React.FC = () => {
     >
       <StatusBar />
       
-      {/* Header Section with Avatar, History and Settings */}
-      <div className="w-full px-5 py-2 flex justify-between items-center">
+      {/* Header Section with Avatar, History and Settings - 增加顶部间距 */}
+      <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
         <div className="w-10 h-10 rounded-full bg-gray-300"></div>
         <div className="flex gap-2">
           <button className="px-4 py-1 bg-gray-700 rounded-full text-sm">历史对话</button>
@@ -72,27 +71,35 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Greeting Text */}
-      <div className="mt-3 mb-1 text-left w-full px-5">
+      {/* Greeting Text - 明确放在圆环上方 */}
+      <div className="mt-6 mb-8 text-center w-full px-5">
         <h1 className="text-2xl font-semibold">Hi, 李小明</h1>
       </div>
       
-      {/* Chatbot Circle - Replaced text with MessageCircle icon */}
+      {/* Chatbot Circle - 重新设计嵌套圆环 */}
       <div 
         ref={chatbotRef}
-        className="relative w-32 h-32 mt-5 mb-2"
+        className="relative w-40 h-40 mb-5"
         onTouchStart={handleChatbotPress}
       >
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-50 blur-lg"></div>
-        <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
-        <div className="absolute inset-2 rounded-full border-2 border-white/50"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <MessageCircle size={40} className="text-blue-200" />
+        {/* 发光背景效果 */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md"></div>
+        
+        {/* 外部圆环 - 使用白色边框 */}
+        <div className="absolute inset-0 rounded-full border-[3px] border-white/70"></div>
+        
+        {/* 中间圆环 - 使用白色边框 */}
+        <div className="absolute inset-[10px] rounded-full border-[3px] border-white/80"></div>
+        
+        {/* 内部圆形 - 深色背景 */}
+        <div className="absolute inset-[20px] rounded-full bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center shadow-inner">
+          {/* 显示消息图标 */}
+          <MessageCircle size={36} className="text-white" />
         </div>
       </div>
       
       {/* Text below Chatbot */}
-      <p className="text-gray-300 mb-5">健康问题随时问</p>
+      <p className="text-gray-300 mt-6 mb-8">健康问题随时问</p>
       
       {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
