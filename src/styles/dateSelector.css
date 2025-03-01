@@ -25,9 +25,19 @@
 
 /* 日期选择列样式 */
 .date-column {
-  width: 33.333%;
   position: relative;
   z-index: 2; /* 确保在指示器上方 */
+}
+
+/* 年份列宽度更大 */
+.date-column:nth-child(1) {
+  width: 50%;
+}
+
+/* 月份和日期列宽度稍小 */
+.date-column:nth-child(2),
+.date-column:nth-child(3) {
+  width: 25%;
 }
 
 /* 日期滚动区域样式 */
@@ -120,6 +130,8 @@
   justify-content: center;
   align-items: center;
   transition: background-color 0.3s;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .primary-button:active {

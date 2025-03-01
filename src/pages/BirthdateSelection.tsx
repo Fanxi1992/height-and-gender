@@ -11,6 +11,7 @@ const BirthdateSelection: React.FC = () => {
   const [year, setYear] = useState(2003);
   const [month, setMonth] = useState(1);
   const [day, setDay] = useState(1);
+  const [age, setAge] = useState(0);
   const navigate = useNavigate();
 
   const years = Array.from({length: 70}, (_, i) => 2006 - i);
@@ -27,6 +28,21 @@ const BirthdateSelection: React.FC = () => {
     }
   }, [year, month, day]);
 
+  const calculateAge = () => {
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      calculatedAge--;
+    }
+    return calculatedAge;
+  };
+  
+  useEffect(() => {
+    setAge(calculateAge());
+  }, [year, month, day]);
+
   const handleNextClick = () => {
     saveBirthdate(year, month, day);
     navigate('/disease-selection');
@@ -36,19 +52,6 @@ const BirthdateSelection: React.FC = () => {
     navigate('/dashboard');
   };
   
-  const calculateAge = () => {
-    const birthDate = new Date(year, month - 1, day);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-  
-  const age = calculateAge();
-
   const centerSelectedOption = (ref: React.RefObject<HTMLDivElement>, index: number) => {
     if (ref.current) {
       const container = ref.current;
