@@ -96,7 +96,7 @@ const HeightSelection: React.FC = () => {
             </div>
             <div className="ruler-selector" />
             <div className="ruler-indicator">
-              {height} 厘米
+              {height} cm
             </div>
           </div>
         </div>
