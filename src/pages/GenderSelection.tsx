@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -93,7 +92,7 @@ const GenderSelection: React.FC = () => {
 
         <button 
           onClick={handleNext}
-          className={`mt-8 ${selectedGender ? 'secondary-button' : 'secondary-button opacity-70'}`}
+          className={`mt-8 ${selectedGender ? 'primary-button' : 'secondary-button opacity-70'}`}
           disabled={!selectedGender}
         >
           下一步
