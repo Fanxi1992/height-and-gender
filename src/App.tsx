@@ -8,6 +8,9 @@ import { ReactNode, useEffect } from "react";
 import Login from "./pages/Login";
 import GenderSelection from "./pages/GenderSelection";
 import HeightSelection from "./pages/HeightSelection";
+import WeightSelection from "./pages/WeightSelection";
+import TargetWeightSelection from "./pages/TargetWeightSelection";
+import BirthdateSelection from "./pages/BirthdateSelection";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
@@ -76,6 +79,36 @@ const App = () => (
               <PageWrapper>
                 <RequireOnboarding>
                   <HeightSelection />
+                </RequireOnboarding>
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/weight" 
+            element={
+              <PageWrapper>
+                <RequireOnboarding>
+                  <WeightSelection />
+                </RequireOnboarding>
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/target-weight" 
+            element={
+              <PageWrapper>
+                <RequireOnboarding>
+                  <TargetWeightSelection />
+                </RequireOnboarding>
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/birthdate" 
+            element={
+              <PageWrapper>
+                <RequireOnboarding>
+                  <BirthdateSelection />
                 </RequireOnboarding>
               </PageWrapper>
             } 
