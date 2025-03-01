@@ -174,7 +174,7 @@ const BirthdateSelection: React.FC = () => {
 
         <button 
           onClick={handleNextClick}
-          className="mt-6 primary-button mx-4"
+          className="mt-6 primary-button"
         >
           下一步
         </button>

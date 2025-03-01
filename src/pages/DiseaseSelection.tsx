@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -54,20 +53,20 @@ const DiseaseSelection: React.FC = () => {
       
       <ProgressIndicator currentStep={6} totalSteps={7} />
       
-      <div className="mx-4 mt-8 bg-white rounded-3xl p-6 flex flex-col items-center">
+      <div className="mx-4 mt-8 bg-white rounded-3xl p-4 flex flex-col items-center">
         <p className="text-center text-gray-500 text-sm mb-1">
           完成评测，生成您的专属健康报告
         </p>
         
-        <h2 className="text-2xl font-bold mb-8 text-center">
+        <h2 className="text-2xl font-bold mb-6 text-center">
           是否有以下疾病
         </h2>
         
-        <div className="grid grid-cols-2 gap-4 w-full mb-6">
+        <div className="grid grid-cols-2 gap-3 w-full mb-5">
           {diseaseOptions.map((disease, index) => (
             <button
               key={index}
-              className={`py-3 px-4 rounded-full text-center ${
+              className={`py-2.5 px-4 rounded-full text-center ${
                 selectedDiseases.includes(disease)
                   ? 'bg-app-blue text-white'
                   : 'bg-gray-100 text-gray-700'
@@ -80,14 +79,14 @@ const DiseaseSelection: React.FC = () => {
         </div>
         
         <button
-          className="w-full py-3 px-4 rounded-full bg-gray-100 text-gray-700 mb-8"
+          className="w-full py-3 px-4 rounded-full bg-gray-100 text-gray-700 mb-5"
           onClick={handleNone}
         >
           以上均无
         </button>
       </div>
       
-      <div className="mx-4 mt-auto mb-2 bg-[#26355A] rounded-3xl p-4 flex items-center">
+      <div className="mx-4 mt-6 mb-4 bg-[#26355A] rounded-3xl p-4 flex items-center">
         <div className="w-16 h-16 mr-4 flex-shrink-0">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center text-white text-xs">
             智能
@@ -98,14 +97,12 @@ const DiseaseSelection: React.FC = () => {
         </p>
       </div>
       
-      <div className="px-4 mb-12">
-        <button
-          onClick={handleNext}
-          className="w-full py-4 bg-gray-500 text-white rounded-full text-lg font-medium"
-        >
-          下一步
-        </button>
-      </div>
+      <button 
+        onClick={handleNext}
+        className="mt-6 primary-button mx-4 mb-12"
+      >
+        下一步
+      </button>
     </div>
   );
 };

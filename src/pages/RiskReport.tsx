@@ -62,14 +62,13 @@ const RiskReport: React.FC = () => {
         </p>
       </div>
       
-      <div className="px-4 mb-12">
         <button
           onClick={handleExplore}
-          className="w-full py-4 bg-blue-500 text-white rounded-full text-lg font-medium"
+          className="mt-6 primary-button"
         >
           开始探索吧
         </button>
-      </div>
+
     </div>
   );
 };
