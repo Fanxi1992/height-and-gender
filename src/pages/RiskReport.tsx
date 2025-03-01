@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -24,16 +23,16 @@ const RiskReport: React.FC = () => {
       
       <ProgressIndicator currentStep={7} totalSteps={7} />
       
-      <div className="mx-4 mt-8 bg-white rounded-3xl p-6 flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+      <div className="mx-4 mt-4 bg-white rounded-3xl p-6 flex flex-col items-center">
+        <h2 className="text-2xl font-bold mb-4 text-center">
           潜在疾病风险报告
         </h2>
         
-        <div className="w-full mb-6">
+        <div className="w-full mb-4">
           <img 
             src="/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png" 
             alt="Disease Risk Visualization" 
-            className="w-full h-auto"
+            className="w-[90%] h-auto mx-auto"
           />
         </div>
         
@@ -51,7 +50,7 @@ const RiskReport: React.FC = () => {
         </div>
       </div>
       
-      <div className="mx-4 mt-auto mb-2 bg-[#26355A] rounded-3xl p-4 flex items-center">
+      <div className="mx-4 mt-8 bg-[#26355A] rounded-3xl p-4 flex items-center">
         <div className="w-16 h-16 mr-4 flex-shrink-0">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center text-white text-xs">
             智能
