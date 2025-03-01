@@ -16,6 +16,7 @@ import RiskReport from "./pages/RiskReport";
 import HomePage from "./pages/HomePage";
 import HealthRiskReport from "./pages/HealthRiskReport";
 import HealthTrajectory from "./pages/HealthTrajectory";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -132,6 +133,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <HealthTrajectory />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/shop" 
+            element={
+              <PageWrapper>
+                <Shop />
               </PageWrapper>
             } 
           />
