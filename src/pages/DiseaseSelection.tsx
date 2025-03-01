@@ -30,6 +30,12 @@ const DiseaseSelection: React.FC = () => {
     navigate('/risk-report');
   };
   
+  const handleSkip = () => {
+    // Save empty array and skip to the next page
+    saveDiseases([]);
+    navigate('/risk-report');
+  };
+  
   const handleNone = () => {
     setSelectedDiseases([]);
     saveDiseases([]);
@@ -43,7 +49,7 @@ const DiseaseSelection: React.FC = () => {
       <div className="mt-4 px-4 flex justify-between items-center">
         <BackButton />
         <h1 className="text-lg font-medium text-white">建立个人报告</h1>
-        <SkipButton />
+        <SkipButton onClick={handleSkip} />
       </div>
       
       <ProgressIndicator currentStep={6} totalSteps={7} />
