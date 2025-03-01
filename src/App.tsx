@@ -13,7 +13,7 @@ import TargetWeightSelection from "./pages/TargetWeightSelection";
 import BirthdateSelection from "./pages/BirthdateSelection";
 import DiseaseSelection from "./pages/DiseaseSelection";
 import RiskReport from "./pages/RiskReport";
-import Dashboard from "./pages/Dashboard";
+import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -110,10 +110,10 @@ const App = () => (
             } 
           />
           <Route 
-            path="/dashboard" 
+            path="/home" 
             element={
               <PageWrapper>
-                <Dashboard />
+                <HomePage />
               </PageWrapper>
             } 
           />

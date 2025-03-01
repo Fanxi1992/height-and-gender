@@ -9,7 +9,7 @@ const RiskReport: React.FC = () => {
   const navigate = useNavigate();
   
   const handleExplore = () => {
-    navigate('/dashboard');
+    navigate('/home');
   };
 
   return (
