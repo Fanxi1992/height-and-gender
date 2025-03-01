@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -10,7 +9,7 @@ import { saveTargetWeight } from '../utils/storage';
 const TargetWeightSelection: React.FC = () => {
   const [targetWeight, setTargetWeight] = useState(50.0);
   const rulerRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef<number | null>(null);
+  const dragStartX = useRef<number | null>(null);
   const initialWeight = useRef<number>(50.0);
   const navigate = useNavigate();
 
@@ -18,12 +17,12 @@ const TargetWeightSelection: React.FC = () => {
   const generateMarks = () => {
     const marks = [];
     for (let i = 30; i <= 120; i++) {
+      const isMainMark = i % 5 === 0;
       marks.push(
-        <div key={i} className="ruler-mark relative">
-          {i % 10 === 0 && (
-            <span className="height-value">{i}</span>
-          )}
-        </div>
+        <div 
+          key={i} 
+          className={`ruler-mark ${isMainMark ? 'h-4' : 'h-2'} w-px bg-gray-300 mx-[3px] relative`}
+        />
       );
     }
     return marks;
@@ -31,17 +30,17 @@ const TargetWeightSelection: React.FC = () => {
 
   // 处理拖动事件
   const handleTouchStart = (e: React.TouchEvent) => {
-    dragStartY.current = e.touches[0].clientY;
+    dragStartX.current = e.touches[0].clientX;
     initialWeight.current = targetWeight;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (dragStartY.current === null) return;
+    if (dragStartX.current === null) return;
     
-    const touchY = e.touches[0].clientY;
-    const diff = dragStartY.current - touchY;
+    const touchX = e.touches[0].clientX;
+    const diff = touchX - dragStartX.current;
     
-    // 每移动10px改变1kg的体重
+    // 每移动5px改变0.1kg的体重
     const weightChange = Math.round(diff / 5) / 10;
     let newWeight = initialWeight.current + weightChange;
     
@@ -53,13 +52,13 @@ const TargetWeightSelection: React.FC = () => {
     
     // 移动刻度尺
     if (rulerRef.current) {
-      const offset = (50 - newWeight) * 5; // 每1kg移动5px
-      rulerRef.current.style.transform = `translateY(${offset}px)`;
+      const offset = (newWeight - 50) * 5; // 每1kg移动5px
+      rulerRef.current.style.transform = `translateX(${-offset}px)`;
     }
   };
 
   const handleTouchEnd = () => {
-    dragStartY.current = null;
+    dragStartX.current = null;
   };
 
   const handleNext = () => {
@@ -97,18 +96,28 @@ const TargetWeightSelection: React.FC = () => {
           <p className="text-gray-500 text-sm text-center mb-2">完成评测，生成您的专属健康报告</p>
           <h2 className="text-center text-2xl font-bold mb-6">您的目标体重是</h2>
 
+          <div className="text-center mb-6">
+            <span className="text-4xl font-bold">{targetWeight.toFixed(1)}</span>
+            <span className="text-xl ml-2">公斤</span>
+          </div>
+
           <div 
-            className="weight-ruler"
+            className="weight-ruler relative h-24 w-full overflow-hidden mb-6"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div ref={rulerRef} className="ruler-marks">
+            <div className="absolute w-full h-[1px] bg-gray-300 top-12"></div>
+            <div className="absolute left-1/2 w-[3px] h-8 bg-purple-500 top-4 -translate-x-1/2 rounded-full"></div>
+            
+            <div ref={rulerRef} className="absolute flex items-start top-12 left-1/2 transform -translate-x-1/2">
               {generateMarks()}
             </div>
-            <div className="ruler-selector" />
-            <div className="ruler-indicator">
-              {targetWeight.toFixed(1)} 公斤
+            
+            <div className="flex justify-between absolute bottom-0 w-full px-8">
+              <span className="text-gray-500">{Math.floor(targetWeight) - 1}</span>
+              <span className="text-gray-500">{Math.floor(targetWeight)}</span>
+              <span className="text-gray-500">{Math.floor(targetWeight) + 1}</span>
             </div>
           </div>
         </div>
