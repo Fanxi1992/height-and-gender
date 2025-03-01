@@ -14,6 +14,8 @@ import BirthdateSelection from "./pages/BirthdateSelection";
 import DiseaseSelection from "./pages/DiseaseSelection";
 import RiskReport from "./pages/RiskReport";
 import HomePage from "./pages/HomePage";
+import HealthRiskReport from "./pages/HealthRiskReport";
+import HealthTrajectory from "./pages/HealthTrajectory";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -114,6 +116,22 @@ const App = () => (
             element={
               <PageWrapper>
                 <HomePage />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/health-risk-report" 
+            element={
+              <PageWrapper>
+                <HealthRiskReport />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/health-trajectory" 
+            element={
+              <PageWrapper>
+                <HealthTrajectory />
               </PageWrapper>
             } 
           />

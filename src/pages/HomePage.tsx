@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import { ArrowRight, Plus, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [showFloatingButton, setShowFloatingButton] = useState(false);
   const chatbotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,14 @@ const HomePage: React.FC = () => {
     { day: '周二', date: '25', active: false },
     { day: '周三', date: '26', active: false },
   ];
+
+  const goToHealthRiskReport = () => {
+    navigate('/health-risk-report');
+  };
+
+  const goToHealthTrajectory = () => {
+    navigate('/health-trajectory');
+  };
 
   return (
     <div 
@@ -142,7 +152,10 @@ const HomePage: React.FC = () => {
       {/* Health Report Cards Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
         {/* Health Risk Report */}
-        <div className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32">
+        <div 
+          className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer"
+          onClick={goToHealthRiskReport}
+        >
           <div className="flex justify-between items-start mb-auto">
             <h3 className="text-sm font-medium text-black">健康风险报告</h3>
             <ArrowRight size={16} className="text-black" />
@@ -153,7 +166,10 @@ const HomePage: React.FC = () => {
         </div>
         
         {/* Health Progress */}
-        <div className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32">
+        <div 
+          className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer"
+          onClick={goToHealthTrajectory}
+        >
           <div className="flex justify-between items-start mb-auto">
             <h3 className="text-sm font-medium text-white">健康轨迹</h3>
             <ArrowRight size={16} className="text-white" />
