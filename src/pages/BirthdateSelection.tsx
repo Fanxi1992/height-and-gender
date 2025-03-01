@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import BackButton from '../components/BackButton';
 import SkipButton from '../components/SkipButton';
 import ProgressIndicator from '../components/ProgressIndicator';
 import { saveBirthdate } from '../utils/storage';
+import '../styles/dateSelector.css';
 
 const BirthdateSelection: React.FC = () => {
   const [year, setYear] = useState(2003);
@@ -18,6 +19,13 @@ const BirthdateSelection: React.FC = () => {
     return new Date(year, month, 0).getDate();
   };
   const days = Array.from({length: getDaysInMonth(year, month)}, (_, i) => i + 1);
+
+  useEffect(() => {
+    const maxDays = getDaysInMonth(year, month);
+    if (day > maxDays) {
+      setDay(maxDays);
+    }
+  }, [year, month, day]);
 
   const handleNextClick = () => {
     saveBirthdate(year, month, day);
@@ -41,6 +49,44 @@ const BirthdateSelection: React.FC = () => {
   
   const age = calculateAge();
 
+  const centerSelectedOption = (ref: React.RefObject<HTMLDivElement>, index: number) => {
+    if (ref.current) {
+      const container = ref.current;
+      const element = container.children[index] as HTMLElement;
+      if (element) {
+        const containerHeight = container.clientHeight;
+        const elementHeight = element.clientHeight;
+        const scrollTop = element.offsetTop - (containerHeight / 2) + (elementHeight / 2);
+        container.scrollTop = scrollTop;
+      }
+    }
+  };
+
+  const yearScrollRef = React.useRef<HTMLDivElement>(null);
+  const monthScrollRef = React.useRef<HTMLDivElement>(null);
+  const dayScrollRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const yearIndex = years.findIndex(y => y === year);
+    if (yearIndex !== -1) {
+      centerSelectedOption(yearScrollRef, yearIndex);
+    }
+  }, [year, years]);
+
+  useEffect(() => {
+    const monthIndex = months.findIndex(m => m === month);
+    if (monthIndex !== -1) {
+      centerSelectedOption(monthScrollRef, monthIndex);
+    }
+  }, [month, months]);
+
+  useEffect(() => {
+    const dayIndex = days.findIndex(d => d === day);
+    if (dayIndex !== -1) {
+      centerSelectedOption(dayScrollRef, dayIndex);
+    }
+  }, [day, days]);
+
   return (
     <div className="page-container bg-black">
       <StatusBar />
@@ -48,21 +94,21 @@ const BirthdateSelection: React.FC = () => {
       <SkipButton onClick={handleSkip} />
 
       <div className="mt-16 w-full">
-        <h1 className="text-center text-xl font-medium">建立个人报告</h1>
+        <h1 className="text-center text-xl font-medium text-white">建立个人报告</h1>
         <ProgressIndicator currentStep={5} totalSteps={7} />
 
         <div className="white-card min-h-[420px]">
           <p className="text-gray-500 text-sm text-center mb-2">完成评测，生成您的专属健康报告</p>
           <h2 className="text-center text-2xl font-bold mb-6">您的出生日期是</h2>
 
-          <div className="date-selector flex justify-between px-6 mt-10">
+          <div className="date-selector-container">
             {/* 年份选择器 */}
-            <div className="flex-1 overflow-hidden relative">
-              <div className="date-scrollable h-40 overflow-y-auto flex flex-col items-center">
+            <div className="date-column">
+              <div className="date-scrollable" ref={yearScrollRef}>
                 {years.map((y) => (
                   <div 
                     key={y} 
-                    className={`py-2 w-full text-center ${y === year ? 'text-black font-bold text-lg' : 'text-gray-300'}`}
+                    className={`date-option ${y === year ? 'selected' : ''}`}
                     onClick={() => setYear(y)}
                   >
                     {y}年
@@ -72,12 +118,12 @@ const BirthdateSelection: React.FC = () => {
             </div>
             
             {/* 月份选择器 */}
-            <div className="flex-1 overflow-hidden relative">
-              <div className="date-scrollable h-40 overflow-y-auto flex flex-col items-center">
+            <div className="date-column">
+              <div className="date-scrollable" ref={monthScrollRef}>
                 {months.map((m) => (
                   <div 
                     key={m} 
-                    className={`py-2 w-full text-center ${m === month ? 'text-black font-bold text-lg' : 'text-gray-300'}`}
+                    className={`date-option ${m === month ? 'selected' : ''}`}
                     onClick={() => setMonth(m)}
                   >
                     {m}月
@@ -87,12 +133,12 @@ const BirthdateSelection: React.FC = () => {
             </div>
             
             {/* 日期选择器 */}
-            <div className="flex-1 overflow-hidden relative">
-              <div className="date-scrollable h-40 overflow-y-auto flex flex-col items-center">
+            <div className="date-column">
+              <div className="date-scrollable" ref={dayScrollRef}>
                 {days.map((d) => (
                   <div 
                     key={d} 
-                    className={`py-2 w-full text-center ${d === day ? 'text-black font-bold text-lg' : 'text-gray-300'}`}
+                    className={`date-option ${d === day ? 'selected' : ''}`}
                     onClick={() => setDay(d)}
                   >
                     {d}日
@@ -104,31 +150,28 @@ const BirthdateSelection: React.FC = () => {
           
           <div className="mt-10 mx-4 p-6 bg-gray-50 rounded-xl">
             <div className="flex items-center">
-              <div className="w-8 h-16 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
-                <span className="text-white text-xl font-bold">{age}</span>
+              <div className="age-indicator">
+                <span className="text-white text-2xl font-bold">{age}</span>
               </div>
-              <span className="text-2xl">岁</span>
+              <span className="text-2xl ml-4">岁</span>
             </div>
             
-            <p className="mt-4 text-sm text-gray-600 leading-relaxed">
+            <p className="mt-4 text-gray-600">
               基础代谢高，身体活动水平高，拥有体重管理的先天优势！
             </p>
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-[#3457CC] rounded-full flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-[#4169E1] flex items-center justify-center mr-3">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L16 6H13V16H11V6H8L12 2Z" fill="white"/>
-              <path d="M21 14V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V14H5V19H19V14H21Z" fill="white"/>
-            </svg>
+        <div className="info-button">
+          <div className="info-icon">
+            <span className="text-white text-sm">问询</span>
           </div>
           <p className="text-sm text-white">年龄与基础代谢水平和身体活动水平息息相关</p>
         </div>
 
         <button 
           onClick={handleNextClick}
-          className="mt-8 primary-button"
+          className="mt-6 primary-button mx-4"
         >
           下一步
         </button>
