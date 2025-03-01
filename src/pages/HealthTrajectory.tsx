@@ -54,7 +54,7 @@ const HealthTrajectory: React.FC = () => {
       <StatusBar />
       
       {/* Header */}
-      <div className="w-full flex items-center justify-center relative py-4">
+      <div className="w-full flex items-center justify-center relative py-4 mt-8">
         <button 
           className="absolute left-4 p-2" 
           onClick={handleBack}

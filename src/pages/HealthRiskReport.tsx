@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -19,8 +18,8 @@ const HealthRiskReport: React.FC = () => {
     <div className="flex flex-col items-center min-h-screen w-full bg-black text-white">
       <StatusBar />
       
-      {/* Header */}
-      <div className="w-full flex items-center justify-center relative py-4">
+      {/* Header - 增加了上方间距 */}
+      <div className="w-full flex items-center justify-center relative py-4 mt-8">
         <button 
           className="absolute left-4 p-2" 
           onClick={handleBack}
@@ -38,24 +37,16 @@ const HealthRiskReport: React.FC = () => {
         <span className="text-xs text-gray-500">5$</span>
       </div>
       
-      {/* Main Disease Network Visualization */}
+      {/* Main Disease Network Visualization - 更新了图片路径 */}
       <div className="w-full px-5 mt-2 mb-4 flex-1">
         <img 
-          src="/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png" 
+          src="/健康风险报告图.jpg" 
           alt="Disease Network Visualization" 
           className="w-full h-auto"
         />
       </div>
       
-      {/* Bottom Content */}
-      <div className="w-full px-5 mb-4">
-        <div className="flex">
-          <div className="flex flex-col items-start">
-            <span className="text-5xl font-bold">02</span>
-            <span className="text-5xl font-bold">04</span>
-          </div>
-        </div>
-      </div>
+      {/* 删除了数字02 04部分 */}
       
       {/* Bottom Button */}
       <div className="w-full px-5 mb-20">
