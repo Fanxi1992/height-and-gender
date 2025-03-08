@@ -16,6 +16,7 @@ import HomePage from "./pages/HomePage";
 import HealthRiskReport from "./pages/HealthRiskReport";
 import HealthTrajectory from "./pages/HealthTrajectory";
 import Shop from "./pages/Shop";
+import KnowledgeBase from "./pages/KnowledgeBase";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -164,6 +165,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <Shop />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/knowledge-base" 
+            element={
+              <PageWrapper>
+                <KnowledgeBase />
               </PageWrapper>
             } 
           />
