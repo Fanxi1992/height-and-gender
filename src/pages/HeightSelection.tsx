@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -31,11 +30,15 @@ const HeightSelection: React.FC = () => {
 
   // 处理拖动事件
   const handleTouchStart = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     dragStartY.current = e.touches[0].clientY;
     initialHeight.current = height;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     if (dragStartY.current === null) return;
     
     const touchY = e.touches[0].clientY;
@@ -58,7 +61,9 @@ const HeightSelection: React.FC = () => {
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     dragStartY.current = null;
   };
 

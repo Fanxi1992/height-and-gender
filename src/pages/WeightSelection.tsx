@@ -30,11 +30,15 @@ const WeightSelection: React.FC = () => {
 
   // 处理拖动事件
   const handleTouchStart = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     dragStartX.current = e.touches[0].clientX;
     initialWeight.current = weight;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     if (dragStartX.current === null) return;
     
     const touchX = e.touches[0].clientX;
@@ -57,7 +61,9 @@ const WeightSelection: React.FC = () => {
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // 阻止默认滚动行为
+    e.preventDefault();
     dragStartX.current = null;
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import BackButton from '../components/BackButton';
@@ -65,9 +65,94 @@ const BirthdateSelection: React.FC = () => {
     }
   };
 
-  const yearScrollRef = React.useRef<HTMLDivElement>(null);
-  const monthScrollRef = React.useRef<HTMLDivElement>(null);
-  const dayScrollRef = React.useRef<HTMLDivElement>(null);
+  // 获取滚动停止后中间位置的选项
+  const getMiddleOption = (container: HTMLDivElement): number => {
+    const containerRect = container.getBoundingClientRect();
+    const containerMiddle = containerRect.top + containerRect.height / 2;
+    
+    let closestOption = -1;
+    let minDistance = Infinity;
+    
+    Array.from(container.children).forEach((child, index) => {
+      const childRect = child.getBoundingClientRect();
+      const childMiddle = childRect.top + childRect.height / 2;
+      const distance = Math.abs(childMiddle - containerMiddle);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestOption = index;
+      }
+    });
+    
+    return closestOption;
+  };
+
+  const yearScrollRef = useRef<HTMLDivElement>(null);
+  const monthScrollRef = useRef<HTMLDivElement>(null);
+  const dayScrollRef = useRef<HTMLDivElement>(null);
+  
+  // 滚动定时器引用
+  const yearScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const monthScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const dayScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 添加滚动事件处理函数
+  const handleScroll = (
+    scrollRef: React.RefObject<HTMLDivElement>,
+    timerRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    setValue: (value: number) => void,
+    values: number[]
+  ) => {
+    return () => {
+      // 清除之前的定时器
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      
+      // 设置新的定时器，滚动停止后执行
+      timerRef.current = setTimeout(() => {
+        if (scrollRef.current) {
+          const middleIndex = getMiddleOption(scrollRef.current);
+          if (middleIndex >= 0 && middleIndex < values.length) {
+            setValue(values[middleIndex]);
+          }
+        }
+      }, 150); // 150ms 延迟，等待滚动停止
+    };
+  };
+
+  // 设置滚动事件监听器
+  useEffect(() => {
+    const yearScrollElement = yearScrollRef.current;
+    const monthScrollElement = monthScrollRef.current;
+    const dayScrollElement = dayScrollRef.current;
+    
+    if (yearScrollElement) {
+      const handleYearScroll = handleScroll(yearScrollRef, yearScrollTimerRef, setYear, years);
+      yearScrollElement.addEventListener('scroll', handleYearScroll);
+      return () => yearScrollElement.removeEventListener('scroll', handleYearScroll);
+    }
+  }, [years]);
+  
+  useEffect(() => {
+    const monthScrollElement = monthScrollRef.current;
+    
+    if (monthScrollElement) {
+      const handleMonthScroll = handleScroll(monthScrollRef, monthScrollTimerRef, setMonth, months);
+      monthScrollElement.addEventListener('scroll', handleMonthScroll);
+      return () => monthScrollElement.removeEventListener('scroll', handleMonthScroll);
+    }
+  }, [months]);
+  
+  useEffect(() => {
+    const dayScrollElement = dayScrollRef.current;
+    
+    if (dayScrollElement) {
+      const handleDayScroll = handleScroll(dayScrollRef, dayScrollTimerRef, setDay, days);
+      dayScrollElement.addEventListener('scroll', handleDayScroll);
+      return () => dayScrollElement.removeEventListener('scroll', handleDayScroll);
+    }
+  }, [days]);
 
   useEffect(() => {
     const yearIndex = years.findIndex(y => y === year);
@@ -112,7 +197,6 @@ const BirthdateSelection: React.FC = () => {
                   <div 
                     key={y} 
                     className={`date-option ${y === year ? 'selected' : ''}`}
-                    onClick={() => setYear(y)}
                   >
                     {y}年
                   </div>
@@ -127,7 +211,6 @@ const BirthdateSelection: React.FC = () => {
                   <div 
                     key={m} 
                     className={`date-option ${m === month ? 'selected' : ''}`}
-                    onClick={() => setMonth(m)}
                   >
                     {m}月
                   </div>
@@ -142,7 +225,6 @@ const BirthdateSelection: React.FC = () => {
                   <div 
                     key={d} 
                     className={`date-option ${d === day ? 'selected' : ''}`}
-                    onClick={() => setDay(d)}
                   >
                     {d}日
                   </div>

@@ -163,6 +163,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  touch-action: none;
 }
 
 .ruler-marks {
@@ -263,4 +264,14 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 添加体重选择器样式 */
+.weight-ruler {
+  position: relative;
+  height: 6rem;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  touch-action: none; /* 防止触发浏览器默认的滚动行为 */
 }
