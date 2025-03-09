@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { Search, ShoppingCart, Menu } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // 商品分类
@@ -345,6 +345,7 @@ const arrangeProducts = (products: any[]) => {
 const Shop: React.FC = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const categoriesRef = useRef<HTMLDivElement>(null);
   const [categories, setCategories] = useState(categoryList);
   const [products, setProducts] = useState(productList);
@@ -373,6 +374,10 @@ const Shop: React.FC = () => {
         setFilteredProducts(filtered);
       }
     }
+    
+    // 重置搜索
+    setSearchValue('');
+    setIsSearchActive(false);
   };
 
   // 处理滚动分类
@@ -404,6 +409,123 @@ const Shop: React.FC = () => {
         return 'h-64';
     }
   };
+  
+  // 搜索关键词计算相似度评分 (用于排序)
+  const calculateRelevanceScore = (product: any, keyword: string) => {
+    if (!keyword) return 0;
+    
+    const lowercaseKeyword = keyword.toLowerCase();
+    let score = 0;
+    
+    // 名称匹配得分
+    const nameLower = product.name.toLowerCase();
+    if (nameLower === lowercaseKeyword) {
+      score += 100; // 完全匹配名称
+    } else if (nameLower.startsWith(lowercaseKeyword)) {
+      score += 80; // 名称开头匹配
+    } else if (nameLower.includes(lowercaseKeyword)) {
+      score += 60; // 名称包含关键词
+    }
+    
+    // 标签匹配得分
+    const matchingTags = product.tags.filter((tag: string) => 
+      tag.toLowerCase().includes(lowercaseKeyword)
+    );
+    score += matchingTags.length * 40; // 每个匹配标签加分
+    
+    // 完全匹配标签额外加分
+    const exactMatchTags = product.tags.filter((tag: string) => 
+      tag.toLowerCase() === lowercaseKeyword
+    );
+    score += exactMatchTags.length * 30;
+    
+    // 类别匹配得分
+    const matchingCategories = product.category.filter((cat: string) => 
+      cat.toLowerCase().includes(lowercaseKeyword)
+    );
+    score += matchingCategories.length * 20;
+    
+    // 热门商品加分
+    if (product.hot) {
+      score += 15;
+    }
+    
+    // 销量影响 (热销商品略微提升排名)
+    score += Math.min(product.sales / 10, 10);
+    
+    return score;
+  };
+  
+  // 处理搜索
+  const handleSearch = () => {
+    if (!searchValue.trim()) {
+      // 如果搜索框为空，恢复到原有分类筛选结果
+      const activeCategory = categories.find(category => category.active);
+      if (activeCategory) {
+        handleCategoryClick(activeCategory.id);
+      }
+      setIsSearchActive(false);
+      return;
+    }
+    
+    setIsSearchActive(true);
+    
+    // 获取所有可能匹配的商品
+    const searchResults = products.filter(product => {
+      const keyword = searchValue.toLowerCase();
+      
+      // 检查商品名称是否包含关键词
+      const nameMatches = product.name.toLowerCase().includes(keyword);
+      
+      // 检查标签是否包含关键词
+      const tagMatches = product.tags.some((tag: string) => 
+        tag.toLowerCase().includes(keyword)
+      );
+      
+      // 检查分类是否包含关键词
+      const categoryMatches = product.category.some((cat: string) => 
+        cat.toLowerCase().includes(keyword)
+      );
+      
+      return nameMatches || tagMatches || categoryMatches;
+    });
+    
+    // 计算每个商品的相关性得分并排序
+    const scoredProducts = searchResults.map(product => ({
+      ...product,
+      relevanceScore: calculateRelevanceScore(product, searchValue)
+    }));
+    
+    // 按照相关性得分降序排序
+    const sortedProducts = scoredProducts.sort((a, b) => 
+      b.relevanceScore - a.relevanceScore
+    );
+    
+    setFilteredProducts(sortedProducts);
+  };
+  
+  // 清除搜索
+  const clearSearch = () => {
+    setSearchValue('');
+    setIsSearchActive(false);
+    
+    // 恢复到活跃分类的筛选结果
+    const activeCategory = categories.find(category => category.active);
+    if (activeCategory) {
+      handleCategoryClick(activeCategory.id);
+    }
+  };
+  
+  // 监听搜索输入变化，实时更新搜索结果
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchValue) {
+        handleSearch();
+      }
+    }, 300); // 300ms防抖
+    
+    return () => clearTimeout(debounceTimer);
+  }, [searchValue]);
 
   return (
     <div className="flex flex-col h-screen w-full bg-black text-white relative">
@@ -444,124 +566,159 @@ const Shop: React.FC = () => {
         </div>
       </div>
       
+      {/* 搜索状态提示 */}
+      {isSearchActive && (
+        <div className="px-4 flex items-center mb-2">
+          <div className="flex-1 text-sm text-blue-400">
+            搜索: "{searchValue}" ({filteredProducts.length} 个结果)
+          </div>
+          <button 
+            onClick={clearSearch}
+            className="flex items-center text-xs text-gray-400"
+          >
+            <X size={14} className="mr-1" />
+            清除搜索
+          </button>
+        </div>
+      )}
+      
       {/* 商品列表 - 瀑布流布局 */}
       <div className="flex-1 overflow-y-auto px-2 pb-24">
-        <div className="flex space-x-2">
-          {/* 左列 */}
-          <div className="w-1/2 flex flex-col space-y-2">
-            {leftColumn.map((product) => (
-              <div 
-                key={product.id}
-                className={cn(
-                  "bg-white rounded-xl overflow-hidden relative",
-                  getProductHeightClass(product.size)
-                )}
-              >
-                {product.hot && (
-                  <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                    爆品
-                  </div>
-                )}
-                <div className="w-full h-2/3 bg-gray-200 relative overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {product.size === 'medium' && product.id === 1 && (
-                    <div className="absolute inset-0 flex flex-col justify-center items-center">
-                      <div className="text-2xl font-bold text-white writing-vertical">
-                        膳食营养
-                      </div>
+        {filteredProducts.length > 0 ? (
+          <div className="flex space-x-2">
+            {/* 左列 */}
+            <div className="w-1/2 flex flex-col space-y-2">
+              {leftColumn.map((product) => (
+                <div 
+                  key={product.id}
+                  className={cn(
+                    "bg-white rounded-xl overflow-hidden relative",
+                    getProductHeightClass(product.size)
+                  )}
+                >
+                  {product.hot && (
+                    <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                      爆品
                     </div>
                   )}
-                </div>
-                <div className="p-2">
-                  <h3 className="text-black font-medium text-sm line-clamp-1">{product.name}</h3>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {product.tags.map((tag, index) => (
-                      <span 
-                        key={index}
-                        className="text-[10px] bg-purple-100 text-purple-500 rounded-full px-2 py-0.5"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                  <div className="w-full h-2/3 bg-gray-200 relative overflow-hidden">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {product.size === 'medium' && product.id === 1 && (
+                      <div className="absolute inset-0 flex flex-col justify-center items-center">
+                        <div className="text-2xl font-bold text-white writing-vertical">
+                          膳食营养
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="text-sm text-purple-500 font-semibold">
-                      ¥{product.price} <span className="text-xs">起</span>
+                  <div className="p-2">
+                    <h3 className="text-black font-medium text-sm line-clamp-1">{product.name}</h3>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {product.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className={cn(
+                            "text-[10px] bg-purple-100 text-purple-500 rounded-full px-2 py-0.5",
+                            searchValue && tag.toLowerCase().includes(searchValue.toLowerCase()) && "bg-blue-100 text-blue-600"
+                          )}
+                        >
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                    <div className="flex items-center text-gray-400">
-                      <span className="text-sm">
-                        <img 
-                          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjgiIGN5PSIyMSIgcj0iMSIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMjEiIHI9IjEiLz48cGF0aCBkPSJNMiAyaDQuMTM0YTEgMSAwIDAgMSAuODkuNmwyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
-                          alt="cart"
-                          className="w-4 h-4 inline-block"
-                        />
-                        {product.sales}
-                      </span>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="text-sm text-purple-500 font-semibold">
+                        ¥{product.price} <span className="text-xs">起</span>
+                      </div>
+                      <div className="flex items-center text-gray-400">
+                        <span className="text-sm">
+                          <img 
+                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjgiIGN5PSIyMSIgcj0iMSIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMjEiIHI9IjEiLz48cGF0aCBkPSJNMiAyaDQuMTM0YTEgMSAwIDAgMSAuODkuNmwyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
+                            alt="cart"
+                            className="w-4 h-4 inline-block"
+                          />
+                          {product.sales}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            
+            {/* 右列 */}
+            <div className="w-1/2 flex flex-col space-y-2">
+              {rightColumn.map((product) => (
+                <div 
+                  key={product.id}
+                  className={cn(
+                    "bg-white rounded-xl overflow-hidden relative",
+                    getProductHeightClass(product.size)
+                  )}
+                >
+                  {product.hot && (
+                    <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                      爆品
+                    </div>
+                  )}
+                  <div className="w-full h-2/3 bg-gray-200 relative overflow-hidden">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-2">
+                    <h3 className="text-black font-medium text-sm line-clamp-1">{product.name}</h3>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {product.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className={cn(
+                            "text-[10px] bg-purple-100 text-purple-500 rounded-full px-2 py-0.5",
+                            searchValue && tag.toLowerCase().includes(searchValue.toLowerCase()) && "bg-blue-100 text-blue-600"
+                          )}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="text-sm text-purple-500 font-semibold">
+                        ¥{product.price} <span className="text-xs">起</span>
+                      </div>
+                      <div className="flex items-center text-gray-400">
+                        <span className="text-sm">
+                          <img 
+                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjgiIGN5PSIyMSIgcj0iMSIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMjEiIHI9IjEiLz48cGF0aCBkPSJNMiAyaDQuMTM0YTEgMSAwIDAgMSAuODkuNmwyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
+                            alt="cart"
+                            className="w-4 h-4 inline-block"
+                          />
+                          {product.sales}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          
-          {/* 右列 */}
-          <div className="w-1/2 flex flex-col space-y-2">
-            {rightColumn.map((product) => (
-              <div 
-                key={product.id}
-                className={cn(
-                  "bg-white rounded-xl overflow-hidden relative",
-                  getProductHeightClass(product.size)
-                )}
-              >
-                {product.hot && (
-                  <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                    爆品
-                  </div>
-                )}
-                <div className="w-full h-2/3 bg-gray-200 relative overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-2">
-                  <h3 className="text-black font-medium text-sm line-clamp-1">{product.name}</h3>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {product.tags.map((tag, index) => (
-                      <span 
-                        key={index}
-                        className="text-[10px] bg-purple-100 text-purple-500 rounded-full px-2 py-0.5"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="text-sm text-purple-500 font-semibold">
-                      ¥{product.price} <span className="text-xs">起</span>
-                    </div>
-                    <div className="flex items-center text-gray-400">
-                      <span className="text-sm">
-                        <img 
-                          src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNob3BwaW5nLWNhcnQiPjxjaXJjbGUgY3g9IjgiIGN5PSIyMSIgcj0iMSIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMjEiIHI9IjEiLz48cGF0aCBkPSJNMiAyaDQuMTM0YTEgMSAwIDAgMSAuODkuNmwyLjk3NiA2LjM0YTEgMSAwIDAgMCAuODkuNTloMTEuODRhMSAxIDAgMCAxIC44OS42bDEuNDE0IDIuNzFhMSAxIDAgMCAxLS44OSAxLjRIOC4xODRhMSAxIDAgMCAxLS44OS0uNkw0IDQuOVYySDJ6Ii8+PC9zdmc+"
-                          alt="cart"
-                          className="w-4 h-4 inline-block"
-                        />
-                        {product.sales}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+        ) : (
+          <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+            <Search size={40} strokeWidth={1} className="mb-2" />
+            <p>未找到与 "{searchValue}" 相关的商品</p>
+            <button 
+              onClick={clearSearch}
+              className="mt-2 text-blue-400 text-sm"
+            >
+              清除搜索
+            </button>
           </div>
-        </div>
+        )}
       </div>
       
       {/* 底部搜索框 */}
@@ -575,6 +732,11 @@ const Shop: React.FC = () => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
+          {searchValue && (
+            <button onClick={clearSearch}>
+              <X size={18} className="text-gray-400" />
+            </button>
+          )}
         </div>
       </div>
       
