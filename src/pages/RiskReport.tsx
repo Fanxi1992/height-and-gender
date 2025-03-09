@@ -159,14 +159,14 @@ const RiskReport: React.FC = () => {
       
       <ProgressIndicator currentStep={7} totalSteps={7} />
       
-      <div className="mx-4 mt-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-6 shadow-lg border border-gray-800">
-        <h2 className="text-2xl font-bold mb-4 text-center text-white flex items-center justify-center">
+      <div className="mx-2 mt-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-4 shadow-lg border border-gray-800">
+        <h2 className="text-2xl font-bold mb-3 text-center text-white flex items-center justify-center">
           <Heart className="text-red-500 mr-2" />
           潜在疾病风险网络
         </h2>
         
         {/* 疾病网络可视化 */}
-        <div className="w-full mb-4 overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl">
+        <div className="w-full mb-3 overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl">
           <svg 
             ref={svgRef} 
             width="100%" 
@@ -176,13 +176,13 @@ const RiskReport: React.FC = () => {
         </div>
         
         {/* 疾病风险排名 */}
-        <div className="w-full mt-4">
+        <div className="w-full mt-3">
           <h3 className="text-lg font-semibold mb-2 text-white">疾病风险排名</h3>
-          <div className="bg-gray-800 rounded-xl p-4">
+          <div className="bg-gray-800 rounded-xl p-3">
             <div className="grid grid-cols-12 text-sm font-medium text-white mb-2">
-              <div className="col-span-1">排名</div>
-              <div className="col-span-9">疾病名称</div>
-              <div className="col-span-2 text-right">风险</div>
+              <div className="col-span-2 text-center">排名</div>
+              <div className="col-span-7 text-center">疾病名称</div>
+              <div className="col-span-3 text-center">风险</div>
             </div>
 
             {DiseaseData.map((disease, index) => (
@@ -190,9 +190,9 @@ const RiskReport: React.FC = () => {
                 key={disease.id} 
                 className={`grid grid-cols-12 text-sm py-2 ${index % 2 === 0 ? 'bg-gray-700/40' : 'bg-gray-800/40'} rounded-lg mb-1 items-center`}
               >
-                <div className="col-span-1 font-bold text-white">{index + 1}</div>
-                <div className="col-span-9 text-gray-200">{disease.name}</div>
-                <div className="col-span-2 text-right font-mono text-yellow-400">{(disease.risk * 100).toFixed(2)}%</div>
+                <div className="col-span-2 font-bold text-white text-center">{index + 1}</div>
+                <div className="col-span-7 text-gray-200 text-center">{disease.name}</div>
+                <div className="col-span-3 text-center font-mono text-yellow-400">{(disease.risk * 100).toFixed(2)}%</div>
               </div>
             ))}
           </div>
@@ -200,7 +200,7 @@ const RiskReport: React.FC = () => {
       </div>
       
       {/* 健康评估与引导 */}
-      <div className="mx-4 mt-4 bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl p-5 shadow-lg">
+      <div className="mx-2 mt-4 bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl p-5 shadow-lg">
         <h3 className="text-lg font-semibold mb-2 text-white">健康状况评估</h3>
         <p className="text-gray-200 text-sm mb-4">
           基于您的体重指数(BMI)分析，您当前处于<span className="text-yellow-300 font-bold">超重</span>状态，这显著增加了您患上代谢性疾病和心血管疾病的风险。
@@ -211,7 +211,7 @@ const RiskReport: React.FC = () => {
       </div>
       
       {/* 引导按钮 */}
-      <div className="mx-4 mt-4 bg-gradient-to-b from-indigo-900 to-indigo-950 rounded-3xl p-5 shadow-lg cursor-pointer" onClick={handleExploreHealthTrajectory}>
+      <div className="mx-2 mt-4 bg-gradient-to-b from-indigo-900 to-indigo-950 rounded-3xl p-5 shadow-lg cursor-pointer" onClick={handleExploreHealthTrajectory}>
         <div className="flex items-center">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
             <ArrowRight className="text-white" size={20} />
