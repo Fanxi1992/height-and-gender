@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,7 @@ import KnowledgeBase from "./pages/KnowledgeBase";
 import Circle from "./pages/Circle";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
+import My from "./pages/My";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +183,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <Circle />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/my" 
+            element={
+              <PageWrapper>
+                <My />
               </PageWrapper>
             } 
           />
