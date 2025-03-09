@@ -98,6 +98,8 @@ const DiseaseRiskDetail: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  // 添加状态记录当前展开的卡片ID
+  const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   
   // 新增引用，用于获取窗口高度
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -117,8 +119,22 @@ const DiseaseRiskDetail: React.FC = () => {
     navigate(-1);
   };
   
+  // 处理卡片点击，展开详情
+  const handleCardClick = (id: number) => {
+    // 如果已经展开了这张卡片，则关闭它
+    if (expandedCardId === id) {
+      setExpandedCardId(null);
+    } else {
+      // 否则展开这张卡片
+      setExpandedCardId(id);
+    }
+  };
+  
   // Touch event handlers for card swiping
   const handleTouchStart = (e: React.TouchEvent) => {
+    // 如果有展开的卡片，点击时不启动滑动
+    if (expandedCardId !== null) return;
+    
     setStartY(e.touches[0].clientY);
     setIsDragging(true);
   };
@@ -153,6 +169,29 @@ const DiseaseRiskDetail: React.FC = () => {
   
   // Calculate card positions and styles
   const getCardStyle = (index: number) => {
+    // 如果当前有展开的卡片，且不是当前卡片，则隐藏其他卡片
+    if (expandedCardId !== null && diseaseData[index].id !== expandedCardId) {
+      return {
+        transform: 'translateY(100vh) scale(0.8)',
+        opacity: 0,
+        zIndex: 0,
+        display: 'none',
+        height: `${cardHeight}px`
+      };
+    }
+    
+    // 如果当前卡片被展开，则全屏显示
+    if (expandedCardId === diseaseData[index].id) {
+      return {
+        transform: 'translateY(0) scale(1)',
+        opacity: 1,
+        zIndex: 30,
+        height: '100vh', // 全屏显示
+        top: 0,
+        borderRadius: 0
+      };
+    }
+    
     const basePosition = index - activeIndex;
     const position = basePosition + (isDragging ? currentOffset / 100 : 0);
     
@@ -210,28 +249,104 @@ const DiseaseRiskDetail: React.FC = () => {
     }
   };
   
+  // 渲染卡片内容，根据是否展开显示不同内容
+  const renderCardContent = (disease: typeof diseaseData[0], index: number) => {
+    const isExpanded = expandedCardId === disease.id;
+    
+    return (
+      <>
+        {/* Card Header with Disease Name and Number */}
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-xl font-bold">{disease.name}</h2>
+          {!isExpanded && (
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 ${index === activeIndex ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'}`}>
+              {disease.id}
+            </div>
+          )}
+          {isExpanded && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedCardId(null);
+              }}
+              className="p-1 rounded-full bg-gray-200 text-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        
+        {/* Risk Value */}
+        <div className="mb-4">
+          <p className={`text-sm ${index === activeIndex ? 'font-medium text-blue-600' : 'text-gray-600'}`}>风险值</p>
+          <div className="w-full bg-gray-200 rounded-full h-2 my-1">
+            <div 
+              className={`h-2 rounded-full ${disease.risk > 0.5 ? 'bg-red-500' : disease.risk > 0.3 ? 'bg-yellow-500' : 'bg-green-500'}`} 
+              style={{ width: `${disease.risk * 100}%` }}
+            ></div>
+          </div>
+          <p className={`text-right ${disease.risk > 0.5 ? 'text-red-500' : disease.risk > 0.3 ? 'text-yellow-500' : 'text-green-500'} font-bold`}>
+            {disease.risk * 100}%
+          </p>
+        </div>
+        
+        {/* Disease Information */}
+        <div className={`transition-all duration-300 ${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`} 
+             style={isExpanded ? {maxHeight: 'calc(100vh - 220px)'} : {maxHeight: 'calc(100% - 160px)'}}>
+          {/* Disease Introduction */}
+          <div className="mb-4">
+            <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>疾病简介</h3>
+            <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} ${isExpanded ? '' : 'line-clamp-6'}`}>
+              {disease.introduction}
+            </p>
+          </div>
+          
+          {/* Prevention Strategy */}
+          <div className="mb-3">
+            <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>预防策略</h3>
+            <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} ${isExpanded ? '' : 'line-clamp-8'}`}>
+              {disease.prevention}
+            </p>
+          </div>
+        </div>
+        
+        {/* Bottom Indicator - only show on non-expanded cards */}
+        {!isExpanded && (
+          <div className="w-16 h-1 bg-gray-300 mx-auto rounded-full mt-3 absolute bottom-4 left-0 right-0"></div>
+        )}
+      </>
+    );
+  };
+  
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
-      <StatusBar />
+      {/* 只有在没有展开卡片时显示状态栏和头部 */}
+      {expandedCardId === null && <StatusBar />}
       
-      {/* Header */}
-      <div className="w-full flex items-center justify-center relative py-3">
-        <button 
-          className="absolute left-4 p-2" 
-          onClick={handleBack}
-        >
-          <ArrowLeft className="text-white" size={24} />
-        </button>
-        <h1 className="text-xl font-medium">TOP 10风险疾病与建议</h1>
-      </div>
+      {/* Header - only show when no card is expanded */}
+      {expandedCardId === null && (
+        <div className="w-full flex items-center justify-center relative py-3">
+          <button 
+            className="absolute left-4 p-2" 
+            onClick={handleBack}
+          >
+            <ArrowLeft className="text-white" size={24} />
+          </button>
+          <h1 className="text-xl font-medium">TOP 10风险疾病与建议</h1>
+        </div>
+      )}
       
-      {/* Indicator line */}
-      <div className="w-20 h-1 bg-white/30 mx-auto rounded-full mb-2"></div>
+      {/* Indicator line - only show when no card is expanded */}
+      {expandedCardId === null && (
+        <div className="w-20 h-1 bg-white/30 mx-auto rounded-full mb-2"></div>
+      )}
       
       {/* Card Container */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-hidden relative px-4 pb-2"
+        className={`flex-1 overflow-hidden relative px-4 pb-2 ${expandedCardId !== null ? 'pt-0' : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -239,7 +354,7 @@ const DiseaseRiskDetail: React.FC = () => {
         {diseaseData.map((disease, index) => (
           <div
             key={disease.id}
-            className={`absolute w-full p-5 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden ${cardColors[index % cardColors.length]}`}
+            className={`absolute w-full p-5 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden ${expandedCardId === disease.id ? 'bg-white' : cardColors[index % cardColors.length]}`}
             style={{
               ...getCardStyle(index),
               left: 0,
@@ -247,77 +362,28 @@ const DiseaseRiskDetail: React.FC = () => {
               marginLeft: 'auto',
               marginRight: 'auto',
             }}
+            onClick={() => handleCardClick(disease.id)}
           >
-            {/* Card Header with Disease Name and Number */}
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-bold">{disease.name}</h2>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 ${index === activeIndex ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'}`}>
-                {disease.id}
-              </div>
-            </div>
-            
-            {/* Risk Value */}
-            <div className="mb-4">
-              <p className={`text-sm ${index === activeIndex ? 'font-medium text-blue-600' : 'text-gray-600'}`}>风险值</p>
-              <div className="w-full bg-gray-200 rounded-full h-2 my-1">
-                <div 
-                  className={`h-2 rounded-full ${disease.risk > 0.5 ? 'bg-red-500' : disease.risk > 0.3 ? 'bg-yellow-500' : 'bg-green-500'}`} 
-                  style={{ width: `${disease.risk * 100}%` }}
-                ></div>
-              </div>
-              <p className={`text-right ${disease.risk > 0.5 ? 'text-red-500' : disease.risk > 0.3 ? 'text-yellow-500' : 'text-green-500'} font-bold`}>
-                {disease.risk * 100}%
-              </p>
-            </div>
-            
-            {/* Disease Information - Only fully visible on active card */}
-            <div className={`transition-all duration-300 h-[calc(100%-160px)] overflow-y-auto ${index === activeIndex ? 'opacity-100' : 'opacity-70'}`}>
-              {/* Disease Introduction */}
-              <div className="mb-4">
-                <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>疾病简介</h3>
-                <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} line-clamp-6`}>
-                  {disease.introduction}
-                </p>
-                {disease.introduction.length > 200 && (
-                  <span className={`text-xs italic ${index === 2 ? 'text-gray-400' : 'text-gray-500'}`}>
-                    查看全部...
-                  </span>
-                )}
-              </div>
-              
-              {/* Prevention Strategy */}
-              <div className="mb-3">
-                <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>预防策略</h3>
-                <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} line-clamp-8`}>
-                  {disease.prevention}
-                </p>
-                {disease.prevention.length > 240 && (
-                  <span className={`text-xs italic ${index === 2 ? 'text-gray-400' : 'text-gray-500'}`}>
-                    查看全部...
-                  </span>
-                )}
-              </div>
-            </div>
-            
-            {/* Bottom Indicator */}
-            <div className="w-16 h-1 bg-gray-300 mx-auto rounded-full mt-3 absolute bottom-4 left-0 right-0"></div>
+            {renderCardContent(disease, index)}
           </div>
         ))}
       </div>
       
-      {/* Bottom Navigation */}
-      <div className="w-full px-5 py-3 bg-black">
-        <div className="w-full flex justify-center space-x-1">
-          {diseaseData.map((_, index) => (
-            <div 
-              key={index} 
-              className={`h-1 rounded-full transition-all duration-300 ${
-                index === activeIndex ? 'w-6 bg-blue-500' : 'w-2 bg-gray-500'
-              }`}
-            />
-          ))}
+      {/* Bottom Navigation - only show when no card is expanded */}
+      {expandedCardId === null && (
+        <div className="w-full px-5 py-3 bg-black">
+          <div className="w-full flex justify-center space-x-1">
+            {diseaseData.map((_, index) => (
+              <div 
+                key={index} 
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  index === activeIndex ? 'w-6 bg-blue-500' : 'w-2 bg-gray-500'
+                }`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
