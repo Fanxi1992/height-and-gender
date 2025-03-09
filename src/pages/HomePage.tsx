@@ -64,7 +64,7 @@ const HomePage: React.FC = () => {
   return (
     <div 
       ref={containerRef} 
-      className="flex flex-col min-h-screen bg-black text-white"
+      className="flex flex-col min-h-screen bg-black text-white overflow-y-auto pb-16"
     >
       <StatusBar />
       
@@ -411,7 +411,7 @@ const HomePage: React.FC = () => {
       )}
       
       {/* Bottom Navigation - 使用更现代化的导航栏 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2 z-40">
         <div className="flex flex-col items-center text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
           <span className="text-xs">主页</span>
