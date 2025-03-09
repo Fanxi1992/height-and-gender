@@ -87,7 +87,7 @@ const HomePage: React.FC = () => {
       {/* Chatbot Circle - 重新设计嵌套圆环 */}
       <div 
         ref={chatbotRef}
-        className="relative w-40 h-40 mb-5"
+        className="relative w-40 h-40 mb-5 mx-auto"
         onTouchStart={handleChatbotPress}
       >
         {/* 发光背景效果 */}
@@ -107,7 +107,11 @@ const HomePage: React.FC = () => {
       </div>
       
       {/* Text below Chatbot */}
-      <p className="text-gray-300 mt-6 mb-8">健康问题随时问</p>
+      <p className="mt-2 mb-8 text-center font-medium relative">
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 animate-pulse">
+          健康问题长按提问 ✨
+        </span>
+      </p>
       
       {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
