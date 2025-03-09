@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -70,10 +70,19 @@ const HomePage: React.FC = () => {
       
       {/* Header Section with Avatar, History and Settings - 增加顶部间距 */}
       <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
-        <div className="w-10 h-10 rounded-full bg-gray-300"></div>
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-400">
+          <img 
+            src="/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png" 
+            alt="用户头像" 
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="flex gap-2">
-          <button className="px-4 py-1 bg-gray-700 rounded-full text-sm">历史对话</button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full">
+          <button className="px-4 py-1 bg-gray-700 rounded-full text-sm flex items-center">
+            <Activity size={14} className="mr-1" />
+            历史对话
+          </button>
+          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
         </div>
@@ -84,40 +93,54 @@ const HomePage: React.FC = () => {
         <h1 className="text-2xl font-semibold">Hi, 李小明</h1>
       </div>
       
-      {/* Chatbot Circle - 重新设计嵌套圆环 */}
+      {/* 更加精美的语音问询组件 */}
       <div 
         ref={chatbotRef}
         className="relative w-40 h-40 mb-5 mx-auto"
         onTouchStart={handleChatbotPress}
       >
-        {/* 发光背景效果 */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md"></div>
+        {/* 动态脉冲效果 */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md animate-pulse"></div>
         
-        {/* 外部圆环 - 使用白色边框 */}
-        <div className="absolute inset-0 rounded-full border-[3px] border-white/70"></div>
+        {/* 外部圆环 - 使用白色边框和闪烁动画 */}
+        <div className="absolute inset-0 rounded-full border-[3px] border-white/70 animate-[ping_4s_ease-in-out_infinite]"></div>
         
-        {/* 中间圆环 - 使用白色边框 */}
-        <div className="absolute inset-[10px] rounded-full border-[3px] border-white/80"></div>
+        {/* 中间圆环 - 光晕效果 */}
+        <div className="absolute inset-[10px] rounded-full border-[3px] border-white/80 shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
         
-        {/* 内部圆形 - 深色背景 */}
-        <div className="absolute inset-[20px] rounded-full bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center shadow-inner">
-          {/* 显示消息图标 */}
-          <MessageCircle size={36} className="text-white" />
+        {/* 内部圆形 - 深色背景和发光效果 */}
+        <div className="absolute inset-[20px] rounded-full bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center shadow-inner overflow-hidden">
+          {/* 显示麦克风图标 */}
+          <div className="relative z-10 flex flex-col items-center">
+            <Mic size={36} className="text-white mb-1" />
+            <div className="flex space-x-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div 
+                  key={i} 
+                  className="w-1 h-3 bg-white rounded-full animate-[bounce_1.5s_ease-in-out_infinite]" 
+                  style={{animationDelay: `${i * 0.2}s`}}
+                ></div>
+              ))}
+            </div>
+          </div>
+          
+          {/* 背景光效 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 mix-blend-overlay"></div>
         </div>
       </div>
       
       {/* Text below Chatbot */}
       <p className="mt-2 mb-8 text-center font-medium relative">
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 animate-pulse">
-          健康问题长按提问 ✨
+          AI健康助手长按语音提问 ✨
         </span>
       </p>
       
       {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
-        <div className="bg-white rounded-xl overflow-hidden">
+        <div className="bg-white rounded-xl overflow-hidden shadow-lg">
           {/* Card Header */}
-          <div className="bg-blue-400 text-white px-4 py-2 flex justify-between items-center">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 flex justify-between items-center">
             <div className="flex-1">
               <span className="text-sm font-medium">体重风险打卡</span>
               <span className="ml-2 text-xs">第1/28天</span>
@@ -132,7 +155,7 @@ const HomePage: React.FC = () => {
                 key={index} 
                 className={cn(
                   "flex flex-col items-center",
-                  item.active ? "bg-gray-200 px-2 py-1 rounded-full" : ""
+                  item.active ? "bg-blue-100 px-2 py-1 rounded-full" : ""
                 )}
               >
                 <span className="text-xs text-gray-500">{item.day}</span>
@@ -148,14 +171,20 @@ const HomePage: React.FC = () => {
               <div className="text-xs text-gray-500">初始体重</div>
             </div>
             
-            {/* Progress Circle */}
+            {/* Progress Circle - 更美观的进度显示 */}
             <div className="relative w-20 h-20">
               <svg viewBox="0 0 100 100" className="w-full h-full">
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8B5CF6" />
+                    <stop offset="100%" stopColor="#3B82F6" />
+                  </linearGradient>
+                </defs>
                 <circle cx="50" cy="50" r="40" stroke="#E0E0E0" strokeWidth="8" fill="none" />
-                <circle cx="50" cy="50" r="40" stroke="#9370DB" strokeWidth="8" fill="none" 
+                <circle cx="50" cy="50" r="40" stroke="url(#progressGradient)" strokeWidth="8" fill="none" 
                   strokeDasharray="251.2" strokeDashoffset="125.6" 
                   transform="rotate(-90 50 50)" />
-                <text x="50" y="45" textAnchor="middle" fill="black" fontSize="10">66.9kg</text>
+                <text x="50" y="45" textAnchor="middle" fill="black" fontSize="10" fontWeight="bold">66.9kg</text>
                 <text x="50" y="58" textAnchor="middle" fill="black" fontSize="8">今日体重</text>
               </svg>
             </div>
@@ -167,111 +196,166 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="px-4 py-2 bg-white flex justify-center">
-            <span className="text-xs text-gray-500">今日减重 0.85kg</span>
+            <span className="text-xs text-gray-500 flex items-center">
+              <Activity size={14} className="text-blue-500 mr-1" />
+              今日减重 0.85kg
+            </span>
           </div>
         </div>
       </div>
       
       {/* Health Report Cards Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Health Risk Report */}
+        {/* Health Risk Report - 使用真实图片 */}
         <div 
-          className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer"
+          className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthRiskReport}
         >
-          <div className="flex justify-between items-start mb-auto">
+          <div className="flex justify-between items-start mb-auto z-10">
             <h3 className="text-sm font-medium text-black">健康风险报告</h3>
             <ArrowRight size={16} className="text-black" />
           </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs text-gray-600">XXXXXXXXXXXXX</p>
+          <div className="flex-1 flex items-center justify-center z-10">
+            <Heart size={24} className="text-red-500 mr-2" />
+            <p className="text-xs text-gray-800 font-medium">分析您的健康隐患</p>
+          </div>
+          {/* 背景图片 */}
+          <div className="absolute inset-0 opacity-20">
+            <img 
+              src="/健康风险报告图.jpg" 
+              alt="健康报告背景" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
         
         {/* Health Progress */}
         <div 
-          className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer"
+          className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthTrajectory}
         >
-          <div className="flex justify-between items-start mb-auto">
+          <div className="flex justify-between items-start mb-auto z-10">
             <h3 className="text-sm font-medium text-white">健康轨迹</h3>
             <ArrowRight size={16} className="text-white" />
           </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs text-white/80">XXXXXXXXXXXXX</p>
+          <div className="flex-1 flex items-center justify-center z-10">
+            <Activity size={24} className="text-white mr-2" />
+            <p className="text-xs text-white/90 font-medium">跟踪您的健康变化</p>
+          </div>
+          {/* 图表背景效果 */}
+          <div className="absolute inset-0 flex items-end opacity-30">
+            <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-16">
+              <path 
+                d="M0,30 L5,28 L10,29 L15,20 L20,25 L25,18 L30,23 L35,15 L40,20 L45,12 L50,17 L55,5 L60,10 L65,8 L70,15 L75,7 L80,13 L85,3 L90,8 L95,0 L100,5 L100,30 L0,30 Z" 
+                fill="white" 
+              />
+            </svg>
           </div>
         </div>
       </div>
       
       {/* Health Tools Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Tongue Inspection */}
-        <div className="bg-gray-800 rounded-xl p-4 flex flex-col h-48">
+        {/* Tongue Inspection - 使用真实舌苔图片 */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 flex flex-col h-48 shadow-lg overflow-hidden">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium text-white">舌苔监测</h3>
             <ArrowRight size={16} className="text-white" />
           </div>
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-16 h-16 bg-gray-700"></div>
+            <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-700">
+              <img 
+                src="/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png" 
+                alt="舌苔监测示例" 
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2">XXXXXXXXXXXXX</p>
+          <p className="text-xs text-gray-400 mt-2 flex items-center">
+            <Heart size={14} className="mr-1 text-red-400" />
+            AI舌诊分析您的健康状况
+          </p>
         </div>
         
-        {/* Water Intake - Fixed overflow */}
-        <div className="bg-blue-400 rounded-xl p-4 flex flex-col h-48 overflow-hidden">
-          <div className="flex justify-between items-start">
+        {/* Water Intake - 更现代化的水分摄入追踪 */}
+        <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col h-48 overflow-hidden shadow-lg relative">
+          <div className="flex justify-between items-start z-10">
             <div>
-              <h3 className="text-sm font-medium text-black">喝水</h3>
-              <p className="text-xs text-black/70">5:30更新</p>
+              <h3 className="text-sm font-medium text-white">喝水</h3>
+              <p className="text-xs text-white/80">5:30更新</p>
             </div>
-            <ArrowRight size={16} className="text-black" />
+            <ArrowRight size={16} className="text-white" />
           </div>
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-black">300 毫升</span>
-            <div className="mt-2 w-12 h-20 bg-blue-200 rounded-md relative overflow-hidden">
-              <div className="absolute bottom-0 w-full h-1/2 bg-blue-500"></div>
+          <div className="flex-1 flex flex-col items-center justify-center z-10">
+            <span className="text-2xl font-bold text-white">300 毫升</span>
+            <div className="mt-2 w-12 h-20 bg-blue-200/40 rounded-full relative overflow-hidden backdrop-blur-sm">
+              <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-blue-100 to-blue-200 animate-pulse"></div>
+              {/* 水波纹动画效果 */}
+              <div className="absolute bottom-[50%] left-0 right-0 h-1 bg-white/30 transform -translate-y-1/2"></div>
             </div>
-            <div className="mt-2 w-full flex">
+            <div className="mt-3 w-full flex justify-center">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className={`w-4 h-4 mr-1 ${i <= 2 ? 'bg-black' : 'bg-blue-200'}`}></div>
+                <div 
+                  key={i} 
+                  className={`w-4 h-4 mx-1 rounded-full ${i <= 2 ? 'bg-white' : 'bg-blue-200/40'}`}
+                ></div>
               ))}
             </div>
+          </div>
+          {/* 水滴背景元素 */}
+          <div className="absolute -right-2 -bottom-2 opacity-10">
+            <Droplet size={80} className="text-white" />
           </div>
         </div>
       </div>
       
-      {/* Calorie Tracking and Health Data Collection - Fixed overflows */}
+      {/* Calorie Tracking and Health Data Collection */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Calorie Card */}
-        <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden">
+        {/* Calorie Card - 使用真实食物图片 */}
+        <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-sm font-medium text-black">卡路里摄照</h3>
+              <h3 className="text-sm font-medium text-black">卡路里摄入</h3>
               <p className="text-xs text-gray-500">5:30更新</p>
             </div>
             <ArrowRight size={16} className="text-black" />
           </div>
           
-          <div className="mt-2 text-left">
-            <p className="text-sm text-black font-medium">还可吃</p>
-            <p className="text-2xl font-bold text-black">300 千卡</p>
+          <div className="mt-2 text-left flex items-center">
+            <div>
+              <p className="text-sm text-black font-medium">还可吃</p>
+              <p className="text-2xl font-bold text-black flex items-center">
+                300 
+                <span className="text-sm ml-1">千卡</span>
+              </p>
+            </div>
+            <div className="ml-auto">
+              <Utensils size={24} className="text-blue-500" />
+            </div>
           </div>
           
-          <div className="flex-1 flex flex-col justify-center space-y-3 overflow-y-auto">
-            {['早餐', '午餐', '晚餐', '小吃'].map((meal, index) => (
+          <div className="flex-1 flex flex-col justify-center space-y-3 overflow-y-auto mt-2">
+            {[
+              {meal: '早餐', kcal: 300, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
+              {meal: '午餐', kcal: 450, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
+              {meal: '晚餐', kcal: 400, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
+              {meal: '小吃', kcal: 150, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'}
+            ].map((item, index) => (
               <div key={index} className="flex items-center">
-                <div className="w-12 h-12 bg-gray-200 mr-3 flex-shrink-0"></div>
+                <div className="w-12 h-12 bg-gray-100 mr-3 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img src={item.img} alt={item.meal} className="w-full h-full object-cover" />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-black truncate">{meal}</p>
-                  <p className="text-xs text-gray-500 truncate">300 千卡</p>
+                  <p className="text-sm text-black truncate font-medium">{item.meal}</p>
+                  <p className="text-xs text-gray-500 truncate">{item.kcal} 千卡</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
         
-        {/* Health Data Collection */}
-        <div className="bg-gray-700 rounded-xl p-4 flex flex-col h-80 overflow-hidden">
+        {/* Health Data Collection - 更现代化的健康数据展示 */}
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-white">健康数据采集</h3>
@@ -280,38 +364,53 @@ const HomePage: React.FC = () => {
             <ArrowRight size={16} className="text-white" />
           </div>
           
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
-            <p className="text-xs text-gray-400 w-full truncate">
-              XXXXXXXXXXXXX<br />
-              XXXXXXXXXXXXX<br />
-              XXXXXXXXXXXXX<br />
-              XXXXXXXXXXXXX<br />
-              XXXXXXXXXXXXX
-            </p>
+          <div className="flex-1 flex flex-col justify-center space-y-4 mt-2 z-10">
+            {[
+              {label: '血压', value: '120/80 mmHg', icon: <Heart size={16} className="text-red-400" />},
+              {label: '血糖', value: '5.5 mmol/L', icon: <Activity size={16} className="text-blue-400" />},
+              {label: '心率', value: '72 次/分钟', icon: <Activity size={16} className="text-green-400" />},
+              {label: '睡眠', value: '7.5 小时/天', icon: <Activity size={16} className="text-purple-400" />},
+              {label: '运动', value: '5000 步/天', icon: <Activity size={16} className="text-yellow-400" />}
+            ].map((item, index) => (
+              <div key={index} className="flex items-center bg-gray-700/50 p-2 rounded-lg">
+                <div className="mr-2">
+                  {item.icon}
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-300">{item.label}</p>
+                  <p className="text-sm text-white font-medium">{item.value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* 背景数据流动效果 */}
+          <div className="absolute inset-0 opacity-5">
+            <Database size={200} className="absolute -right-10 -bottom-10 text-white" />
           </div>
         </div>
       </div>
       
-      {/* Add Health Tools Button */}
+      {/* Add Health Tools Button - 更现代的按钮设计 */}
       <div className="w-full px-5 mb-20">
-        <button className="w-full bg-blue-500 text-white py-3 rounded-full flex items-center justify-center">
+        <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
           <Plus size={20} className="mr-2" />
           添加新健康工具
         </button>
       </div>
       
-      {/* Floating Chatbot Button - Updated to use MessageCircle icon */}
+      {/* Floating Chatbot Button - 更现代化的语音助手浮动按钮 */}
       {showFloatingButton && (
         <div 
-          className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-purple-800 border-2 border-purple-300 flex items-center justify-center z-50"
+          className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
           onTouchStart={handleChatbotPress}
         >
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70"></div>
-          <MessageCircle size={20} className="text-white z-10" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
+          <Mic size={20} className="text-white z-10" />
         </div>
       )}
       
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - 使用更现代化的导航栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2">
         <div className="flex flex-col items-center text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
