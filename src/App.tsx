@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import HealthRiskReport from "./pages/HealthRiskReport";
 import HealthTrajectory from "./pages/HealthTrajectory";
 import Shop from "./pages/Shop";
 import KnowledgeBase from "./pages/KnowledgeBase";
+import Circle from "./pages/Circle";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -173,6 +175,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <KnowledgeBase />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/circle" 
+            element={
+              <PageWrapper>
+                <Circle />
               </PageWrapper>
             } 
           />
