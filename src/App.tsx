@@ -19,6 +19,7 @@ import HealthTrajectory from "./pages/HealthTrajectory";
 import Shop from "./pages/Shop";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Circle from "./pages/Circle";
+import My from "./pages/My";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 
@@ -183,6 +184,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <Circle />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/my" 
+            element={
+              <PageWrapper>
+                <My />
               </PageWrapper>
             } 
           />
