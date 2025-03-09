@@ -69,10 +69,14 @@ const HeightSelection: React.FC = () => {
 
   const handleNext = () => {
     saveHeight(height);
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/weight'); // 修改为跳转到体重选择页面
   };
 
   const handleSkip = () => {
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/weight'); // 修改为跳转到体重选择页面
   };
 

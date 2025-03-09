@@ -45,10 +45,12 @@ const BirthdateSelection: React.FC = () => {
 
   const handleNextClick = () => {
     saveBirthdate(year, month, day);
+    window.scrollTo(0, 0);
     navigate('/disease-selection');
   };
 
   const handleSkip = () => {
+    window.scrollTo(0, 0);
     navigate('/dashboard');
   };
   

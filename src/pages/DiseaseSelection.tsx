@@ -26,18 +26,21 @@ const DiseaseSelection: React.FC = () => {
   
   const handleNext = () => {
     saveDiseases(selectedDiseases);
+    window.scrollTo(0, 0);
     navigate('/risk-report');
   };
   
   const handleSkip = () => {
     // Save empty array and skip to the next page
     saveDiseases([]);
+    window.scrollTo(0, 0);
     navigate('/risk-report');
   };
   
   const handleNone = () => {
     setSelectedDiseases([]);
     saveDiseases([]);
+    window.scrollTo(0, 0);
     navigate('/risk-report');
   };
 

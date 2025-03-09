@@ -69,10 +69,14 @@ const WeightSelection: React.FC = () => {
 
   const handleNext = () => {
     saveWeight(weight);
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/target-weight');
   };
 
   const handleSkip = () => {
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/target-weight');
   };
   

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,6 +35,12 @@ const preventZoom = (e: TouchEvent) => {
 // 页面包装组件，用于添加过渡效果
 const PageWrapper = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
+  
+  // 添加滚动到顶部的效果
+  useEffect(() => {
+    // 当路由变化时，滚动到页面顶部
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   
   // 添加防止双击缩放的效果
   useEffect(() => {

@@ -69,10 +69,14 @@ const TargetWeightSelection: React.FC = () => {
 
   const handleNext = () => {
     saveTargetWeight(targetWeight);
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/birthdate');
   };
 
   const handleSkip = () => {
+    // 在导航前滚动到顶部
+    window.scrollTo(0, 0);
     navigate('/birthdate');
   };
   

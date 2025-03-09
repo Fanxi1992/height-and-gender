@@ -20,11 +20,13 @@ const GenderSelection: React.FC = () => {
   const handleNext = () => {
     if (selectedGender) {
       saveGender(selectedGender);
+      window.scrollTo(0, 0);
       navigate('/height');
     }
   };
 
   const handleSkip = () => {
+    window.scrollTo(0, 0);
     navigate('/height');
   };
 
