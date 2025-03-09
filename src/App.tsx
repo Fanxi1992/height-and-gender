@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ import DiseaseSelection from "./pages/DiseaseSelection";
 import RiskReport from "./pages/RiskReport";
 import HomePage from "./pages/HomePage";
 import HealthRiskReport from "./pages/HealthRiskReport";
+import DiseaseRiskDetail from "./pages/DiseaseRiskDetail";
 import HealthTrajectory from "./pages/HealthTrajectory";
 import Shop from "./pages/Shop";
 import KnowledgeBase from "./pages/KnowledgeBase";
@@ -151,6 +153,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <HealthRiskReport />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/disease-risk-detail" 
+            element={
+              <PageWrapper>
+                <DiseaseRiskDetail />
               </PageWrapper>
             } 
           />
