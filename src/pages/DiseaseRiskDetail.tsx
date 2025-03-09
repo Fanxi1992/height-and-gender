@@ -79,16 +79,16 @@ const diseaseData = [
 
 // Card colors for different positions
 const cardColors = [
-  "bg-white", // First card (main focus)
-  "bg-blue-100", // Second card
-  "bg-black text-white", // Third card
-  "bg-blue-200", // Fourth card
-  "bg-purple-200", // Fifth card
-  "bg-white", // Sixth card
-  "bg-gray-300", // Seventh card
-  "bg-blue-100", // Eighth card
-  "bg-white", // Ninth card
-  "bg-gray-200", // Tenth card
+  "bg-blue-900 text-white", // First card (main focus)
+  "bg-blue-900 text-white", // Second card
+  "bg-blue-900 text-white", // Third card
+  "bg-blue-900 text-white", // Fourth card
+  "bg-blue-900 text-white", // Fifth card
+  "bg-blue-900 text-white", // Sixth card
+  "bg-blue-900 text-white", // Seventh card
+  "bg-blue-900 text-white", // Eighth card
+  "bg-blue-900 text-white", // Ninth card
+  "bg-blue-900 text-white", // Tenth card
 ];
 
 const DiseaseRiskDetail: React.FC = () => {
@@ -195,6 +195,9 @@ const DiseaseRiskDetail: React.FC = () => {
     const basePosition = index - activeIndex;
     const position = basePosition + (isDragging ? currentOffset / 100 : 0);
     
+    // 顶部卡片的额外偏移量（使所有卡片位置下移）
+    const topOffset = 40; // 增加顶部偏移量，使卡片整体下移
+    
     // Different transformations based on position
     if (position < -2) {
       // Cards way above the stack - hide them
@@ -208,7 +211,7 @@ const DiseaseRiskDetail: React.FC = () => {
     } else if (position < -1) {
       // Card just above the top of stack
       return {
-        transform: `translateY(-120%) scale(0.85)`,
+        transform: `translateY(calc(-120% + ${topOffset}px)) scale(0.85)`,
         opacity: 0.3,
         zIndex: 10 - index,
         height: `${cardHeight}px`
@@ -216,7 +219,7 @@ const DiseaseRiskDetail: React.FC = () => {
     } else if (position < 0) {
       // Card at top of stack
       return {
-        transform: `translateY(${position * 60}px) scale(${0.95 + position * 0.05})`,
+        transform: `translateY(calc(${position * 60}px + ${topOffset}px)) scale(${0.95 + position * 0.05})`,
         opacity: 1 + position * 0.3,
         zIndex: 10 - index,
         height: `${cardHeight}px`
@@ -224,7 +227,7 @@ const DiseaseRiskDetail: React.FC = () => {
     } else if (position === 0) {
       // Active card
       return {
-        transform: 'translateY(0) scale(1)',
+        transform: `translateY(${topOffset}px) scale(1)`,
         opacity: 1,
         zIndex: 20,
         height: `${cardHeight}px`
@@ -232,7 +235,7 @@ const DiseaseRiskDetail: React.FC = () => {
     } else if (position < 4) {
       // Cards below active card
       return {
-        transform: `translateY(${position * 60}px) scale(${1 - position * 0.05})`,
+        transform: `translateY(calc(${position * 60}px + ${topOffset}px)) scale(${1 - position * 0.05})`,
         opacity: 1 - position * 0.2,
         zIndex: 10 - position,
         height: `${cardHeight}px`
@@ -240,7 +243,7 @@ const DiseaseRiskDetail: React.FC = () => {
     } else {
       // Cards way below - hide them
       return {
-        transform: `translateY(240px) scale(0.75)`,
+        transform: `translateY(calc(240px + ${topOffset}px)) scale(0.75)`,
         opacity: 0,
         zIndex: 1,
         display: 'none',
@@ -259,7 +262,7 @@ const DiseaseRiskDetail: React.FC = () => {
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-bold">{disease.name}</h2>
           {!isExpanded && (
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 ${index === activeIndex ? 'text-blue-500 border-blue-500' : 'text-gray-400 border-gray-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 ${index === activeIndex ? 'text-white border-white' : 'text-white/70 border-white/70'}`}>
               {disease.id}
             </div>
           )}
@@ -269,7 +272,7 @@ const DiseaseRiskDetail: React.FC = () => {
                 e.stopPropagation();
                 setExpandedCardId(null);
               }}
-              className="p-1 rounded-full bg-gray-200 text-gray-700"
+              className="p-1 rounded-full bg-white text-blue-900"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -280,15 +283,15 @@ const DiseaseRiskDetail: React.FC = () => {
         
         {/* Risk Value */}
         <div className="mb-4">
-          <p className={`text-sm ${index === activeIndex ? 'font-medium text-blue-600' : 'text-gray-600'}`}>风险值</p>
-          <div className="w-full bg-gray-200 rounded-full h-2 my-1">
+          <p className="text-sm font-medium text-white">风险值</p>
+          <div className="w-full bg-blue-950 rounded-full h-2 my-1">
             <div 
               className={`h-2 rounded-full ${disease.risk > 0.5 ? 'bg-red-500' : disease.risk > 0.3 ? 'bg-yellow-500' : 'bg-green-500'}`} 
               style={{ width: `${disease.risk * 100}%` }}
             ></div>
           </div>
-          <p className={`text-right ${disease.risk > 0.5 ? 'text-red-500' : disease.risk > 0.3 ? 'text-yellow-500' : 'text-green-500'} font-bold`}>
-            {disease.risk * 100}%
+          <p className={`text-right ${disease.risk > 0.5 ? 'text-red-300' : disease.risk > 0.3 ? 'text-yellow-300' : 'text-green-300'} font-bold`}>
+            {(disease.risk * 100).toFixed(2)}%
           </p>
         </div>
         
@@ -297,16 +300,16 @@ const DiseaseRiskDetail: React.FC = () => {
              style={isExpanded ? {maxHeight: 'calc(100vh - 220px)'} : {maxHeight: 'calc(100% - 160px)'}}>
           {/* Disease Introduction */}
           <div className="mb-4">
-            <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>疾病简介</h3>
-            <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} ${isExpanded ? '' : 'line-clamp-6'}`}>
+            <h3 className="text-md font-semibold text-white">疾病简介</h3>
+            <p className={`text-sm mt-1 text-white/90 ${isExpanded ? '' : 'line-clamp-6'}`}>
               {disease.introduction}
             </p>
           </div>
           
           {/* Prevention Strategy */}
           <div className="mb-3">
-            <h3 className={`text-md font-semibold ${index === 2 ? 'text-white' : 'text-gray-800'}`}>预防策略</h3>
-            <p className={`text-sm mt-1 ${index === 2 ? 'text-gray-300' : 'text-gray-600'} ${isExpanded ? '' : 'line-clamp-8'}`}>
+            <h3 className="text-md font-semibold text-white">预防策略</h3>
+            <p className={`text-sm mt-1 text-white/90 ${isExpanded ? '' : 'line-clamp-8'}`}>
               {disease.prevention}
             </p>
           </div>
@@ -314,7 +317,7 @@ const DiseaseRiskDetail: React.FC = () => {
         
         {/* Bottom Indicator - only show on non-expanded cards */}
         {!isExpanded && (
-          <div className="w-16 h-1 bg-gray-300 mx-auto rounded-full mt-3 absolute bottom-4 left-0 right-0"></div>
+          <div className="w-16 h-1 bg-white/50 mx-auto rounded-full mt-3 absolute bottom-4 left-0 right-0"></div>
         )}
       </>
     );
@@ -327,9 +330,9 @@ const DiseaseRiskDetail: React.FC = () => {
       
       {/* Header - only show when no card is expanded */}
       {expandedCardId === null && (
-        <div className="w-full flex items-center justify-center relative py-3">
+        <div className="w-full flex items-center justify-center relative pt-12">
           <button 
-            className="absolute left-4 p-2" 
+            className="absolute left-4 p-2 z-30" 
             onClick={handleBack}
           >
             <ArrowLeft className="text-white" size={24} />
@@ -338,15 +341,10 @@ const DiseaseRiskDetail: React.FC = () => {
         </div>
       )}
       
-      {/* Indicator line - only show when no card is expanded */}
-      {expandedCardId === null && (
-        <div className="w-20 h-1 bg-white/30 mx-auto rounded-full mb-2"></div>
-      )}
-      
       {/* Card Container */}
       <div 
         ref={containerRef}
-        className={`flex-1 overflow-hidden relative px-4 pb-2 ${expandedCardId !== null ? 'pt-0' : ''}`}
+        className={`flex-1 overflow-hidden relative px-4 pb-2 ${expandedCardId !== null ? 'pt-0' : 'pt-1'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -354,7 +352,7 @@ const DiseaseRiskDetail: React.FC = () => {
         {diseaseData.map((disease, index) => (
           <div
             key={disease.id}
-            className={`absolute w-full p-5 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden ${expandedCardId === disease.id ? 'bg-white' : cardColors[index % cardColors.length]}`}
+            className={`absolute w-full p-5 rounded-3xl transition-all duration-300 shadow-lg overflow-hidden ${expandedCardId === disease.id ? 'bg-blue-900 text-white' : cardColors[index % cardColors.length]}`}
             style={{
               ...getCardStyle(index),
               left: 0,

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -102,7 +101,7 @@ const HealthTrajectory: React.FC = () => {
 
     // 添加Y轴
     chart.append("g")
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"));
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(2) + "%"));
 
     // 定义疾病类别的颜色
     const colorScale = d3.scaleOrdinal<string>()
@@ -193,7 +192,7 @@ const HealthTrajectory: React.FC = () => {
     if (initialTotal === 0) return 0;
     
     const reductionPercent = ((initialTotal - currentTotal) / initialTotal) * 100;
-    return reductionPercent.toFixed(1);
+    return reductionPercent.toFixed(2);
   };
 
   return (

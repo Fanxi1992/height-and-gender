@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -193,7 +192,7 @@ const RiskReport: React.FC = () => {
               >
                 <div className="col-span-1 font-bold text-white">{index + 1}</div>
                 <div className="col-span-9 text-gray-200">{disease.name}</div>
-                <div className="col-span-2 text-right font-mono text-yellow-400">{disease.risk}%</div>
+                <div className="col-span-2 text-right font-mono text-yellow-400">{(disease.risk * 100).toFixed(2)}%</div>
               </div>
             ))}
           </div>
