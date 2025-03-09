@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import { Search, Plus } from 'lucide-react';
+import Feed from '../components/Feed';
 
 const Circle = () => {
   const navigate = useNavigate();
@@ -237,9 +237,7 @@ const Circle = () => {
         )}
         
         {activeTab === '动态' && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">动态功能即将上线</p>
-          </div>
+          <Feed />
         )}
         
         {activeTab === '家人' && (
