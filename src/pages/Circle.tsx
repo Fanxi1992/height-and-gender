@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import { Search, Plus } from 'lucide-react';
 import Feed from '../components/Feed';
+import Family from '../components/Family';
 
 const Circle = () => {
   const navigate = useNavigate();
@@ -241,9 +242,7 @@ const Circle = () => {
         )}
         
         {activeTab === '家人' && (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">家人功能即将上线</p>
-          </div>
+          <Family />
         )}
       </div>
       
