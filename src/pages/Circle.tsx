@@ -39,14 +39,14 @@ const Circle = () => {
       
       {/* Tabs */}
       <div className="px-5 mb-4">
-        <div className="flex bg-white rounded-lg overflow-hidden">
+        <div className="flex bg-gray-800 rounded-lg overflow-hidden">
           {['挑战', '动态', '家人'].map((tab) => (
             <button
               key={tab}
-              className={`flex-1 text-center py-3 text-sm ${
+              className={`flex-1 text-center py-3 text-sm font-medium ${
                 activeTab === tab 
-                  ? 'text-app-blue border-b-2 border-app-blue' 
-                  : 'text-gray-500 border-b-2 border-transparent'
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-300'
               }`}
               onClick={() => handleTabChange(tab)}
             >
