@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -353,10 +352,10 @@ const HomePage: React.FC = () => {
         </button>
       </div>
       
-      {/* Floating Chat Input and Bottom Navigation */}
+      {/* Fixed Bottom Navigation and Chat Input */}
       <div className="fixed bottom-0 left-0 right-0 z-40">
-        {/* Chat Input - only shown on home page */}
-        <ChatInput currentPath={location.pathname} />
+        {/* Chat Input - always show on home page */}
+        <ChatInput currentPath="/home" onlyShouldShowOnHomePage={false} />
         
         {/* Bottom Navigation */}
         <div className="bg-black border-t border-gray-800 flex justify-around py-2">

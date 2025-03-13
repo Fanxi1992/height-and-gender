@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Keyboard, Mic, Camera, Image, SendHorizontal, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -89,7 +88,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Camera options overlay */}
       {showCameraOptions && (
-        <div className="absolute bottom-14 left-0 right-0 bg-white/95 backdrop-blur-sm rounded-t-2xl p-4 shadow-lg z-40 animate-in slide-in-from-bottom duration-300">
+        <div className="absolute bottom-14 left-0 right-0 bg-white/95 backdrop-blur-sm rounded-t-2xl p-4 shadow-lg z-40">
           <div className="flex justify-between items-center mb-3">
             <p className="text-gray-700 text-sm">可以发送：检验/检查报告、病例、药物等含文字的图片</p>
             <button onClick={toggleCameraOptions} className="text-gray-500">
