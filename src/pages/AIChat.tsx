@@ -235,6 +235,22 @@ const AIChat: React.FC = () => {
               )
             ) : (
               <div className="w-full">
+                {/* 思考区 - 移到回答区前面 */}
+                {message.thinking && (
+                  <div className="mt-3 mb-3 bg-gray-50 rounded-xl p-3">
+                    <div className="flex items-center text-green-500 mb-1">
+                      <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span className="text-sm font-medium">已完成思考</span>
+                      <ChevronLeft size={20} className="ml-auto transform rotate-90" />
+                    </div>
+                    <p className="text-sm text-gray-600">{message.thinking}</p>
+                  </div>
+                )}
+                
+                {/* 回答区 */}
                 <div className="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm mb-2">
                   <p className="text-sm">{message.text}</p>
                 </div>
@@ -261,27 +277,12 @@ const AIChat: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
-                {/* Thinking section (collapsible) */}
-                {message.thinking && (
-                  <div className="mt-3 bg-gray-50 rounded-xl p-3">
-                    <div className="flex items-center text-green-500 mb-1">
-                      <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span className="text-sm font-medium">已完成思考</span>
-                      <ChevronLeft size={20} className="ml-auto transform rotate-90" />
-                    </div>
-                    <p className="text-sm text-gray-600">{message.thinking}</p>
-                  </div>
-                )}
               </div>
             )}
           </div>
         ))}
         
-        {/* 当前正在进行的思考和回答 - 只在存在内容且不是已完成消息时显示 */}
+        {/* 当前正在进行的思考和回答 - 先显示思考再显示回答 */}
         {currentThinking && (
           <div className="w-full mb-4">
             <div className="bg-gray-50 rounded-xl p-3">
@@ -302,7 +303,7 @@ const AIChat: React.FC = () => {
           </div>
         )}
         
-        {/* 回答区域 - 只在存在内容且不是已完成消息时显示 */}
+        {/* 回答区域 - 只在思考后显示 */}
         {currentResponse && (
           <div className="w-full mb-4">
             <div className="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm">
