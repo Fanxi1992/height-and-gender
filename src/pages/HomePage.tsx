@@ -212,12 +212,12 @@ const HomePage: React.FC = () => {
           onClick={goToHealthRiskReport}
         >
           <div className="flex justify-between items-start mb-auto z-10">
-            <h3 className="text-sm font-medium text-black">健康风险报告</h3>
+            <h3 className="text-sm font-medium text-black">您的疾病风险TOP10</h3>
             <ArrowRight size={16} className="text-black" />
           </div>
           <div className="flex-1 flex items-center justify-center z-10">
             <Heart size={24} className="text-red-500 mr-2" />
-            <p className="text-xs text-gray-800 font-medium">分析您的健康隐患</p>
+            <p className="text-xs text-gray-800 font-medium">一键解开健康隐患</p>
           </div>
           {/* 背景图片 */}
           <div className="absolute inset-0 opacity-20">
@@ -226,8 +226,7 @@ const HomePage: React.FC = () => {
               alt="健康报告背景" 
               className="w-full h-full object-cover"
             />
-          </div>
-        </div>
+          </div>        </div>
         
         {/* Health Progress */}
         <div 
