@@ -65,7 +65,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="fixed bottom-0 left-0 right-0 z-50" style={{ transform: 'translateZ(0)' }}>
       {/* Audio recording overlay */}
       {isRecording && (
         <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50">
@@ -115,24 +115,24 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Main chat input bar */}
       <div className={cn(
-        "w-full px-3 py-1.5 bg-white border-t border-gray-100 flex items-center space-x-2",
-        showCameraOptions ? "pb-2" : ""
+        "w-full px-3 py-1 bg-white border-t border-gray-100 flex items-center space-x-2",
+        showCameraOptions ? "pb-1.5" : ""
       )}>
         {/* Left icon - keyboard or mic depending on mode */}
         <button 
           onClick={toggleInputMode} 
-          className="w-9 h-9 flex items-center justify-center rounded-full text-gray-600"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-600"
         >
           {inputMode === 'voice' 
-            ? <Keyboard size={22} /> 
-            : <Mic size={22} />
+            ? <Keyboard size={20} /> 
+            : <Mic size={20} />
           }
         </button>
         
         {/* Middle input area - changes based on mode */}
         {inputMode === 'voice' ? (
           <div 
-            className="flex-1 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm active:bg-gray-200 touch-none select-none"
+            className="flex-1 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm active:bg-gray-200 touch-none select-none"
             onTouchStart={startRecording}
             onMouseDown={startRecording}
             onTouchEnd={stopRecording}
@@ -142,7 +142,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           >
             <div className="flex items-center">
               {isRecording ? (
-                <AudioLines size={18} className="text-blue-500 mr-1 animate-pulse" />
+                <AudioLines size={16} className="text-blue-500 mr-1 animate-pulse" />
               ) : null}
               <span>{isRecording ? "松开发送" : "按下说话"}</span>
             </div>
@@ -154,14 +154,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="任何问题，欢迎问我哦~"
-              className="w-full h-9 bg-gray-100 rounded-full px-4 text-black text-sm placeholder:text-gray-500 focus:outline-none"
+              className="w-full h-8 bg-gray-100 rounded-full px-4 text-black text-sm placeholder:text-gray-500 focus:outline-none"
             />
             {inputText && (
               <button 
                 onClick={handleSend} 
                 className="absolute right-3 top-1/2 transform -translate-y-1/2"
               >
-                <SendHorizontal size={18} className="text-blue-500" />
+                <SendHorizontal size={16} className="text-blue-500" />
               </button>
             )}
           </div>
@@ -170,9 +170,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
         {/* Right icon - camera */}
         <button 
           onClick={toggleCameraOptions} 
-          className="w-9 h-9 flex items-center justify-center rounded-full text-gray-600"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-600"
         >
-          <Camera size={22} />
+          <Camera size={20} />
         </button>
       </div>
     </div>
