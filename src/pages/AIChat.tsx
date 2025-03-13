@@ -221,7 +221,7 @@ const AIChat: React.FC = () => {
                         key={i}
                         className="bg-white w-1 mx-px rounded-full"
                         style={{ 
-                          height: `${Math.random() * 12 + 3}px`,
+                          height: `${[7, 9, 12, 15, 10, 8, 5, 8, 10, 15, 12, 9, 7, 5, 8][i % 15]}px`,
                         }}
                       />
                     ))}
