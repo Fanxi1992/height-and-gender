@@ -53,8 +53,8 @@ const HomePage: React.FC = () => {
     navigate('/health-risk-report');
   };
 
-  const goToHealthTrajectory = () => {
-    navigate('/health-trajectory');
+  const goToGenderPage = () => {
+    navigate('/gender');
   };
   
   const goToKnowledgeBase = () => {
@@ -393,10 +393,10 @@ const HomePage: React.FC = () => {
         
         <div 
           className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
-          onClick={goToHealthTrajectory}
+          onClick={goToGenderPage}
         >
           <div className="flex justify-between items-start mb-auto z-10">
-            <h3 className="text-sm font-medium text-white">健康轨迹</h3>
+            <h3 className="text-sm font-medium text-white">健康测一测</h3>
             <ArrowRight size={16} className="text-white" />
           </div>
           <div className="flex-1 flex items-center justify-center z-10">
