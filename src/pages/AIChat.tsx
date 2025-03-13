@@ -21,6 +21,7 @@ interface Message {
   isUser: boolean;
   isVoice?: boolean;
   thinking?: string;
+  isThinkingCollapsed?: boolean;
 }
 
 const AIChat: React.FC = () => {
@@ -32,7 +33,8 @@ const AIChat: React.FC = () => {
       id: '1',
       text: '下午好！你今天怎么样？有什么问题尽管问我。',
       isUser: false,
-      thinking: ''
+      thinking: '',
+      isThinkingCollapsed: false
     }
   ]);
   const [isThinking, setIsThinking] = useState(false);
@@ -41,6 +43,7 @@ const AIChat: React.FC = () => {
   const [currentResponse, setCurrentResponse] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [locationProcessed, setLocationProcessed] = useState(false);
+  const [isCurrentThinkingCollapsed, setIsCurrentThinkingCollapsed] = useState(false);
   
   // Mock thinking and response text
   const mockThinking = "嗯.....这个问题似乎简单：'你是谁？'不过话说回来，对于一个人工智能来说，这是一个非常深刻的问题呢。让我仔细想想该怎么回答才能既简单明了又能传达我们的核心理念。";
@@ -87,14 +90,16 @@ const AIChat: React.FC = () => {
     setCurrentResponse('');
     setIsThinking(false);
     setIsResponding(false);
+    setIsCurrentThinkingCollapsed(false);
     
     setLocationProcessed(true);
     
     const newMessage: Message = {
-      id: generateUniqueId(), // 使用更可靠的ID生成方法
+      id: generateUniqueId(),
       text: message,
       isUser: true,
-      isVoice
+      isVoice,
+      isThinkingCollapsed: false
     };
     setMessages(prevMessages => [...prevMessages, newMessage]);
     
@@ -124,10 +129,11 @@ const AIChat: React.FC = () => {
                 console.log('最终添加消息:', mockResponse);
                 
                 const newAIMessage = { 
-                  id: generateUniqueId(), // 使用更可靠的ID生成方法
+                  id: generateUniqueId(),
                   text: mockResponse, 
                   isUser: false,
-                  thinking: mockThinking
+                  thinking: mockThinking,
+                  isThinkingCollapsed: false
                 };
                 
                 console.log('添加AI消息对象:', newAIMessage);
@@ -141,6 +147,7 @@ const AIChat: React.FC = () => {
                 setCurrentThinking('');
                 setCurrentResponse('');
                 setIsResponding(false);
+                setIsCurrentThinkingCollapsed(false);
                 
                 setLocationProcessed(false);
               }, 500);
@@ -174,9 +181,26 @@ const AIChat: React.FC = () => {
         id: '1',
         text: '下午好！你今天怎么样？有什么问题尽管问我。',
         isUser: false,
-        thinking: ''
+        thinking: '',
+        isThinkingCollapsed: false
       }
     ]);
+  };
+
+  // 添加切换消息思考区折叠状态的函数
+  const toggleThinkingCollapse = (messageId: string) => {
+    setMessages(prevMessages => 
+      prevMessages.map(message => 
+        message.id === messageId 
+          ? { ...message, isThinkingCollapsed: !message.isThinkingCollapsed }
+          : message
+      )
+    );
+  };
+
+  // 切换当前思考区的折叠状态
+  const toggleCurrentThinking = () => {
+    setIsCurrentThinkingCollapsed(!isCurrentThinkingCollapsed);
   };
 
   return (
@@ -256,15 +280,23 @@ const AIChat: React.FC = () => {
                 {/* 思考区 - 移到回答区前面 */}
                 {message.thinking && (
                   <div className="mt-3 mb-3 bg-gray-50 rounded-xl p-3">
-                    <div className="flex items-center text-green-500 mb-1">
+                    <div 
+                      className="flex items-center text-green-500 mb-1 cursor-pointer"
+                      onClick={() => toggleThinkingCollapse(message.id)}
+                    >
                       <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       <span className="text-sm font-medium">已完成思考</span>
-                      <ChevronLeft size={20} className="ml-auto transform rotate-90" />
+                      <ChevronLeft 
+                        size={20} 
+                        className={`ml-auto transform transition-transform ${message.isThinkingCollapsed ? 'rotate-270' : 'rotate-90'}`}
+                      />
                     </div>
-                    <p className="text-sm text-gray-600">{message.thinking}</p>
+                    {!message.isThinkingCollapsed && (
+                      <p className="text-sm text-gray-600">{message.thinking}</p>
+                    )}
                   </div>
                 )}
                 
@@ -305,7 +337,10 @@ const AIChat: React.FC = () => {
         {currentThinking && (
           <div className="w-full mb-4">
             <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center text-green-500 mb-1">
+              <div 
+                className="flex items-center text-green-500 mb-1 cursor-pointer"
+                onClick={toggleCurrentThinking}
+              >
                 <svg className={`w-5 h-5 mr-1 ${isThinking ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                   {isThinking ? (
@@ -315,9 +350,14 @@ const AIChat: React.FC = () => {
                   )}
                 </svg>
                 <span className="text-sm font-medium">{isThinking ? 'AI思考中...' : '已完成思考'}</span>
-                <ChevronLeft size={20} className="ml-auto transform rotate-90" />
+                <ChevronLeft 
+                  size={20} 
+                  className={`ml-auto transform transition-transform ${isCurrentThinkingCollapsed ? 'rotate-270' : 'rotate-90'}`}
+                />
               </div>
-              <p className="text-sm text-gray-600">{currentThinking}</p>
+              {!isCurrentThinkingCollapsed && (
+                <p className="text-sm text-gray-600">{currentThinking}</p>
+              )}
             </div>
           </div>
         )}
