@@ -1,20 +1,22 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database } from 'lucide-react';
+import ChatInput from '../components/ChatInput';
+import { ArrowRight, Plus, Activity, Droplet, Utensils, Heart, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFloatingButton, setShowFloatingButton] = useState(false);
-  const chatbotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (chatbotRef.current && containerRef.current) {
-        const rect = chatbotRef.current.getBoundingClientRect();
-        setShowFloatingButton(rect.bottom < 0);
+      if (containerRef.current) {
+        const scrollPosition = containerRef.current.scrollTop;
+        setShowFloatingButton(scrollPosition > 200);
       }
     };
 
@@ -26,11 +28,6 @@ const HomePage: React.FC = () => {
       };
     }
   }, []);
-
-  const handleChatbotPress = () => {
-    console.log('Chatbot long press activated');
-    // Voice chat functionality would be implemented here
-  };
 
   const weekDays = [
     { day: '周五', date: '21', active: false },
@@ -64,11 +61,11 @@ const HomePage: React.FC = () => {
   return (
     <div 
       ref={containerRef} 
-      className="flex flex-col min-h-screen bg-black text-white overflow-y-auto pb-16"
+      className="flex flex-col min-h-screen bg-black text-white overflow-y-auto pb-32"
     >
       <StatusBar />
       
-      {/* Header Section with Avatar, History and Settings - 增加顶部间距 */}
+      {/* Header Section with Avatar, History and Settings */}
       <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-400">
           <img 
@@ -88,53 +85,10 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Greeting Text - 明确放在圆环上方 */}
+      {/* Greeting Text */}
       <div className="mt-6 mb-8 text-center w-full px-5">
         <h1 className="text-2xl font-semibold">Hi, 李小明</h1>
       </div>
-      
-      {/* 更加精美的语音问询组件 */}
-      <div 
-        ref={chatbotRef}
-        className="relative w-40 h-40 mb-5 mx-auto"
-        onTouchStart={handleChatbotPress}
-      >
-        {/* 动态脉冲效果 */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md animate-pulse"></div>
-        
-        {/* 外部圆环 - 使用白色边框和闪烁动画 */}
-        <div className="absolute inset-0 rounded-full border-[3px] border-white/70 animate-[ping_4s_ease-in-out_infinite]"></div>
-        
-        {/* 中间圆环 - 光晕效果 */}
-        <div className="absolute inset-[10px] rounded-full border-[3px] border-white/80 shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
-        
-        {/* 内部圆形 - 深色背景和发光效果 */}
-        <div className="absolute inset-[20px] rounded-full bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center shadow-inner overflow-hidden">
-          {/* 显示麦克风图标 */}
-          <div className="relative z-10 flex flex-col items-center">
-            <Mic size={36} className="text-white mb-1" />
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4].map((i) => (
-                <div 
-                  key={i} 
-                  className="w-1 h-3 bg-white rounded-full animate-[bounce_1.5s_ease-in-out_infinite]" 
-                  style={{animationDelay: `${i * 0.2}s`}}
-                ></div>
-              ))}
-            </div>
-          </div>
-          
-          {/* 背景光效 */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 mix-blend-overlay"></div>
-        </div>
-      </div>
-      
-      {/* Text below Chatbot */}
-      <p className="mt-2 mb-8 text-center font-medium relative">
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 animate-pulse">
-          AI健康助手长按语音提问 ✨
-        </span>
-      </p>
       
       {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
@@ -171,7 +125,7 @@ const HomePage: React.FC = () => {
               <div className="text-xs text-gray-500">初始体重</div>
             </div>
             
-            {/* Progress Circle - 更美观的进度显示 */}
+            {/* Progress Circle */}
             <div className="relative w-20 h-20">
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <defs>
@@ -206,7 +160,7 @@ const HomePage: React.FC = () => {
       
       {/* Health Report Cards Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Health Risk Report - 使用真实图片 */}
+        {/* Health Risk Report */}
         <div 
           className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthRiskReport}
@@ -226,7 +180,8 @@ const HomePage: React.FC = () => {
               alt="健康报告背景" 
               className="w-full h-full object-cover"
             />
-          </div>        </div>
+          </div>
+        </div>
         
         {/* Health Progress */}
         <div 
@@ -255,7 +210,7 @@ const HomePage: React.FC = () => {
       
       {/* Health Tools Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Tongue Inspection - 使用真实舌苔图片 */}
+        {/* Tongue Inspection */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 flex flex-col h-48 shadow-lg overflow-hidden">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium text-white">舌苔监测</h3>
@@ -276,7 +231,7 @@ const HomePage: React.FC = () => {
           </p>
         </div>
         
-        {/* Water Intake - 更现代化的水分摄入追踪 */}
+        {/* Water Intake */}
         <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col h-48 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start z-10">
             <div>
@@ -310,7 +265,7 @@ const HomePage: React.FC = () => {
       
       {/* Calorie Tracking and Health Data Collection */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Calorie Card - 使用真实食物图片 */}
+        {/* Calorie Card */}
         <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg">
           <div className="flex justify-between items-start">
             <div>
@@ -353,7 +308,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Health Data Collection - 更现代化的健康数据展示 */}
+        {/* Health Data Collection */}
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start">
             <div>
@@ -390,7 +345,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Add Health Tools Button - 更现代的按钮设计 */}
+      {/* Add Health Tools Button */}
       <div className="w-full px-5 mb-20">
         <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
           <Plus size={20} className="mr-2" />
@@ -398,38 +353,33 @@ const HomePage: React.FC = () => {
         </button>
       </div>
       
-      {/* Floating Chatbot Button - 更现代化的语音助手浮动按钮 */}
-      {showFloatingButton && (
-        <div 
-          className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
-          onTouchStart={handleChatbotPress}
-        >
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
-          <Mic size={20} className="text-white z-10" />
-        </div>
-      )}
-      
-      {/* Bottom Navigation - 使用更现代化的导航栏 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2 z-40">
-        <div className="flex flex-col items-center text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-          <span className="text-xs">主页</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-500" onClick={goToKnowledgeBase}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          <span className="text-xs">知识库</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-500" onClick={goToCircle}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span className="text-xs">圈子</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-500" onClick={goToShop}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-          <span className="text-xs">商城</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-500" onClick={() => navigate('/my')}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg>
-          <span className="text-xs">我的</span>
+      {/* Floating Chat Input and Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-40">
+        {/* Chat Input - only shown on home page */}
+        <ChatInput currentPath={location.pathname} />
+        
+        {/* Bottom Navigation */}
+        <div className="bg-black border-t border-gray-800 flex justify-around py-2">
+          <div className="flex flex-col items-center text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span className="text-xs">主页</span>
+          </div>
+          <div className="flex flex-col items-center text-gray-500" onClick={goToKnowledgeBase}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            <span className="text-xs">知识库</span>
+          </div>
+          <div className="flex flex-col items-center text-gray-500" onClick={goToCircle}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span className="text-xs">圈子</span>
+          </div>
+          <div className="flex flex-col items-center text-gray-500" onClick={goToShop}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            <span className="text-xs">商城</span>
+          </div>
+          <div className="flex flex-col items-center text-gray-500" onClick={() => navigate('/my')}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg>
+            <span className="text-xs">我的</span>
+          </div>
         </div>
       </div>
     </div>
