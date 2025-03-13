@@ -2,7 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import ChatInput from '../components/ChatInput';
-import { ArrowRight, Plus, Activity, Droplet, Utensils, Heart, Database } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Plus, 
+  Activity, 
+  Droplet, 
+  Utensils, 
+  Heart, 
+  Database,
+  MessageCircle,
+  ThumbsUp,
+  Play,
+  Image as ImageIcon
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -57,6 +69,209 @@ const HomePage: React.FC = () => {
     navigate('/circle');
   };
 
+  const contentItems = [
+    {
+      id: 1,
+      type: 'article',
+      title: '"体重管理年"系列: 体重篇',
+      image: '/lovable-uploads/b0865539-1b41-46be-bced-4820d395a894.png',
+      tag: '体重管理年系列',
+      author: '健康管理师',
+      likes: 845,
+      comments: 75,
+    },
+    {
+      id: 2,
+      type: 'video',
+      title: '国家出手了！卫健委带你做"减脂餐"',
+      image: '/lovable-uploads/bde8425d-5107-4e92-b856-1885fff982ff.png',
+      tag: '官方指导',
+      author: '央视新闻',
+      likes: 5100,
+      views: 8600,
+    },
+    {
+      id: 3,
+      type: 'article',
+      title: '吃完这个，我怕你只剩一点点了',
+      image: '/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png',
+      tag: '饮食控制',
+      author: '饮食专家',
+      likes: 328,
+      comments: 42,
+    },
+    {
+      id: 4,
+      type: 'article',
+      title: '2025达减肥目标，挑战7斤公主减重',
+      image: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png',
+      tag: '减重挑战',
+      author: '减重达人',
+      likes: 763,
+      comments: 124,
+    },
+    {
+      id: 5,
+      type: 'article',
+      title: '为什么运动有这么大热量缺口，而且还喝水...',
+      image: '/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png',
+      tag: '科普知识',
+      author: '徐风暖阳',
+      likes: 46,
+      comments: 15,
+    },
+    {
+      id: 6,
+      type: 'video',
+      title: '第127天: 77.95kg，差2.95kg达标，今天...',
+      image: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png',
+      tag: '减重日记',
+      author: '瘦桐友友_3',
+      likes: 23,
+      views: 567,
+    },
+    {
+      id: 7,
+      type: 'article',
+      title: '光，理直气壮的干了...',
+      image: '/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png',
+      tag: '励志故事',
+      author: '万物向阳',
+      likes: 14,
+      comments: 5,
+    },
+    {
+      id: 8,
+      type: 'article',
+      title: 'DAY 128 | 今天吃了好多好多大枣，上瘾了...',
+      image: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png',
+      tag: '小米粥',
+      author: '奇迹寒寒',
+      likes: 9,
+      comments: 3,
+    },
+    {
+      id: 9,
+      type: 'article',
+      title: '之前胖的时候认为BMI18.5以下的朋友瘦瘦的很好看。我不求减到极低体重，减到标准体重就满足了。可减肥会上瘾...',
+      image: '/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png',
+      tag: '心理调适',
+      author: '一直笑的碳水',
+      likes: 12,
+      comments: 4,
+    },
+    {
+      id: 10,
+      type: 'article',
+      title: '口服即可，抑制食欲很强',
+      image: '/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png',
+      tag: '药物指导',
+      author: '专业医师',
+      likes: 332,
+      comments: 67,
+    },
+    {
+      id: 11,
+      type: 'video',
+      title: '选一个方案冲刺新目标',
+      image: '/lovable-uploads/bde8425d-5107-4e92-b856-1885fff982ff.png',
+      tag: '目标设定',
+      author: '健康达人',
+      likes: 156,
+      views: 2874,
+    },
+    {
+      id: 12,
+      type: 'article',
+      title: '每天30分钟，一个月减掉10斤的运动方案',
+      image: '/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png',
+      tag: '运动指导',
+      author: '健身教练',
+      likes: 521,
+      comments: 98,
+    },
+    {
+      id: 13,
+      type: 'article',
+      title: '3.7千餐 - 减重过程中的营养均衡指南',
+      image: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png',
+      tag: '营养指导',
+      author: '营养师王小明',
+      likes: 287,
+      comments: 43,
+    },
+    {
+      id: 14,
+      type: 'video',
+      title: '早餐这样吃，一周轻松瘦3斤',
+      image: '/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png',
+      tag: '饮食指导',
+      author: '营养师李明',
+      likes: 402,
+      views: 5689,
+    },
+    {
+      id: 15,
+      type: 'article',
+      title: '减重期间如何应对节日聚餐',
+      image: '/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png',
+      tag: '社交指南',
+      author: '心理咨询师',
+      likes: 198,
+      comments: 37,
+    },
+    {
+      id: 16,
+      type: 'article',
+      title: '血糖波动与体重管理的关系',
+      image: '/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png',
+      tag: '医学知识',
+      author: '内分泌专家',
+      likes: 276,
+      comments: 42,
+    },
+    {
+      id: 17,
+      type: 'video',
+      title: '居家15分钟高效燃脂训练',
+      image: '/lovable-uploads/bde8425d-5107-4e92-b856-1885fff982ff.png',
+      tag: '运动指导',
+      author: '私教小张',
+      likes: 387,
+      views: 4569,
+    },
+    {
+      id: 18,
+      type: 'article',
+      title: '减重平台期怎么破？专家给你支招',
+      image: '/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png',
+      tag: '专家指导',
+      author: '减重专家',
+      likes: 312,
+      comments: 58,
+    },
+    {
+      id: 19,
+      type: 'article',
+      title: '睡眠质量与体重管理的关系',
+      image: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png',
+      tag: '睡眠研究',
+      author: '睡眠专家',
+      likes: 187,
+      comments: 29,
+    },
+    {
+      id: 20,
+      type: 'video',
+      title: '科学减重，远离反弹',
+      image: '/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png',
+      tag: '长期管理',
+      author: '健康管理师',
+      likes: 421,
+      views: 6732,
+    },
+  ];
+
   return (
     <div 
       ref={containerRef} 
@@ -92,7 +307,6 @@ const HomePage: React.FC = () => {
       {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
         <div className="bg-white rounded-xl overflow-hidden shadow-lg">
-          {/* Card Header */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 flex justify-between items-center">
             <div className="flex-1">
               <span className="text-sm font-medium">体重风险打卡</span>
@@ -101,7 +315,6 @@ const HomePage: React.FC = () => {
             <ArrowRight size={16} />
           </div>
           
-          {/* Week Calendar */}
           <div className="flex justify-between px-4 py-2 bg-white">
             {weekDays.map((item, index) => (
               <div 
@@ -117,14 +330,12 @@ const HomePage: React.FC = () => {
             ))}
           </div>
           
-          {/* Weight Progress */}
           <div className="px-4 py-4 bg-white flex justify-between items-center">
             <div className="text-center">
               <div className="text-2xl font-bold text-black">70.00</div>
               <div className="text-xs text-gray-500">初始体重</div>
             </div>
             
-            {/* Progress Circle */}
             <div className="relative w-20 h-20">
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <defs>
@@ -159,7 +370,6 @@ const HomePage: React.FC = () => {
       
       {/* Health Report Cards Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Health Risk Report */}
         <div 
           className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthRiskReport}
@@ -172,7 +382,6 @@ const HomePage: React.FC = () => {
             <Heart size={24} className="text-red-500 mr-2" />
             <p className="text-xs text-gray-800 font-medium">一键解开健康隐患</p>
           </div>
-          {/* 背景图片 */}
           <div className="absolute inset-0 opacity-20">
             <img 
               src="/健康风险报告图.jpg" 
@@ -182,7 +391,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Health Progress */}
         <div 
           className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthTrajectory}
@@ -195,7 +403,6 @@ const HomePage: React.FC = () => {
             <Activity size={24} className="text-white mr-2" />
             <p className="text-xs text-white/90 font-medium">跟踪您的健康变化</p>
           </div>
-          {/* 图表背景效果 */}
           <div className="absolute inset-0 flex items-end opacity-30">
             <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-16">
               <path 
@@ -209,7 +416,6 @@ const HomePage: React.FC = () => {
       
       {/* Health Tools Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Tongue Inspection */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 flex flex-col h-48 shadow-lg overflow-hidden">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium text-white">舌苔监测</h3>
@@ -230,7 +436,6 @@ const HomePage: React.FC = () => {
           </p>
         </div>
         
-        {/* Water Intake */}
         <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col h-48 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start z-10">
             <div>
@@ -243,7 +448,6 @@ const HomePage: React.FC = () => {
             <span className="text-2xl font-bold text-white">300 毫升</span>
             <div className="mt-2 w-12 h-20 bg-blue-200/40 rounded-full relative overflow-hidden backdrop-blur-sm">
               <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-blue-100 to-blue-200 animate-pulse"></div>
-              {/* 水波纹动画效果 */}
               <div className="absolute bottom-[50%] left-0 right-0 h-1 bg-white/30 transform -translate-y-1/2"></div>
             </div>
             <div className="mt-3 w-full flex justify-center">
@@ -255,7 +459,6 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           </div>
-          {/* 水滴背景元素 */}
           <div className="absolute -right-2 -bottom-2 opacity-10">
             <Droplet size={80} className="text-white" />
           </div>
@@ -264,7 +467,6 @@ const HomePage: React.FC = () => {
       
       {/* Calorie Tracking and Health Data Collection */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Calorie Card */}
         <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg">
           <div className="flex justify-between items-start">
             <div>
@@ -307,7 +509,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Health Data Collection */}
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start">
             <div>
@@ -337,27 +538,116 @@ const HomePage: React.FC = () => {
             ))}
           </div>
           
-          {/* 背景数据流动效果 */}
           <div className="absolute inset-0 opacity-5">
             <Database size={200} className="absolute -right-10 -bottom-10 text-white" />
           </div>
         </div>
       </div>
       
-      {/* Add Health Tools Button */}
-      <div className="w-full px-5 mb-20">
+      <div className="w-full px-5 mb-6">
         <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
           <Plus size={20} className="mr-2" />
           添加新健康工具
         </button>
       </div>
       
-      {/* Fixed Bottom Navigation and Chat Input */}
+      <div className="w-full bg-gray-100 rounded-t-3xl pt-6 pb-8">
+        <div className="px-5 mb-4">
+          <div className="flex items-center mb-4">
+            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center mr-2">
+              <span className="text-orange-500">🔍</span>
+            </div>
+            <h2 className="text-xl font-bold text-black">大家都在看</h2>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {contentItems.map((item) => (
+              <div 
+                key={item.id} 
+                className={`bg-white rounded-xl overflow-hidden shadow-sm ${
+                  item.id % 3 === 0 ? 'row-span-2' : ''
+                }`}
+              >
+                <div className="relative">
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-32 object-cover"
+                  />
+                  {item.type === 'video' && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                        <Play size={16} className="text-white ml-1" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2">
+                    <span className="text-xs px-2 py-1 rounded-full bg-white/80 text-black font-medium">
+                      #{item.tag}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="p-2">
+                  <h3 className="text-sm font-medium text-black line-clamp-2 mb-1">
+                    {item.title}
+                  </h3>
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                    <div className="flex items-center">
+                      <span>{item.author}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {item.type === 'video' ? (
+                        <>
+                          <span className="flex items-center">
+                            <Play size={10} className="mr-0.5" />
+                            {item.views}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="flex items-center">
+                          <MessageCircle size={10} className="mr-0.5" />
+                          {item.comments}
+                        </span>
+                      )}
+                      <span className="flex items-center">
+                        <ThumbsUp size={10} className="mr-0.5" />
+                        {item.likes}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex items-center justify-center my-6 text-xs text-gray-400">
+            <div className="h-px bg-gray-200 flex-grow"></div>
+            <span className="mx-4">— 已经到底了 —</span>
+            <div className="h-px bg-gray-200 flex-grow"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <button 
+              onClick={() => navigate('/knowledge-base')}
+              className="py-3 px-4 rounded-full bg-blue-100 text-blue-500 font-medium flex items-center justify-center"
+            >
+              更多内容 <ArrowRight size={16} className="ml-1" />
+            </button>
+            <button 
+              onClick={() => navigate('/shop')}
+              className="py-3 px-4 rounded-full bg-green-100 text-green-500 font-medium flex items-center justify-center"
+            >
+              更多商品 <ArrowRight size={16} className="ml-1" />
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <div className="fixed bottom-0 left-0 right-0 z-40">
-        {/* Chat Input - always show on home page */}
         <ChatInput currentPath="/home" onlyShouldShowOnHomePage={false} />
         
-        {/* Bottom Navigation */}
         <div className="bg-black border-t border-gray-800 flex justify-around py-2">
           <div className="flex flex-col items-center text-white">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
