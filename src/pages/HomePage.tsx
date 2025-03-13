@@ -164,7 +164,7 @@ const HomePage: React.FC = () => {
       id: 10,
       type: 'article',
       title: '口服即可，抑制食欲很强',
-      image: 'https://images.pexels.com/photos/139398/pexels-photo-139398.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      image: '/public/为什么运动有这么大热量缺口，而且还喝水...jpg',
       tag: '药物指导',
       author: '专业医师',
       likes: 332,
@@ -565,15 +565,13 @@ const HomePage: React.FC = () => {
               {contentItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className={`bg-white rounded-xl overflow-hidden shadow-sm ${
-                    item.id % 3 === 0 ? 'row-span-2' : ''
-                  }`}
+                  className="bg-white rounded-xl overflow-hidden shadow-sm h-64"
                 >
-                  <div className="relative">
+                  <div className="relative h-32">
                     <img 
                       src={item.image} 
                       alt={item.title} 
-                      className="w-full h-32 object-cover"
+                      className="w-full h-full object-cover"
                     />
                     {item.type === 'video' && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -589,14 +587,14 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="p-2">
-                    <h3 className="text-sm font-medium text-black line-clamp-2 mb-1">
+                  <div className="p-2 flex flex-col h-32">
+                    <h3 className="text-sm font-medium text-black line-clamp-3 mb-1">
                       {item.title}
                     </h3>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+                    <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
                       <div className="flex items-center">
-                        <span>{item.author}</span>
+                        <span className="truncate max-w-20">{item.author}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         {item.type === 'video' ? (
