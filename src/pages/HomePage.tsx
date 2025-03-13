@@ -74,7 +74,7 @@ const HomePage: React.FC = () => {
       id: 1,
       type: 'article',
       title: '"体重管理年"系列: 体重篇',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+      image: '/public/体重管理年系列 体重篇.jpg',
       tag: '体重管理年系列',
       author: '健康管理师',
       likes: 845,
@@ -571,7 +571,7 @@ const HomePage: React.FC = () => {
                 >
                   <div className="relative">
                     <img 
-                      src={`https://source.unsplash.com/random/300x200?health&sig=${item.id}`} 
+                      src={item.image} 
                       alt={item.title} 
                       className="w-full h-32 object-cover"
                     />
