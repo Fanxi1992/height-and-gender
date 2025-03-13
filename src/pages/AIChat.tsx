@@ -103,59 +103,63 @@ const AIChat: React.FC = () => {
     };
     setMessages(prevMessages => [...prevMessages, newMessage]);
     
+    // 立即显示思考框
     setIsThinking(true);
     
-    let i = 0;
-    const thinkingInterval = setInterval(() => {
-      if (i < mockThinking.length) {
-        setCurrentThinking(prev => prev + mockThinking.charAt(i));
-        i++;
-      } else {
-        clearInterval(thinkingInterval);
-        
-        setTimeout(() => {
-          setIsThinking(false);
-          setIsResponding(true);
+    // 延迟1秒后开始生成思考文字
+    setTimeout(() => {
+      let i = 0;
+      const thinkingInterval = setInterval(() => {
+        if (i < mockThinking.length) {
+          setCurrentThinking(prev => prev + mockThinking.charAt(i));
+          i++;
+        } else {
+          clearInterval(thinkingInterval);
           
-          let j = 0;
-          const responseInterval = setInterval(() => {
-            if (j < mockResponse.length) {
-              setCurrentResponse(prev => prev + mockResponse.charAt(j));
-              j++;
-            } else {
-              clearInterval(responseInterval);
-              setTimeout(() => {
-                // 添加调试日志
-                console.log('最终添加消息:', mockResponse);
-                
-                const newAIMessage = { 
-                  id: generateUniqueId(),
-                  text: mockResponse, 
-                  isUser: false,
-                  thinking: mockThinking,
-                  isThinkingCollapsed: false
-                };
-                
-                console.log('添加AI消息对象:', newAIMessage);
-                
-                setMessages(prev => {
-                  const newMessages = [...prev, newAIMessage];
-                  console.log('更新后的消息数组:', newMessages);
-                  return newMessages;
-                });
-                
-                setCurrentThinking('');
-                setCurrentResponse('');
-                setIsResponding(false);
-                setIsCurrentThinkingCollapsed(false);
-                
-                setLocationProcessed(false);
-              }, 500);
-            }
-          }, 30);
-        }, 1000);
-      }
-    }, 30);
+          setTimeout(() => {
+            setIsThinking(false);
+            setIsResponding(true);
+            
+            let j = 0;
+            const responseInterval = setInterval(() => {
+              if (j < mockResponse.length) {
+                setCurrentResponse(prev => prev + mockResponse.charAt(j));
+                j++;
+              } else {
+                clearInterval(responseInterval);
+                setTimeout(() => {
+                  // 添加调试日志
+                  console.log('最终添加消息:', mockResponse);
+                  
+                  const newAIMessage = { 
+                    id: generateUniqueId(),
+                    text: mockResponse, 
+                    isUser: false,
+                    thinking: mockThinking,
+                    isThinkingCollapsed: false
+                  };
+                  
+                  console.log('添加AI消息对象:', newAIMessage);
+                  
+                  setMessages(prev => {
+                    const newMessages = [...prev, newAIMessage];
+                    console.log('更新后的消息数组:', newMessages);
+                    return newMessages;
+                  });
+                  
+                  setCurrentThinking('');
+                  setCurrentResponse('');
+                  setIsResponding(false);
+                  setIsCurrentThinkingCollapsed(false);
+                  
+                  setLocationProcessed(false);
+                }, 500);
+              }
+            }, 30);
+          }, 1000);
+        }
+      }, 30);
+    }, 1000); // 添加1秒延迟
   };
 
   // Go back to home
