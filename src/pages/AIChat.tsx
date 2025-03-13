@@ -209,34 +209,34 @@ const AIChat: React.FC = () => {
       
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-40 pt-10 pb-3 px-4 bg-white rounded-b-3xl shadow-sm">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           {/* Back button */}
           <button 
             onClick={handleBack}
-            className="p-2 -ml-2"
+            className="p-2"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={28} className="text-gray-700" />
           </button>
           
           {/* Avatar and title */}
-          <div className="flex items-center ml-2">
-            <Avatar className="h-10 w-10 border-2 border-purple-100">
-              <AvatarImage src="/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png" alt="康友AI" />
+          <div className="flex items-center flex-1 ml-4">
+            <Avatar className="h-14 w-14 border-2 border-purple-100">
+              <AvatarImage src="https://img.lovepik.com/element/40116/7811.png_300.png" alt="康友AI" />
               <AvatarFallback>AI</AvatarFallback>
             </Avatar>
             <div className="ml-3">
-              <h2 className="text-base font-semibold">康友AI</h2>
-              <p className="text-xs text-gray-500">你的24h慢病管理专家</p>
+              <h2 className="text-lg font-bold text-gray-800">康友AI</h2>
+              <p className="text-xs text-gray-500">医疗健康百科</p>
             </div>
           </div>
           
           {/* Right buttons */}
-          <div className="ml-auto flex items-center space-x-4">
-            <button onClick={toggleAudio} className="text-gray-500">
-              {audioEnabled ? <Volume2 size={22} /> : <VolumeX size={22} />}
+          <div className="flex items-center space-x-6">
+            <button onClick={toggleAudio} className="text-gray-700">
+              {audioEnabled ? <Volume2 size={26} /> : <VolumeX size={26} />}
             </button>
-            <button onClick={startNewConversation} className="text-gray-500">
-              <MessageCirclePlus size={22} />
+            <button onClick={startNewConversation} className="text-gray-700">
+              <MessageCirclePlus size={26} />
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@ const AIChat: React.FC = () => {
                 
                 {/* 回答区 */}
                 <div className="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm mb-2">
-                  <p className="text-sm text-black font-normal">{message.text}</p> {/* 添加text-black确保文字可见 */}
+                  <p className="text-sm text-gray-800 leading-relaxed">{message.text}</p>
                 </div>
                 
                 {/* Action buttons */}
