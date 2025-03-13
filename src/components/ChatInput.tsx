@@ -38,7 +38,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       if (currentPath !== '/aichat') {
         navigate('/aichat', { state: { message: inputText, isVoice: false } });
       } else {
-        // Get the handleNewMessage function from parent via props
+        // Dispatch custom event for parent components to handle
         window.dispatchEvent(new CustomEvent('newChatMessage', { 
           detail: { message: inputText, isVoice: false } 
         }));
@@ -80,7 +80,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     if (currentPath !== '/aichat') {
       navigate('/aichat', { state: { message: '语音输入', isVoice: true } });
     } else {
-      // Get the handleNewMessage function from parent via props
+      // Dispatch custom event for parent components to handle
       window.dispatchEvent(new CustomEvent('newChatMessage', { 
         detail: { message: '语音输入', isVoice: true } 
       }));

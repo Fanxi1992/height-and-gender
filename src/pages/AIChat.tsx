@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import ChatInput from '../components/ChatInput';
 import { 
@@ -12,8 +12,7 @@ import {
   Copy, 
   Share, 
   ThumbsUp, 
-  ThumbsDown, 
-  Download 
+  ThumbsDown
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -27,6 +26,7 @@ interface Message {
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -43,12 +43,33 @@ const AIChat: React.FC = () => {
   
   // Mock thinking and response text
   const mockThinking = "嗯.....这个问题似乎简单："你是谁？"不过话说回来，对于一个人工智能来说，这是一个非常深刻的问题呢。让我仔细想想该怎么回答才能既简单明了又能传达我们的核心理念。";
-  const mockResponse = "嗨，看起来你想开个玩笑呢！不过不用担心，我很高兴回答你的问题："我是好小伴，一位来自智诊科技团队的全科医疗健康小管家。"我的任务就是为你提供全方位的健康管理和咨询服务。无论你有什么健康方面的小困惑，都可以来找我聊聊。我会运用最新的医学知识和技术，尽力帮您解决问题。希望能为您带来有价值的帮助呀～ 😊";
+  const mockResponse = "嗨，看起来你想开个玩笑呢！不过不用担心，我很高兴回答你的问题："我是康友AI，一位来自智诊科技团队的全科医疗健康小管家。"我的任务就是为你提供全方位的健康管理和咨询服务。无论你有什么健康方面的小困惑，都可以来找我聊聊。我会运用最新的医学知识和技术，尽力帮您解决问题。希望能为您带来有价值的帮助呀～ 😊";
   
   // Auto-scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, currentThinking, currentResponse]);
+
+  // Process incoming message from location state
+  useEffect(() => {
+    if (location.state && location.state.message) {
+      const { message, isVoice } = location.state;
+      handleNewMessage(message, isVoice);
+    }
+  }, [location.state]);
+
+  // Listen for custom events from ChatInput
+  useEffect(() => {
+    const handleCustomEvent = (event: CustomEvent<{ message: string, isVoice: boolean }>) => {
+      handleNewMessage(event.detail.message, event.detail.isVoice);
+    };
+
+    window.addEventListener('newChatMessage', handleCustomEvent as EventListener);
+
+    return () => {
+      window.removeEventListener('newChatMessage', handleCustomEvent as EventListener);
+    };
+  }, []);
 
   // Handle new message from chat input
   const handleNewMessage = (message: string, isVoice: boolean = false) => {
@@ -59,7 +80,7 @@ const AIChat: React.FC = () => {
       isUser: true,
       isVoice
     };
-    setMessages([...messages, newMessage]);
+    setMessages(prevMessages => [...prevMessages, newMessage]);
     
     // Start AI thinking
     setIsThinking(true);
@@ -146,11 +167,11 @@ const AIChat: React.FC = () => {
           {/* Avatar and title */}
           <div className="flex items-center ml-2">
             <Avatar className="h-10 w-10 border-2 border-purple-100">
-              <AvatarImage src="/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png" alt="好小伴" />
+              <AvatarImage src="/lovable-uploads/19e9cb5f-c68b-4b14-b9d4-c010f340a31b.png" alt="康友AI" />
               <AvatarFallback>AI</AvatarFallback>
             </Avatar>
             <div className="ml-3">
-              <h2 className="text-base font-semibold">好小伴</h2>
+              <h2 className="text-base font-semibold">康友AI</h2>
               <p className="text-xs text-gray-500">你的24h慢病管理专家</p>
             </div>
           </div>
@@ -253,7 +274,7 @@ const AIChat: React.FC = () => {
                   <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="text-sm font-medium">已完成思考</span>
+                <span className="text-sm font-medium">思考中...</span>
                 <ChevronLeft size={20} className="ml-auto transform rotate-90" />
               </div>
               <p className="text-sm text-gray-600">{currentThinking}</p>
