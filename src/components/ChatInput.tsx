@@ -1,23 +1,29 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Keyboard, Mic, Camera, Image, SendHorizontal, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AudioLines } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatInputProps {
   onlyShouldShowOnHomePage?: boolean;
   currentPath: string;
+  onSendMessage?: (text: string, isVoice: boolean) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ 
   onlyShouldShowOnHomePage = true, 
-  currentPath 
+  currentPath,
+  onSendMessage
 }) => {
+  const navigate = useNavigate();
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
   const [inputText, setInputText] = useState('');
   const [showCameraOptions, setShowCameraOptions] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [audioWaveValues, setAudioWaveValues] = useState<number[]>(Array(10).fill(5));
   const audioWaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Only show on home page if that setting is enabled
   if (onlyShouldShowOnHomePage && currentPath !== '/home') {
@@ -26,11 +32,30 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   const toggleInputMode = () => {
     setInputMode(inputMode === 'voice' ? 'text' : 'voice');
+    // Focus the input field when switching to text mode
+    if (inputMode === 'voice') {
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
   };
 
   const handleSend = () => {
-    console.log('Sending message:', inputText);
-    setInputText('');
+    if (inputText.trim()) {
+      console.log('Sending message:', inputText);
+      
+      if (onSendMessage) {
+        // If a callback is provided, use it
+        onSendMessage(inputText, false);
+      } else if (currentPath === '/home') {
+        // If on home page, navigate to AI chat
+        navigate('/ai-chat', { state: { initialMessage: inputText, isVoice: false } });
+      }
+      
+      setInputText('');
+    }
   };
 
   const toggleCameraOptions = () => {
@@ -61,7 +86,32 @@ const ChatInput: React.FC<ChatInputProps> = ({
     
     // Reset the wave
     setAudioWaveValues(Array(10).fill(5));
+    
+    // Send voice message or navigate
+    if (onSendMessage) {
+      // If a callback is provided, use it with a placeholder message
+      onSendMessage("语音消息", true);
+    } else if (currentPath === '/home') {
+      // If on home page, navigate to AI chat
+      navigate('/ai-chat', { state: { initialMessage: "语音消息", isVoice: true } });
+    }
   };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (audioWaveTimer.current) {
+        clearInterval(audioWaveTimer.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="relative">
@@ -114,8 +164,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Main chat input bar */}
       <div className={cn(
-        "w-full px-3 py-1.5 bg-white border-t border-gray-100 flex items-center space-x-2",
-        showCameraOptions ? "pb-2" : ""
+        "w-full px-3 py-1 bg-white border-t border-gray-100 flex items-center space-x-2",
+        showCameraOptions ? "pb-2" : "",
+        "will-change-transform backface-visibility-hidden translate-z-0" // Hardware acceleration
       )}>
         {/* Left icon - keyboard or mic depending on mode */}
         <button 
@@ -149,9 +200,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
         ) : (
           <div className="flex-1 relative">
             <input
+              ref={inputRef}
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
               placeholder="任何问题，欢迎问我哦~"
               className="w-full h-9 bg-gray-100 rounded-full px-4 text-black text-sm placeholder:text-gray-500 focus:outline-none"
             />
