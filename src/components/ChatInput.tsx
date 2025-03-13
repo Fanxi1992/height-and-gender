@@ -1,7 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Keyboard, Mic, Camera, Image, SendHorizontal, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AudioLines } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatInputProps {
   onlyShouldShowOnHomePage?: boolean;
@@ -12,6 +14,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onlyShouldShowOnHomePage = true, 
   currentPath 
 }) => {
+  const navigate = useNavigate();
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
   const [inputText, setInputText] = useState('');
   const [showCameraOptions, setShowCameraOptions] = useState(false);
@@ -30,7 +33,18 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSend = () => {
     console.log('Sending message:', inputText);
-    setInputText('');
+    if (inputText.trim()) {
+      // Navigate to AI Chat page with text input
+      if (currentPath !== '/aichat') {
+        navigate('/aichat', { state: { message: inputText, isVoice: false } });
+      } else {
+        // Get the handleNewMessage function from parent via props
+        window.dispatchEvent(new CustomEvent('newChatMessage', { 
+          detail: { message: inputText, isVoice: false } 
+        }));
+      }
+      setInputText('');
+    }
   };
 
   const toggleCameraOptions = () => {
@@ -61,6 +75,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
     
     // Reset the wave
     setAudioWaveValues(Array(10).fill(5));
+    
+    // Navigate to AI Chat page with voice input
+    if (currentPath !== '/aichat') {
+      navigate('/aichat', { state: { message: '语音输入', isVoice: true } });
+    } else {
+      // Get the handleNewMessage function from parent via props
+      window.dispatchEvent(new CustomEvent('newChatMessage', { 
+        detail: { message: '语音输入', isVoice: true } 
+      }));
+    }
   };
 
   return (
