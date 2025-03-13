@@ -46,6 +46,11 @@ const AIChat: React.FC = () => {
   const mockThinking = "嗯.....这个问题似乎简单：'你是谁？'不过话说回来，对于一个人工智能来说，这是一个非常深刻的问题呢。让我仔细想想该怎么回答才能既简单明了又能传达我们的核心理念。";
   const mockResponse = "嗨，看起来你想开个玩笑呢！不过不用担心，我很高兴回答你的问题：'我是康友AI，一位来自智诊科技团队的全科医疗健康小管家。'我的任务就是为你提供全方位的健康管理和咨询服务。无论你有什么健康方面的小困惑，都可以来找我聊聊。我会运用最新的医学知识和技术，尽力帮您解决问题。希望能为您带来有价值的帮助呀～ 😊";
   
+  // 生成唯一ID的辅助函数
+  const generateUniqueId = () => {
+    return Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+  };
+  
   // Auto-scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,7 +91,7 @@ const AIChat: React.FC = () => {
     setLocationProcessed(true);
     
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: generateUniqueId(), // 使用更可靠的ID生成方法
       text: message,
       isUser: true,
       isVoice
@@ -115,15 +120,24 @@ const AIChat: React.FC = () => {
             } else {
               clearInterval(responseInterval);
               setTimeout(() => {
-                setMessages(prev => [
-                  ...prev, 
-                  { 
-                    id: Date.now().toString(), 
-                    text: mockResponse, 
-                    isUser: false,
-                    thinking: mockThinking
-                  }
-                ]);
+                // 添加调试日志
+                console.log('最终添加消息:', mockResponse);
+                
+                const newAIMessage = { 
+                  id: generateUniqueId(), // 使用更可靠的ID生成方法
+                  text: mockResponse, 
+                  isUser: false,
+                  thinking: mockThinking
+                };
+                
+                console.log('添加AI消息对象:', newAIMessage);
+                
+                setMessages(prev => {
+                  const newMessages = [...prev, newAIMessage];
+                  console.log('更新后的消息数组:', newMessages);
+                  return newMessages;
+                });
+                
                 setCurrentThinking('');
                 setCurrentResponse('');
                 setIsResponding(false);
@@ -206,7 +220,11 @@ const AIChat: React.FC = () => {
       
       {/* Chat messages */}
       <div className="flex-1 pt-32 pb-24 px-4 overflow-y-auto">
-        {messages.map((message) => (
+        {messages.map((message) => {
+          // 添加调试日志，但不要让它成为返回值的一部分
+          console.log('渲染消息:', message.id, '内容长度:', message.text?.length, '是否用户:', message.isUser);
+          
+          return (
           <div 
             key={message.id}
             className={`mb-6 ${message.isUser ? 'flex justify-end' : ''}`}
@@ -252,7 +270,7 @@ const AIChat: React.FC = () => {
                 
                 {/* 回答区 */}
                 <div className="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm mb-2">
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-sm text-black font-normal">{message.text}</p> {/* 添加text-black确保文字可见 */}
                 </div>
                 
                 {/* Action buttons */}
@@ -280,7 +298,8 @@ const AIChat: React.FC = () => {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
         
         {/* 当前正在进行的思考和回答 - 先显示思考再显示回答 */}
         {currentThinking && (
@@ -314,7 +333,7 @@ const AIChat: React.FC = () => {
                 </svg>
                 <span className="text-xs font-medium">{isResponding ? '正在回答...' : '回答完成'}</span>
               </div>
-              <p className="text-sm text-black">{currentResponse}</p>
+              <p className="text-sm text-black font-normal">{currentResponse}</p> {/* 添加text-black确保文字可见 */}
             </div>
           </div>
         )}
