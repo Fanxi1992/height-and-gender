@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -37,9 +36,11 @@ const AIChat: React.FC = () => {
     }
   ]);
   const [isThinking, setIsThinking] = useState(false);
+  const [isResponding, setIsResponding] = useState(false);
   const [currentThinking, setCurrentThinking] = useState('');
   const [currentResponse, setCurrentResponse] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [locationProcessed, setLocationProcessed] = useState(false);
   
   // Mock thinking and response text
   const mockThinking = "嗯.....这个问题似乎简单：'你是谁？'不过话说回来，对于一个人工智能来说，这是一个非常深刻的问题呢。让我仔细想想该怎么回答才能既简单明了又能传达我们的核心理念。";
@@ -52,16 +53,20 @@ const AIChat: React.FC = () => {
 
   // Process incoming message from location state
   useEffect(() => {
-    if (location.state && location.state.message) {
+    if (location.state && location.state.message && !locationProcessed) {
       const { message, isVoice } = location.state;
       handleNewMessage(message, isVoice);
+      setLocationProcessed(true);
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate, locationProcessed]);
 
   // Listen for custom events from ChatInput
   useEffect(() => {
     const handleCustomEvent = (event: CustomEvent<{ message: string, isVoice: boolean }>) => {
-      handleNewMessage(event.detail.message, event.detail.isVoice);
+      if (!locationProcessed) {
+        handleNewMessage(event.detail.message, event.detail.isVoice);
+      }
     };
 
     window.addEventListener('newChatMessage', handleCustomEvent as EventListener);
@@ -69,11 +74,17 @@ const AIChat: React.FC = () => {
     return () => {
       window.removeEventListener('newChatMessage', handleCustomEvent as EventListener);
     };
-  }, []);
+  }, [locationProcessed]);
 
   // Handle new message from chat input
   const handleNewMessage = (message: string, isVoice: boolean = false) => {
-    // Add user message
+    setCurrentThinking('');
+    setCurrentResponse('');
+    setIsThinking(false);
+    setIsResponding(false);
+    
+    setLocationProcessed(true);
+    
     const newMessage: Message = {
       id: Date.now().toString(),
       text: message,
@@ -82,12 +93,8 @@ const AIChat: React.FC = () => {
     };
     setMessages(prevMessages => [...prevMessages, newMessage]);
     
-    // Start AI thinking
     setIsThinking(true);
-    setCurrentThinking('');
-    setCurrentResponse('');
     
-    // Simulate thinking typing effect
     let i = 0;
     const thinkingInterval = setInterval(() => {
       if (i < mockThinking.length) {
@@ -96,9 +103,10 @@ const AIChat: React.FC = () => {
       } else {
         clearInterval(thinkingInterval);
         
-        // When thinking is done, start response
         setTimeout(() => {
           setIsThinking(false);
+          setIsResponding(true);
+          
           let j = 0;
           const responseInterval = setInterval(() => {
             if (j < mockResponse.length) {
@@ -106,7 +114,6 @@ const AIChat: React.FC = () => {
               j++;
             } else {
               clearInterval(responseInterval);
-              // Add AI response to messages
               setTimeout(() => {
                 setMessages(prev => [
                   ...prev, 
@@ -119,6 +126,9 @@ const AIChat: React.FC = () => {
                 ]);
                 setCurrentThinking('');
                 setCurrentResponse('');
+                setIsResponding(false);
+                
+                setLocationProcessed(false);
               }, 500);
             }
           }, 30);
@@ -139,6 +149,12 @@ const AIChat: React.FC = () => {
 
   // New conversation
   const startNewConversation = () => {
+    setCurrentThinking('');
+    setCurrentResponse('');
+    setIsThinking(false);
+    setIsResponding(false);
+    setLocationProcessed(false);
+    
     setMessages([
       {
         id: '1',
@@ -265,16 +281,20 @@ const AIChat: React.FC = () => {
           </div>
         ))}
         
-        {/* Thinking in progress */}
-        {isThinking && currentThinking && (
+        {/* 当前正在进行的思考和回答 - 只在存在内容且不是已完成消息时显示 */}
+        {currentThinking && (
           <div className="w-full mb-4">
             <div className="bg-gray-50 rounded-xl p-3">
               <div className="flex items-center text-green-500 mb-1">
-                <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg className={`w-5 h-5 mr-1 ${isThinking ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  {isThinking ? (
+                    <path d="M12 8V12L14 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  ) : (
+                    <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  )}
                 </svg>
-                <span className="text-sm font-medium">思考中...</span>
+                <span className="text-sm font-medium">{isThinking ? 'AI思考中...' : '已完成思考'}</span>
                 <ChevronLeft size={20} className="ml-auto transform rotate-90" />
               </div>
               <p className="text-sm text-gray-600">{currentThinking}</p>
@@ -282,11 +302,18 @@ const AIChat: React.FC = () => {
           </div>
         )}
         
-        {/* Response in progress */}
-        {!isThinking && currentResponse && (
+        {/* 回答区域 - 只在存在内容且不是已完成消息时显示 */}
+        {currentResponse && (
           <div className="w-full mb-4">
             <div className="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm">
-              <p className="text-sm">{currentResponse}</p>
+              <div className="flex items-center text-green-500 mb-2">
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-xs font-medium">{isResponding ? '正在回答...' : '回答完成'}</span>
+              </div>
+              <p className="text-sm text-black">{currentResponse}</p>
             </div>
           </div>
         )}
