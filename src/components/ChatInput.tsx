@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Keyboard, Mic, Camera, Image, SendHorizontal, X, Volume2 } from 'lucide-react';
+import { Keyboard, Mic, Camera, Image, SendHorizontal, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AudioLines } from 'lucide-react';
+import { AudioLines, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ChatInputProps {
