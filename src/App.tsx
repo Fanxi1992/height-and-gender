@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +23,7 @@ import Circle from "./pages/Circle";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/PageTransition";
 import My from "./pages/My";
+import AIChat from "./pages/AIChat";
 
 const queryClient = new QueryClient();
 
@@ -210,6 +212,14 @@ const App = () => (
             element={
               <PageWrapper>
                 <My />
+              </PageWrapper>
+            } 
+          />
+          <Route 
+            path="/aichat" 
+            element={
+              <PageWrapper>
+                <AIChat />
               </PageWrapper>
             } 
           />
