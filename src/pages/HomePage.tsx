@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database, ThumbsUp, Play } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database, ThumbsUp, Play, RotateCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -9,6 +9,16 @@ const HomePage: React.FC = () => {
   const [showFloatingButton, setShowFloatingButton] = useState(false);
   const chatbotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [networkAnimate, setNetworkAnimate] = useState(false);
+
+  useEffect(() => {
+    const animationInterval = setInterval(() => {
+      setNetworkAnimate(true);
+      setTimeout(() => setNetworkAnimate(false), 2000);
+    }, 6000);
+    
+    return () => clearInterval(animationInterval);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,6 +69,14 @@ const HomePage: React.FC = () => {
 
   const goToCircle = () => {
     navigate('/circle');
+  };
+
+  const goToDetailedRisk = () => {
+    navigate('/disease-risk-detail');
+  };
+
+  const restartRiskAssessment = () => {
+    navigate('/gender');
   };
 
   const contentItems = [
@@ -151,7 +169,6 @@ const HomePage: React.FC = () => {
     >
       <StatusBar />
       
-      {/* Header Section with Avatar, History and Settings - 增加顶部间距 */}
       <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-400">
           <img 
@@ -171,29 +188,22 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Greeting Text - 明确放在圆环上方 */}
       <div className="mt-6 mb-8 text-center w-full px-5">
         <h1 className="text-2xl font-semibold">Hi, 李小明</h1>
       </div>
       
-      {/* 更加精美的语音问询组件 */}
       <div 
         ref={chatbotRef}
         className="relative w-40 h-40 mb-5 mx-auto"
         onTouchStart={handleChatbotPress}
       >
-        {/* 动态脉冲效果 */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md animate-pulse"></div>
         
-        {/* 外部圆环 - 使用白色边框和闪烁动画 */}
         <div className="absolute inset-0 rounded-full border-[3px] border-white/70 animate-[ping_4s_ease-in-out_infinite]"></div>
         
-        {/* 中间圆环 - 光晕效果 */}
         <div className="absolute inset-[10px] rounded-full border-[3px] border-white/80 shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
         
-        {/* 内部圆形 - 深色背景和发光效果 */}
         <div className="absolute inset-[20px] rounded-full bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center shadow-inner overflow-hidden">
-          {/* 显示麦克风图标 */}
           <div className="relative z-10 flex flex-col items-center">
             <Mic size={36} className="text-white mb-1" />
             <div className="flex space-x-1">
@@ -207,89 +217,78 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           
-          {/* 背景光效 */}
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 mix-blend-overlay"></div>
         </div>
       </div>
       
-      {/* Text below Chatbot */}
       <p className="mt-2 mb-8 text-center font-medium relative">
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 animate-pulse">
           AI健康助手长按语音提问 ✨
         </span>
       </p>
       
-      {/* Weight Tracking Card */}
       <div className="w-full px-5 mb-4">
-        <div className="bg-white rounded-xl overflow-hidden shadow-lg">
-          {/* Card Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-gray-900 to-black rounded-xl overflow-hidden shadow-lg border border-gray-800">
+          <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white px-4 py-3 flex justify-between items-center">
             <div className="flex-1">
-              <span className="text-sm font-medium">体重风险打卡</span>
-              <span className="ml-2 text-xs">第1/28天</span>
+              <span className="text-sm font-medium">测一测您的健康风险</span>
             </div>
-            <ArrowRight size={16} />
+            <div 
+              className="flex items-center bg-black/30 px-3 py-1 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
+              onClick={restartRiskAssessment}
+            >
+              <RotateCw size={14} className="mr-1 text-blue-300" />
+              <span className="text-xs">重新测算</span>
+            </div>
           </div>
           
-          {/* Week Calendar */}
-          <div className="flex justify-between px-4 py-2 bg-white">
-            {weekDays.map((item, index) => (
-              <div 
-                key={index} 
+          <div
+            className="relative overflow-hidden cursor-pointer"
+            onClick={goToDetailedRisk}
+          >
+            <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
+              <img 
+                src="/健康风险报告图.jpg" 
+                alt="疾病风险网络" 
                 className={cn(
-                  "flex flex-col items-center",
-                  item.active ? "bg-blue-100 px-2 py-1 rounded-full" : ""
+                  "w-full h-auto object-cover transition-all duration-500 ease-in-out",
+                  networkAnimate ? "scale-110 blur-sm" : "scale-100"
                 )}
-              >
-                <span className="text-xs text-gray-500">{item.day}</span>
-                <span className="text-xs font-medium text-black">{item.date}</span>
+              />
+              
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 transition-opacity duration-500",
+                networkAnimate ? "opacity-70" : "opacity-0"
+              )}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className={cn(
+                    "text-white text-center transition-all duration-500",
+                    networkAnimate ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                  )}>
+                    <div className="text-lg font-bold">分析中...</div>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          
-          {/* Weight Progress */}
-          <div className="px-4 py-4 bg-white flex justify-between items-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-black">70.00</div>
-              <div className="text-xs text-gray-500">初始体重</div>
+              
+              <div className="absolute bottom-3 right-3 bg-red-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium">
+                <Heart size={12} className="mr-1" />
+                高风险: 2 项
+              </div>
+              <div className="absolute bottom-3 left-3 bg-yellow-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium">
+                <Activity size={12} className="mr-1" />
+                中风险: 3 项
+              </div>
             </div>
             
-            {/* Progress Circle - 更美观的进度显示 */}
-            <div className="relative w-20 h-20">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <defs>
-                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#8B5CF6" />
-                    <stop offset="100%" stopColor="#3B82F6" />
-                  </linearGradient>
-                </defs>
-                <circle cx="50" cy="50" r="40" stroke="#E0E0E0" strokeWidth="8" fill="none" />
-                <circle cx="50" cy="50" r="40" stroke="url(#progressGradient)" strokeWidth="8" fill="none" 
-                  strokeDasharray="251.2" strokeDashoffset="125.6" 
-                  transform="rotate(-90 50 50)" />
-                <text x="50" y="45" textAnchor="middle" fill="black" fontSize="10" fontWeight="bold">66.9kg</text>
-                <text x="50" y="58" textAnchor="middle" fill="black" fontSize="8">今日体重</text>
-              </svg>
+            <div className="px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 flex justify-between items-center">
+              <span className="text-sm text-gray-300">点击查看详细风险报告</span>
+              <ArrowRight size={16} className="text-blue-400" />
             </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-black">60.00</div>
-              <div className="text-xs text-gray-500">最终目标</div>
-            </div>
-          </div>
-          
-          <div className="px-4 py-2 bg-white flex justify-center">
-            <span className="text-xs text-gray-500 flex items-center">
-              <Activity size={14} className="text-blue-500 mr-1" />
-              今日减重 0.85kg
-            </span>
           </div>
         </div>
       </div>
       
-      {/* Health Report Cards Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Health Risk Report - 使用真实图片 */}
         <div 
           className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthRiskReport}
@@ -302,7 +301,6 @@ const HomePage: React.FC = () => {
             <Heart size={24} className="text-red-500 mr-2" />
             <p className="text-xs text-gray-800 font-medium">分析您的健康隐患</p>
           </div>
-          {/* 背景图片 */}
           <div className="absolute inset-0 opacity-20">
             <img 
               src="/健康风险报告图.jpg" 
@@ -312,7 +310,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Health Progress */}
         <div 
           className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
           onClick={goToHealthTrajectory}
@@ -325,7 +322,6 @@ const HomePage: React.FC = () => {
             <Activity size={24} className="text-white mr-2" />
             <p className="text-xs text-white/90 font-medium">跟踪您的健康变化</p>
           </div>
-          {/* 图表背景效果 */}
           <div className="absolute inset-0 flex items-end opacity-30">
             <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-16">
               <path 
@@ -337,9 +333,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Health Tools Grid */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Tongue Inspection - 使用真实舌苔图片 */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 flex flex-col h-48 shadow-lg overflow-hidden">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium text-white">舌苔监测</h3>
@@ -360,7 +354,6 @@ const HomePage: React.FC = () => {
           </p>
         </div>
         
-        {/* Water Intake - 更现代化的水分摄入追踪 */}
         <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col h-48 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start z-10">
             <div>
@@ -373,7 +366,6 @@ const HomePage: React.FC = () => {
             <span className="text-2xl font-bold text-white">300 毫升</span>
             <div className="mt-2 w-12 h-20 bg-blue-200/40 rounded-full relative overflow-hidden backdrop-blur-sm">
               <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-blue-100 to-blue-200 animate-pulse"></div>
-              {/* 水波纹动画效果 */}
               <div className="absolute bottom-[50%] left-0 right-0 h-1 bg-white/30 transform -translate-y-1/2"></div>
             </div>
             <div className="mt-3 w-full flex justify-center">
@@ -385,16 +377,13 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           </div>
-          {/* 水滴背景元素 */}
           <div className="absolute -right-2 -bottom-2 opacity-10">
             <Droplet size={80} className="text-white" />
           </div>
         </div>
       </div>
       
-      {/* Calorie Tracking and Health Data Collection */}
       <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        {/* Calorie Card - 使用真实食物图片 */}
         <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg">
           <div className="flex justify-between items-start">
             <div>
@@ -437,7 +426,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Health Data Collection - 更现代化的健康数据展示 */}
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg relative">
           <div className="flex justify-between items-start">
             <div>
@@ -467,14 +455,12 @@ const HomePage: React.FC = () => {
             ))}
           </div>
           
-          {/* 背景数据流动效果 */}
           <div className="absolute inset-0 opacity-5">
             <Database size={200} className="absolute -right-10 -bottom-10 text-white" />
           </div>
         </div>
       </div>
       
-      {/* Add Health Tools Button - 更现代的按钮设计 */}
       <div className="w-full px-5 mb-4">
         <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
           <Plus size={20} className="mr-2" />
@@ -482,7 +468,6 @@ const HomePage: React.FC = () => {
         </button>
       </div>
       
-      {/* "大家都在看" Content Stream Section */}
       <div className="w-full px-5 mb-20">
         <div className="bg-gray-100 rounded-t-3xl pt-6 pb-8 rounded-b-3xl">
           <div className="px-5 mb-4">
@@ -577,18 +562,13 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Floating Chatbot Button - 更现代化的语音助手浮动按钮 */}
-      {showFloatingButton && (
-        <div 
-          className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
-          onTouchStart={handleChatbotPress}
-        >
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
-          <Mic size={20} className="text-white z-10" />
-        </div>
-      )}
+      <div className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
+        onTouchStart={handleChatbotPress}
+      >
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
+        <Mic size={20} className="text-white z-10" />
+      </div>
       
-      {/* Bottom Navigation - 使用更现代化的导航栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2 z-40">
         <div className="flex flex-col items-center text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
@@ -603,7 +583,7 @@ const HomePage: React.FC = () => {
           <span className="text-xs">圈子</span>
         </div>
         <div className="flex flex-col items-center text-gray-500" onClick={goToShop}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v1.662"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           <span className="text-xs">商城</span>
         </div>
         <div className="flex flex-col items-center text-gray-500" onClick={() => navigate('/my')}>
