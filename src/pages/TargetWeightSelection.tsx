@@ -71,13 +71,13 @@ const TargetWeightSelection: React.FC = () => {
     saveTargetWeight(targetWeight);
     // 在导航前滚动到顶部
     window.scrollTo(0, 0);
-    navigate('/birthdate');
+    navigate('/disease-selection');
   };
 
   const handleSkip = () => {
     // 在导航前滚动到顶部
     window.scrollTo(0, 0);
-    navigate('/birthdate');
+    navigate('/disease-selection');
   };
   
   // 计算与当前体重的差值百分比
