@@ -32,6 +32,13 @@ const preventZoom = (e: TouchEvent) => {
   }
 };
 
+// 防止双击缩放的处理函数
+const preventDoubleTapZoom = (e: TouchEvent) => {
+  if (e.touches.length > 1) {
+    e.preventDefault();
+  }
+};
+
 // 页面包装组件，用于添加过渡效果
 const PageWrapper = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
@@ -45,16 +52,13 @@ const PageWrapper = ({ children }: { children: ReactNode }) => {
   // 添加防止双击缩放的效果
   useEffect(() => {
     // 防止双击缩放
-    document.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    document.addEventListener('touchstart', preventDoubleTapZoom, { passive: false });
     
     // 防止双指缩放
     document.addEventListener('touchmove', preventZoom, { passive: false });
     
     return () => {
+      document.removeEventListener('touchstart', preventDoubleTapZoom);
       document.removeEventListener('touchmove', preventZoom);
     };
   }, []);
