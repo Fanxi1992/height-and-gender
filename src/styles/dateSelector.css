@@ -3,9 +3,10 @@
   display: flex;
   justify-content: space-between;
   margin-top: 2.5rem;
-  padding: 0 0.5rem;
+  /* padding: 0 0.5rem; */
   position: relative;
-  height: 10rem; /* 固定高度 */
+  height: 10rem;
+  width: 80%;  
 }
 
 /* 选择指示器 - 中间高亮区域 */
@@ -31,7 +32,7 @@
 
 /* 年份列宽度更大 */
 .date-column:nth-child(1) {
-  width: 50%;
+  width: 30%;
 }
 
 /* 月份和日期列宽度稍小 */
