@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
@@ -321,46 +320,44 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* 新的每周饮食模块 */}
-      <div className="w-full px-5 grid grid-cols-1 gap-4 mb-4">
-        <div 
-          className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col overflow-hidden relative shadow-lg"
-          onClick={goToKnowledgeBase}
-        >
-          <div className="flex justify-between items-start z-10">
-            <h3 className="text-lg font-semibold text-white">我的每周饮食</h3>
-            <ArrowRight size={20} className="text-white" />
-          </div>
-          <p className="text-xs text-white/80 mt-1 mb-4">点击生成适合的菜谱</p>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-white">每日推荐</p>
-              <div className="mt-1">
-                <p className="text-base font-bold text-white">早餐</p>
-                <p className="text-sm text-white/90">燕麦粥 🌾 + 蓝莓 🫐 + 煮鸡蛋 🥚</p>
+      {/* 工具模块网格布局 */}
+      <div className="w-full px-5 mb-4">
+        <div className="grid grid-cols-4 grid-rows-[auto_auto_auto] gap-4 auto-rows-min">
+          {/* 我的每周饮食模块 */}
+          <div 
+            className="col-span-2 row-span-2 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col overflow-hidden relative shadow-lg"
+            onClick={goToKnowledgeBase}
+          >
+            <div className="flex justify-between items-start z-10">
+              <h3 className="text-lg font-semibold text-white">我的每周饮食</h3>
+              <ArrowRight size={20} className="text-white" />
+            </div>
+            <p className="text-xs text-white/80 mt-1 mb-4">点击生成适合的菜谱</p>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-white">每日推荐</p>
+                <div className="mt-1">
+                  <p className="text-base font-bold text-white">早餐</p>
+                  <p className="text-sm text-white/90">燕麦粥 🌾 + 蓝莓 🫐 + 煮鸡蛋 🥚</p>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-base font-bold text-white">午餐</p>
+                <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
+              </div>
+              
+              <div>
+                <p className="text-base font-bold text-white">晚餐</p>
+                <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
               </div>
             </div>
-            
-            <div>
-              <p className="text-base font-bold text-white">午餐</p>
-              <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
-            </div>
-            
-            <div>
-              <p className="text-base font-bold text-white">晚餐</p>
-              <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
-            </div>
           </div>
-        </div>
-      </div>
-      
-      {/* 新的卡路里打卡模块和圈子模块并排 */}
-      <div className="w-full px-5 mb-4">
-        <div className="grid grid-cols-1 gap-4">
+          
           {/* 卡路里打卡模块 */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-lg">
-            <div className="p-4 flex flex-col">
+          <div className="col-span-2 row-span-3 bg-white rounded-xl overflow-hidden shadow-lg">
+            <div className="p-4 flex flex-col h-full">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-lg font-medium text-black">卡路里打卡</h3>
@@ -383,12 +380,12 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-3 flex-grow">
                 {[
                   {meal: '早餐', kcal: 300, img: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '午餐', kcal: 450, img: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '晚餐', kcal: 400, img: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '小吃', kcal: 150, img: 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}
+                  {meal: '午餐', kcal: 300, img: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
+                  {meal: '晚餐', kcal: 300, img: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
+                  {meal: '小吃', kcal: 300, img: 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}
                 ].map((item, index) => (
                   <div key={index} className="flex items-center bg-gray-50 p-2 rounded-lg">
                     <div className="w-16 h-16 bg-gray-100 mr-3 flex-shrink-0 rounded-lg overflow-hidden">
@@ -408,9 +405,56 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           
+          {/* 健康星球模块 */}
+          <div className="col-span-2 row-span-1 bg-green-500 rounded-xl overflow-hidden shadow-lg relative">
+            <div className="p-4">
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-semibold text-black flex items-center">
+                  健康星球
+                  <Globe size={16} className="text-blue-500 ml-1" />
+                </h3>
+                <ArrowRight size={20} className="text-black" />
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="w-full h-44 overflow-hidden">
+                <img 
+                  src="/lovable-uploads/be42a73c-38a7-4a03-a374-602de676ec36.png" 
+                  alt="健康星球" 
+                  className="w-full h-full object-cover"
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex flex-col justify-end p-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
+                      10MIN
+                    </div>
+                    <Play size={16} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mt-2">有氧减脂太快了</h3>
+                  <p className="text-sm text-white/80">1分钟=跑步1小时</p>
+                </div>
+                
+                <div className="absolute bottom-6 right-6 bg-blue-500/80 px-2 py-1 rounded text-xs text-white">
+                  巨量精选
+                </div>
+              </div>
+              
+              <div className="absolute top-6 left-6 flex flex-col items-start space-y-1">
+                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
+                  🔥 巨燃脂
+                </div>
+                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
+                  💧 巨减肥
+                </div>
+              </div>
+            </div>
+          </div>
+          
           {/* 我的圈子模块 */}
           <div 
-            className="bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-xl p-4 flex flex-col h-auto overflow-hidden shadow-lg relative"
+            className="col-span-2 row-span-1 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-xl p-4 flex flex-col overflow-hidden shadow-lg relative"
             onClick={goToCircle}
           >
             <div className="flex justify-between items-start">
@@ -446,91 +490,37 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           
-          {/* 健康星球模块 */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-lg relative">
-            <div className="p-4">
-              <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-black flex items-center">
-                  健康星球
-                  <Globe size={16} className="text-blue-500 ml-1" />
-                </h3>
-                <ArrowRight size={20} className="text-black" />
-              </div>
+          {/* 其他工具模块 */}
+          <div className="col-span-2 row-span-1 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-white">其他工具</h3>
+              <ArrowRight size={20} className="text-white" />
             </div>
             
-            <div className="relative">
-              <div className="w-full h-64 overflow-hidden">
-                <img 
-                  src="/lovable-uploads/be42a73c-38a7-4a03-a374-602de676ec36.png" 
-                  alt="健康星球" 
-                  className="w-full h-full object-cover"
-                />
-                
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex flex-col justify-end p-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
-                      10MIN
-                    </div>
-                    <Play size={16} className="text-white" />
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
+                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
+                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: 'AI面诊', bg: 'bg-purple-500' },
+                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '看看手相', bg: 'bg-yellow-500' },
+                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '专家门诊', bg: 'bg-blue-500' },
+              ].map((tool, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  <div className={`${tool.bg} w-12 h-12 rounded-full flex items-center justify-center mb-1`}>
+                    {tool.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-white mt-2">有氧减脂太快了</h3>
-                  <p className="text-sm text-white/80">1分钟=跑步1小时</p>
+                  <span className="text-xs text-gray-300">{tool.name}</span>
                 </div>
-                
-                <div className="absolute bottom-6 right-6 bg-blue-500/80 px-2 py-1 rounded text-xs text-white">
-                  巨量精选
-                </div>
-              </div>
-              
-              <div className="absolute top-6 left-6 flex flex-col items-start space-y-1">
-                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
-                  🔥 巨燃脂
-                </div>
-                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
-                  💧 巨减肥
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-      
-      {/* 其他工具模块 */}
-      <div className="w-full px-5 mb-4">
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 shadow-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-white">其他工具</h3>
-            <ArrowRight size={20} className="text-white" />
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: '健康轨迹', bg: 'bg-purple-500' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
-              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: '健康轨迹', bg: 'bg-purple-500' },
-            ].map((tool, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                <div className={`${tool.bg} w-12 h-12 rounded-full flex items-center justify-center mb-1`}>
-                  {tool.icon}
-                </div>
-                <span className="text-xs text-gray-300">{tool.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <div className="w-full px-5 mb-4">
-        <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
-          <Plus size={20} className="mr-2" />
-          添加新健康工具
-        </button>
-      </div>
-      
-      <div className="w-full px-5 mb-20">
+
+              {/* 添加分隔线 */}
+        <div className="mt-4 w-full h-[1px] bg-gray-400"></div>
+      <div className="w-full px-5 mb-20 mt-8">
+
         <div className="bg-gray-100 rounded-t-3xl pt-6 pb-8 rounded-b-3xl">
           <div className="px-5 mb-4">
             <div className="flex items-center justify-center mb-4">
@@ -617,7 +607,7 @@ const HomePage: React.FC = () => {
                 onClick={() => navigate('/shop')}
                 className="py-3 px-4 rounded-full bg-green-100 text-green-500 font-medium flex items-center justify-center"
               >
-                更多商品 <ArrowRight size={16} className="ml-1" />
+                加入圈子 <ArrowRight size={16} className="ml-1" />
               </button>
             </div>
           </div>
