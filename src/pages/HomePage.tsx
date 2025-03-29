@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database, ThumbsUp, Play, RotateCw } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -41,15 +42,6 @@ const HomePage: React.FC = () => {
     console.log('Chatbot long press activated');
     // Voice chat functionality would be implemented here
   };
-
-  const weekDays = [
-    { day: '周五', date: '21', active: false },
-    { day: '周六', date: '22', active: false },
-    { day: '周日', date: '23', active: false },
-    { day: '今天', date: '24', active: true },
-    { day: '周二', date: '25', active: false },
-    { day: '周三', date: '26', active: false },
-  ];
 
   const goToHealthRiskReport = () => {
     navigate('/health-risk-report');
@@ -160,6 +152,46 @@ const HomePage: React.FC = () => {
       likes: 9,
       comments: 3,
     },
+    {
+      id: 9,
+      type: 'video',
+      title: '有氧减脂太快了！10MIN一跳瘦一小时',
+      image: 'https://images.pexels.com/photos/4498148/pexels-photo-4498148.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '健身视频',
+      author: '健身教练小王',
+      likes: 1324,
+      views: 23589,
+    },
+    {
+      id: 10,
+      type: 'article',
+      title: '低GI饮食法：稳定血糖轻松瘦',
+      image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '饮食计划',
+      author: '营养师李明',
+      likes: 568,
+      comments: 47,
+    },
+    {
+      id: 11,
+      type: 'article',
+      title: '减脂期怎么吃？7天食谱大公开',
+      image: 'https://images.pexels.com/photos/1660030/pexels-photo-1660030.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '减脂食谱',
+      author: '厨师长张师傅',
+      likes: 789,
+      comments: 103,
+    },
+    {
+      id: 12,
+      type: 'video',
+      title: '15分钟早餐减脂餐制作，营养又美味',
+      image: 'https://images.pexels.com/photos/566566/pexels-photo-566566.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '减脂餐制作',
+      author: '健康厨房',
+      likes: 432,
+      views: 8976,
+    },
   ];
 
   return (
@@ -227,6 +259,7 @@ const HomePage: React.FC = () => {
         </span>
       </p>
       
+      {/* 健康风险网络图模块 */}
       <div className="w-full px-5 mb-4">
         <div className="bg-gradient-to-r from-gray-900 to-black rounded-xl overflow-hidden shadow-lg border border-gray-800">
           <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white px-4 py-3 flex justify-between items-center">
@@ -288,175 +321,204 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
+      {/* 新的每周饮食模块 */}
+      <div className="w-full px-5 grid grid-cols-1 gap-4 mb-4">
         <div 
-          className="bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
-          onClick={goToHealthRiskReport}
+          className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col overflow-hidden relative shadow-lg"
+          onClick={goToKnowledgeBase}
         >
-          <div className="flex justify-between items-start mb-auto z-10">
-            <h3 className="text-sm font-medium text-black">健康风险报告</h3>
-            <ArrowRight size={16} className="text-black" />
+          <div className="flex justify-between items-start z-10">
+            <h3 className="text-lg font-semibold text-white">我的每周饮食</h3>
+            <ArrowRight size={20} className="text-white" />
           </div>
-          <div className="flex-1 flex items-center justify-center z-10">
-            <Heart size={24} className="text-red-500 mr-2" />
-            <p className="text-xs text-gray-800 font-medium">分析您的健康隐患</p>
-          </div>
-          <div className="absolute inset-0 opacity-20">
-            <img 
-              src="/健康风险报告图.jpg" 
-              alt="健康报告背景" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-        
-        <div 
-          className="bg-gradient-to-br from-purple-200 to-purple-400 rounded-xl p-4 flex flex-col h-32 cursor-pointer overflow-hidden relative shadow-lg"
-          onClick={goToHealthTrajectory}
-        >
-          <div className="flex justify-between items-start mb-auto z-10">
-            <h3 className="text-sm font-medium text-white">健康轨迹</h3>
-            <ArrowRight size={16} className="text-white" />
-          </div>
-          <div className="flex-1 flex items-center justify-center z-10">
-            <Activity size={24} className="text-white mr-2" />
-            <p className="text-xs text-white/90 font-medium">跟踪您的健康变化</p>
-          </div>
-          <div className="absolute inset-0 flex items-end opacity-30">
-            <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-16">
-              <path 
-                d="M0,30 L5,28 L10,29 L15,20 L20,25 L25,18 L30,23 L35,15 L40,20 L45,12 L50,17 L55,5 L60,10 L65,8 L70,15 L75,7 L80,13 L85,3 L90,8 L95,0 L100,5 L100,30 L0,30 Z" 
-                fill="white" 
-              />
-            </svg>
+          <p className="text-xs text-white/80 mt-1 mb-4">点击生成适合的菜谱</p>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-white">每日推荐</p>
+              <div className="mt-1">
+                <p className="text-base font-bold text-white">早餐</p>
+                <p className="text-sm text-white/90">燕麦粥 🌾 + 蓝莓 🫐 + 煮鸡蛋 🥚</p>
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-base font-bold text-white">午餐</p>
+              <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
+            </div>
+            
+            <div>
+              <p className="text-base font-bold text-white">晚餐</p>
+              <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-4 flex flex-col h-48 shadow-lg overflow-hidden">
-          <div className="flex justify-between items-start">
-            <h3 className="text-sm font-medium text-white">舌苔监测</h3>
-            <ArrowRight size={16} className="text-white" />
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-700">
-              <img 
-                src="/lovable-uploads/203e265d-cf69-4459-8298-f8d6413e93a7.png" 
-                alt="舌苔监测示例" 
-                className="w-full h-full object-cover"
-              />
+      {/* 新的卡路里打卡模块和圈子模块并排 */}
+      <div className="w-full px-5 mb-4">
+        <div className="grid grid-cols-1 gap-4">
+          {/* 卡路里打卡模块 */}
+          <div className="bg-white rounded-xl overflow-hidden shadow-lg">
+            <div className="p-4 flex flex-col">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-medium text-black">卡路里打卡</h3>
+                  <p className="text-xs text-gray-500">5:30更新</p>
+                </div>
+                <ArrowRight size={20} className="text-black" />
+              </div>
+              
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center">
+                  <Flame size={20} className="text-orange-500 mr-2" />
+                  <div>
+                    <p className="text-3xl font-bold text-purple-500">15</p>
+                    <p className="text-xs text-gray-500">连续打卡天</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-purple-500">300</p>
+                  <p className="text-xs text-gray-500">还可吃千卡</p>
+                </div>
+              </div>
+              
+              <div className="mt-4 space-y-3">
+                {[
+                  {meal: '早餐', kcal: 300, img: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
+                  {meal: '午餐', kcal: 450, img: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
+                  {meal: '晚餐', kcal: 400, img: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
+                  {meal: '小吃', kcal: 150, img: 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center bg-gray-50 p-2 rounded-lg">
+                    <div className="w-16 h-16 bg-gray-100 mr-3 flex-shrink-0 rounded-lg overflow-hidden">
+                      <img src={item.img} alt={item.meal} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base text-black truncate font-medium">{item.meal}</p>
+                      <p className="text-2xl text-purple-500 font-bold">{item.kcal} <span className="text-sm">千卡</span></p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <button className="mt-4 w-full bg-purple-500 text-white py-3 rounded-full font-medium">
+                立即拍照
+              </button>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2 flex items-center">
-            <Heart size={14} className="mr-1 text-red-400" />
-            AI舌诊分析您的健康状况
-          </p>
-        </div>
-        
-        <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col h-48 overflow-hidden shadow-lg relative">
-          <div className="flex justify-between items-start z-10">
-            <div>
-              <h3 className="text-sm font-medium text-white">喝水</h3>
-              <p className="text-xs text-white/80">5:30更新</p>
+          
+          {/* 我的圈子模块 */}
+          <div 
+            className="bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-xl p-4 flex flex-col h-auto overflow-hidden shadow-lg relative"
+            onClick={goToCircle}
+          >
+            <div className="flex justify-between items-start">
+              <h3 className="text-lg font-semibold text-black">我的圈子</h3>
+              <ArrowRight size={20} className="text-black" />
             </div>
-            <ArrowRight size={16} className="text-white" />
-          </div>
-          <div className="flex-1 flex flex-col items-center justify-center z-10">
-            <span className="text-2xl font-bold text-white">300 毫升</span>
-            <div className="mt-2 w-12 h-20 bg-blue-200/40 rounded-full relative overflow-hidden backdrop-blur-sm">
-              <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-blue-100 to-blue-200 animate-pulse"></div>
-              <div className="absolute bottom-[50%] left-0 right-0 h-1 bg-white/30 transform -translate-y-1/2"></div>
-            </div>
-            <div className="mt-3 w-full flex justify-center">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div 
-                  key={i} 
-                  className={`w-4 h-4 mx-1 rounded-full ${i <= 2 ? 'bg-white' : 'bg-blue-200/40'}`}
-                ></div>
+            
+            <div className="flex flex-wrap mt-4 gap-2">
+              {[
+                'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+                'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+                'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+                'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'
+              ].map((img, idx) => (
+                <div key={idx} className="w-12 h-12 rounded-full overflow-hidden border-2 border-white">
+                  <img src={img} alt={`User ${idx + 1}`} className="w-full h-full object-cover" />
+                </div>
               ))}
             </div>
+            
+            <div className="mt-6 flex items-center">
+              <div className="p-2 bg-orange-500 rounded-full">
+                <Flame size={16} className="text-white" />
+              </div>
+              <p className="ml-2 text-black font-medium">当前挑战：低糖饮食</p>
+            </div>
+            
+            <div className="mt-4 flex items-center">
+              <div className="p-2 bg-blue-500 rounded-full">
+                <User size={16} className="text-white" />
+              </div>
+              <p className="ml-2 text-black font-medium">今日已打卡圈友 <span className="text-xl font-bold text-purple-600">6</span> 人</p>
+            </div>
           </div>
-          <div className="absolute -right-2 -bottom-2 opacity-10">
-            <Droplet size={80} className="text-white" />
+          
+          {/* 健康星球模块 */}
+          <div className="bg-white rounded-xl overflow-hidden shadow-lg relative">
+            <div className="p-4">
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-semibold text-black flex items-center">
+                  健康星球
+                  <Globe size={16} className="text-blue-500 ml-1" />
+                </h3>
+                <ArrowRight size={20} className="text-black" />
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="w-full h-64 overflow-hidden">
+                <img 
+                  src="/lovable-uploads/be42a73c-38a7-4a03-a374-602de676ec36.png" 
+                  alt="健康星球" 
+                  className="w-full h-full object-cover"
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex flex-col justify-end p-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
+                      10MIN
+                    </div>
+                    <Play size={16} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mt-2">有氧减脂太快了</h3>
+                  <p className="text-sm text-white/80">1分钟=跑步1小时</p>
+                </div>
+                
+                <div className="absolute bottom-6 right-6 bg-blue-500/80 px-2 py-1 rounded text-xs text-white">
+                  巨量精选
+                </div>
+              </div>
+              
+              <div className="absolute top-6 left-6 flex flex-col items-start space-y-1">
+                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
+                  🔥 巨燃脂
+                </div>
+                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
+                  💧 巨减肥
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="w-full px-5 grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-white rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-sm font-medium text-black">卡路里摄入</h3>
-              <p className="text-xs text-gray-500">5:30更新</p>
-            </div>
-            <ArrowRight size={16} className="text-black" />
+      {/* 其他工具模块 */}
+      <div className="w-full px-5 mb-4">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 shadow-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-white">其他工具</h3>
+            <ArrowRight size={20} className="text-white" />
           </div>
           
-          <div className="mt-2 text-left flex items-center">
-            <div>
-              <p className="text-sm text-black font-medium">还可吃</p>
-              <p className="text-2xl font-bold text-black flex items-center">
-                300 
-                <span className="text-sm ml-1">千卡</span>
-              </p>
-            </div>
-            <div className="ml-auto">
-              <Utensils size={24} className="text-blue-500" />
-            </div>
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center space-y-3 overflow-y-auto mt-2">
+          <div className="grid grid-cols-3 gap-4">
             {[
-              {meal: '早餐', kcal: 300, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
-              {meal: '午餐', kcal: 450, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
-              {meal: '晚餐', kcal: 400, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'},
-              {meal: '小吃', kcal: 150, img: '/lovable-uploads/b545d173-0e2d-4a9b-825b-2e802baaea29.png'}
-            ].map((item, index) => (
-              <div key={index} className="flex items-center">
-                <div className="w-12 h-12 bg-gray-100 mr-3 flex-shrink-0 rounded-lg overflow-hidden">
-                  <img src={item.img} alt={item.meal} className="w-full h-full object-cover" />
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: '健康轨迹', bg: 'bg-purple-500' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
+              { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: '健康轨迹', bg: 'bg-purple-500' },
+            ].map((tool, idx) => (
+              <div key={idx} className="flex flex-col items-center">
+                <div className={`${tool.bg} w-12 h-12 rounded-full flex items-center justify-center mb-1`}>
+                  {tool.icon}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-black truncate font-medium">{item.meal}</p>
-                  <p className="text-xs text-gray-500 truncate">{item.kcal} 千卡</p>
-                </div>
+                <span className="text-xs text-gray-300">{tool.name}</span>
               </div>
             ))}
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 flex flex-col h-80 overflow-hidden shadow-lg relative">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-sm font-medium text-white">健康数据采集</h3>
-              <p className="text-xs text-gray-400">5:30更新</p>
-            </div>
-            <ArrowRight size={16} className="text-white" />
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center space-y-4 mt-2 z-10">
-            {[
-              {label: '血压', value: '120/80 mmHg', icon: <Heart size={16} className="text-red-400" />},
-              {label: '血糖', value: '5.5 mmol/L', icon: <Activity size={16} className="text-blue-400" />},
-              {label: '心率', value: '72 次/分钟', icon: <Activity size={16} className="text-green-400" />},
-              {label: '睡眠', value: '7.5 小时/天', icon: <Activity size={16} className="text-purple-400" />},
-              {label: '运动', value: '5000 步/天', icon: <Activity size={16} className="text-yellow-400" />}
-            ].map((item, index) => (
-              <div key={index} className="flex items-center bg-gray-700/50 p-2 rounded-lg">
-                <div className="mr-2">
-                  {item.icon}
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-gray-300">{item.label}</p>
-                  <p className="text-sm text-white font-medium">{item.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="absolute inset-0 opacity-5">
-            <Database size={200} className="absolute -right-10 -bottom-10 text-white" />
           </div>
         </div>
       </div>
