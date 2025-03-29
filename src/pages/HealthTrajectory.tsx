@@ -4,6 +4,7 @@ import StatusBar from '../components/StatusBar';
 import BackButton from '../components/BackButton';
 import { Heart, TrendingDown, ArrowDown, ArrowUp } from 'lucide-react';
 import * as d3 from 'd3';
+import ProgressIndicator from '../components/ProgressIndicator';
 
 // 疾病数据与初始体重状态下的风险率
 const initialDiseaseData = [
@@ -199,13 +200,13 @@ const HealthTrajectory: React.FC = () => {
     <div className="page-container bg-black">
       <StatusBar />
       
-      <div className="mt-4 px-4 flex justify-between items-center">
+      <div className="mt-16 px-4 flex justify-between items-center">
         <BackButton />
-        <h1 className="text-lg font-medium text-white">健康轨迹模拟</h1>
+        <h1 className="text-center text-xl font-medium">健康轨迹模拟</h1>
         <div className="w-8"></div>
       </div>
-      
-      <div className="mx-4 mt-6 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-6 shadow-lg border border-gray-800">
+      <ProgressIndicator currentStep={7} totalSteps={7} />
+      <div className="mx-4 mt-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-6 shadow-lg border border-gray-800">
         <h2 className="text-xl font-bold mb-4 text-center text-white flex items-center justify-center">
           <TrendingDown className="text-green-500 mr-2" />
           体重对疾病风险的影响

@@ -330,14 +330,15 @@ const DiseaseRiskDetail: React.FC = () => {
       
       {/* Header - only show when no card is expanded */}
       {expandedCardId === null && (
-        <div className="w-full flex items-center justify-center relative pt-12">
+        <div className="mt-4 px-4 flex justify-between items-center">
           <button 
-            className="absolute left-4 p-2 z-30" 
+            className="p-2" 
             onClick={handleBack}
           >
             <ArrowLeft className="text-white" size={24} />
           </button>
-          <h1 className="text-xl font-medium">TOP 10风险疾病与建议</h1>
+          <h1 className="text-xl font-medium text-white">TOP 10风险疾病与建议</h1>
+          <div className="w-8"></div>
         </div>
       )}
       

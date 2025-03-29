@@ -48,15 +48,15 @@ const DiseaseSelection: React.FC = () => {
     <div className="page-container bg-black">
       <StatusBar />
       
-      <div className="mt-4 px-4 flex justify-between items-center">
+      <div className="mt-16 px-4 flex justify-between items-center">
         <BackButton />
-        <h1 className="text-lg font-medium text-white">建立个人报告</h1>
+        <h1 className="text-xl font-medium text-white">建立个人报告</h1>
         <SkipButton onClick={handleSkip} />
       </div>
       
-      <ProgressIndicator currentStep={6} totalSteps={7} />
+      <ProgressIndicator currentStep={5} totalSteps={7} />
       
-      <div className="mx-4 mt-8 bg-white rounded-3xl p-4 flex flex-col items-center">
+      <div className="white-card flex flex-col items-center">
         <p className="text-center text-gray-500 text-sm mb-1">
           完成评测，生成您的专属健康报告
         </p>

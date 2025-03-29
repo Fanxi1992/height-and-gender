@@ -151,13 +151,13 @@ const RiskReport: React.FC = () => {
     <div className="page-container bg-black">
       <StatusBar />
       
-      <div className="mt-4 px-4 flex justify-between items-center">
+      <div className="mt-16 px-4 flex justify-between items-center">
         <BackButton />
-        <h1 className="text-lg font-medium text-white">建立疾病风险报告</h1>
+        <h1 className="text-center text-xl font-medium">建立疾病风险报告</h1>
         <div className="w-8"></div> {/* 占位，使标题居中 */}
       </div>
       
-      <ProgressIndicator currentStep={7} totalSteps={7} />
+      <ProgressIndicator currentStep={6} totalSteps={7} />
       
       <div className="mx-2 mt-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-4 shadow-lg border border-gray-800">
         <h2 className="text-2xl font-bold mb-3 text-center text-white flex items-center justify-center">
