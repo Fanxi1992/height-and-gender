@@ -1,29 +1,218 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Plus } from 'lucide-react';
+import { Menu, X, Plus, MessageCircle } from 'lucide-react';
 import ChatInput from '../components/ChatInput';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-interface Message {
+// Define chat history types
+interface ChatMessage {
   id: string;
   text: string;
   isUser: boolean;
+  timestamp: Date;
 }
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  date: Date;
+}
+
+// Group chat sessions by date
+const groupSessionsByDate = (sessions: ChatSession[]) => {
+  const groups: Record<string, ChatSession[]> = {};
+  
+  sessions.forEach(session => {
+    const date = new Date(session.date);
+    const dateKey = getDateKey(date);
+    
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    
+    groups[dateKey].push(session);
+  });
+  
+  return groups;
+};
+
+// Get the date key string
+const getDateKey = (date: Date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const inputDate = new Date(date);
+  inputDate.setHours(0, 0, 0, 0);
+  
+  if (inputDate.getTime() === today.getTime()) {
+    return '今天';
+  } else if (inputDate.getTime() === yesterday.getTime()) {
+    return '昨天';
+  } else {
+    return '更早之前';
+  }
+};
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       text: '我是你的健康助手小张医生，很高兴见到你！',
-      isUser: false
+      isUser: false,
+      timestamp: new Date()
     },
     {
       id: '2',
       text: '我可以帮你预测风险、推荐食谱、分析营养、制定健身计划、欢迎向我提问，还有更多等你来发现～',
-      isUser: false
+      isUser: false,
+      timestamp: new Date()
     }
   ]);
+  
+  // Chat history state
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([
+    {
+      id: '1',
+      title: '如何快速瘦身？',
+      messages: [
+        {
+          id: '1-1',
+          text: '如何快速瘦身？',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '1-2',
+          text: '要健康快速瘦身，可以进行有氧运动如慢跑30分钟，控制碳水摄入，多吃蛋白质和蔬菜，保持每日500卡路里的热量赤字。记得要循序渐进，避免极端节食。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date()
+    },
+    {
+      id: '2',
+      title: '推荐一份适合我的晚餐',
+      messages: [
+        {
+          id: '2-1',
+          text: '推荐一份适合我的晚餐',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '2-2',
+          text: '建议晚餐可以选择烤三文鱼配芦笋和藜麦，高蛋白低碳水，既美味又健康。或者可以尝试鸡胸肉沙拉，加入牛油果、西红柿和混合生菜，淋上橄榄油和柠檬汁调味。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date()
+    },
+    {
+      id: '3',
+      title: '怎么提升睡眠质量？',
+      messages: [
+        {
+          id: '3-1',
+          text: '怎么提升睡眠质量？',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '3-2',
+          text: '提升睡眠质量的方法：保持规律作息时间，睡前关闭电子设备，卧室保持凉爽和安静，避免睡前饮用咖啡因和酒精，尝试睡前放松活动如深呼吸或冥想，需要时可咨询医生。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date(new Date().setDate(new Date().getDate() - 1)) // Yesterday
+    },
+    {
+      id: '4',
+      title: '有什么快速减脂的方法？',
+      messages: [
+        {
+          id: '4-1',
+          text: '有什么快速减脂的方法？',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '4-2',
+          text: '快速减脂可以尝试间歇性禁食，增加高强度间歇训练，减少精制碳水和糖分摄入，多吃高蛋白食物和膳食纤维，保持充足水分，但记住健康减脂应当循序渐进，避免极端方法。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date(new Date().setDate(new Date().getDate() - 1)) // Yesterday
+    },
+    {
+      id: '5',
+      title: '睡不好怎么办？',
+      messages: [
+        {
+          id: '5-1',
+          text: '睡不好怎么办？',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '5-2',
+          text: '改善睡眠可以尝试：创建舒适的睡眠环境，养成规律的作息时间，睡前一小时避免使用电子设备，尝试冥想或深呼吸放松身心，如果持续失眠，建议咨询医生寻求专业帮助。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date(new Date().setDate(new Date().getDate() - 1)) // Yesterday
+    },
+    {
+      id: '6',
+      title: '适合我当前身体的晚餐有哪些推荐？',
+      messages: [
+        {
+          id: '6-1',
+          text: '适合我当前身体的晚餐有哪些推荐？',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '6-2',
+          text: '针对您的情况，推荐晚餐选择低脂高蛋白食物，如清蒸鱼配蔬菜，豆腐炒菌菇，或鸡胸肉沙拉。建议控制主食量，增加膳食纤维摄入，晚餐时间尽量在睡前3小时完成。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date(new Date().setDate(new Date().getDate() - 14)) // Earlier
+    },
+    {
+      id: '7',
+      title: '蔬菜蛋白为主的食谱推荐',
+      messages: [
+        {
+          id: '7-1',
+          text: '蔬菜蛋白为主的食谱推荐',
+          isUser: true,
+          timestamp: new Date()
+        },
+        {
+          id: '7-2',
+          text: '以蔬菜蛋白为主的食谱推荐：藜麦豆腐沙拉、烤豆腐配芦笋、扁豆奎奴亚藜碗、豆浆蔬菜汤、蘑菇豌豆蛋白炒饭。这些食谱富含植物蛋白、膳食纤维和各种营养素，既健康又美味。',
+          isUser: false,
+          timestamp: new Date()
+        }
+      ],
+      date: new Date(new Date().setDate(new Date().getDate() - 14)) // Earlier
+    }
+  ]);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Common questions
@@ -48,7 +237,8 @@ const AIChat: React.FC = () => {
       const newMessage = {
         id: generateUniqueId(),
         text: message,
-        isUser: true
+        isUser: true,
+        timestamp: new Date()
       };
       
       setMessages(prev => [...prev, newMessage]);
@@ -64,17 +254,64 @@ const AIChat: React.FC = () => {
   const handleCommonQuestionClick = (question: string) => {
     handleSendMessage(question);
   };
+  
+  // Load chat history
+  const handleSelectChatSession = (session: ChatSession) => {
+    setMessages(session.messages);
+    // Scroll to bottom after messages are loaded
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+  
+  // Group chat history by date
+  const groupedSessions = groupSessionsByDate(chatHistory);
+
+  // Scroll to bottom on initial load
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-black">
       {/* Header */}
       <div className="relative flex items-center justify-center py-4 border-b border-gray-800">
-        <button 
-          onClick={handleBack}
-          className="absolute left-4 p-2"
-        >
-          <Menu size={24} className="text-white" />
-        </button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <button className="absolute left-4 p-2">
+              <Menu size={24} className="text-white" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="bg-black text-white p-0 w-[85%] border-r border-gray-800">
+            <div className="flex flex-col h-full">
+              <div className="p-4 border-b border-gray-800">
+                <h2 className="text-lg font-medium">聊天历史</h2>
+              </div>
+              <ScrollArea className="flex-1 px-2">
+                {Object.entries(groupedSessions).map(([dateKey, sessions]) => (
+                  <div key={dateKey} className="mb-4">
+                    <h3 className="text-xs text-gray-400 px-3 py-2">{dateKey}</h3>
+                    {sessions.map(session => (
+                      <button
+                        key={session.id}
+                        className="w-full text-left px-3 py-3 rounded-xl mb-2 bg-[#3b2c71] text-white"
+                        onClick={() => handleSelectChatSession(session)}
+                      >
+                        <p className="text-sm truncate">{session.title}</p>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </ScrollArea>
+              <div className="border-t border-gray-800 p-4">
+                <button className="flex items-center text-blue-400">
+                  <MessageCircle size={18} className="mr-2" />
+                  <span>新建聊天</span>
+                </button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
         
         <h1 className="text-lg font-medium text-white">健康顾问</h1>
         
@@ -89,81 +326,68 @@ const AIChat: React.FC = () => {
       </div>
       
       {/* Chat container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Doctor avatar */}
-        <div className="flex flex-col items-center justify-center mb-8">
-          <div className="relative w-24 h-24 rounded-full mb-4 overflow-hidden">
-            <div className="absolute inset-0 rounded-full bg-blue-500 opacity-20 blur-md"></div>
-            <div className="absolute inset-0 border-2 border-white rounded-full"></div>
-            <div className="absolute inset-0 border border-blue-400 rounded-full"></div>
-            <img 
-              src="/lovable-uploads/1bbfe88a-e9fb-4f56-a679-bb8f36a23055.png" 
-              alt="AI Doctor" 
-              className="w-full h-full object-cover rounded-full"
-            />
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-6">
+          {/* Doctor avatar */}
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="relative w-24 h-24 rounded-full mb-4 overflow-hidden">
+              <div className="absolute inset-0 rounded-full bg-blue-500 opacity-20 blur-md"></div>
+              <div className="absolute inset-0 border-2 border-white rounded-full"></div>
+              <div className="absolute inset-0 border border-blue-400 rounded-full"></div>
+              <img 
+                src="/lovable-uploads/1bbfe88a-e9fb-4f56-a679-bb8f36a23055.png" 
+                alt="AI Doctor" 
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
           </div>
-        </div>
-        
-        {/* Messages */}
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div 
-              key={message.id}
-              className={`${
-                message.isUser 
-                  ? 'flex justify-end' 
-                  : 'flex justify-center'
-              }`}
-            >
-              <div
-                className={`px-4 py-3 rounded-2xl max-w-[90%] ${
-                  message.isUser
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-black'
+          
+          {/* Messages */}
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div 
+                key={message.id}
+                className={`${
+                  message.isUser 
+                    ? 'flex justify-end' 
+                    : 'flex justify-center'
                 }`}
               >
-                <p className="text-sm">{message.text}</p>
+                <div
+                  className={`px-4 py-3 rounded-2xl max-w-[90%] ${
+                    message.isUser
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-black'
+                  }`}
+                >
+                  <p className="text-sm">{message.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          
+          {/* Common questions */}
+          <div className="flex space-x-3 overflow-x-auto py-2 scrollbar-none mt-auto">
+            {commonQuestions.map((question, index) => (
+              <button
+                key={index}
+                onClick={() => handleCommonQuestionClick(question)}
+                className="px-4 py-2 bg-white rounded-full text-black text-sm whitespace-nowrap"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+          
+          {/* Auto-scroll anchor */}
+          <div ref={messagesEndRef} />
         </div>
-        
-        {/* Common questions */}
-        <div className="flex space-x-3 overflow-x-auto py-2 scrollbar-none mt-auto">
-          {commonQuestions.map((question, index) => (
-            <button
-              key={index}
-              onClick={() => handleCommonQuestionClick(question)}
-              className="px-4 py-2 bg-white rounded-full text-black text-sm whitespace-nowrap"
-            >
-              {question}
-            </button>
-          ))}
-        </div>
-        
-        {/* Auto-scroll anchor */}
-        <div ref={messagesEndRef} />
-      </div>
+      </ScrollArea>
       
       {/* Chat input */}
-      <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center bg-[#333333] rounded-full px-4 py-2">
-          <input
-            type="text"
-            placeholder="给 Healthbot 发送消息"
-            className="flex-1 bg-transparent text-white border-none outline-none text-sm"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSendMessage(e.currentTarget.value);
-                e.currentTarget.value = '';
-              }
-            }}
-          />
-          <button className="ml-2 text-gray-400">
-            <Plus size={20} />
-          </button>
-        </div>
-      </div>
+      <ChatInput 
+        onSendMessage={handleSendMessage}
+      />
       
       {/* Bottom tab bar */}
       <div className="flex justify-around py-3 bg-black border-t border-gray-800">
