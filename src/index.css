@@ -64,7 +64,6 @@
     outline: none;
   }
 }
-/* 移除了输入框聚焦时的默认轮廓线 */
 
 @layer components {
   .page-container {
@@ -275,4 +274,31 @@
   overflow: hidden;
   margin-bottom: 1.5rem;
   touch-action: none; /* 防止触发浏览器默认的滚动行为 */
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
