@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle, Mic, Activity, Droplet, Utensils, Heart, Database, ThumbsUp, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HomePage: React.FC = () => {
@@ -60,6 +60,89 @@ const HomePage: React.FC = () => {
   const goToCircle = () => {
     navigate('/circle');
   };
+
+  const contentItems = [
+    {
+      id: 1,
+      type: 'article',
+      title: '"体重管理年"系列: 体重篇',
+      image: '/public/体重管理年系列 体重篇.jpg',
+      tag: '体重管理年系列',
+      author: '健康管理师',
+      likes: 845,
+      comments: 75,
+    },
+    {
+      id: 2,
+      type: 'video',
+      title: '国家出手了！卫健委带你做"减脂餐"',
+      image: 'https://images.pexels.com/photos/1640770/pexels-photo-1640770.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '官方指导',
+      author: '央视新闻',
+      likes: 5100,
+      views: 8600,
+    },
+    {
+      id: 3,
+      type: 'article',
+      title: '吃完这个，我怕你只剩一点点了',
+      image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+      tag: '饮食控制',
+      author: '饮食专家',
+      likes: 328,
+      comments: 42,
+    },
+    {
+      id: 4,
+      type: 'article',
+      title: '2025达减肥目标，挑战7斤公主减重',
+      image: 'https://images.pexels.com/photos/3757954/pexels-photo-3757954.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '减重挑战',
+      author: '减重达人',
+      likes: 763,
+      comments: 124,
+    },
+    {
+      id: 5,
+      type: 'article',
+      title: '为什么运动有这么大热量缺口，而且还喝水...',
+      image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+      tag: '科普知识',
+      author: '徐风暖阳',
+      likes: 46,
+      comments: 15,
+    },
+    {
+      id: 6,
+      type: 'video',
+      title: '第127天: 77.95kg，差2.95kg达标，今天...',
+      image: 'https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '减重日记',
+      author: '瘦桐友友_3',
+      likes: 23,
+      views: 567,
+    },
+    {
+      id: 7,
+      type: 'article',
+      title: '光，理直气壮的干了...',
+      image: 'https://images.unsplash.com/photo-1579126038374-6064e9370f0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
+      tag: '励志故事',
+      author: '万物向阳',
+      likes: 14,
+      comments: 5,
+    },
+    {
+      id: 8,
+      type: 'article',
+      title: 'DAY 128 | 今天吃了好多好多大枣，上瘾了...',
+      image: 'https://images.pexels.com/photos/5473182/pexels-photo-5473182.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
+      tag: '小米粥',
+      author: '奇迹寒寒',
+      likes: 9,
+      comments: 3,
+    },
+  ];
 
   return (
     <div 
@@ -392,11 +475,106 @@ const HomePage: React.FC = () => {
       </div>
       
       {/* Add Health Tools Button - 更现代的按钮设计 */}
-      <div className="w-full px-5 mb-20">
+      <div className="w-full px-5 mb-4">
         <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full flex items-center justify-center shadow-lg hover:shadow-blue-500/20 transition-all">
           <Plus size={20} className="mr-2" />
           添加新健康工具
         </button>
+      </div>
+      
+      {/* "大家都在看" Content Stream Section */}
+      <div className="w-full px-5 mb-20">
+        <div className="bg-gray-100 rounded-t-3xl pt-6 pb-8 rounded-b-3xl">
+          <div className="px-5 mb-4">
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center mr-2">
+                <span className="text-orange-500">🔍</span>
+              </div>
+              <h2 className="text-xl font-bold text-black">大家都在看</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {contentItems.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="bg-white rounded-xl overflow-hidden shadow-sm h-60"
+                >
+                  <div className="relative h-32">
+                    <img 
+                      src={item.image} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    {item.type === 'video' && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                          <Play size={16} className="text-white ml-1" />
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute top-2 left-2">
+                      <span className="text-xs px-2 py-1 rounded-full bg-white/80 text-black font-medium">
+                        #{item.tag}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2 flex flex-col h-28">
+                    <h3 className="text-sm font-medium text-black line-clamp-2 mb-1">
+                      {item.title}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+                      <div className="flex items-center">
+                        <span className="truncate max-w-20">{item.author}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {item.type === 'video' ? (
+                          <>
+                            <span className="flex items-center">
+                              <Play size={10} className="mr-0.5" />
+                              {item.views}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="flex items-center">
+                            <MessageCircle size={10} className="mr-0.5" />
+                            {item.comments}
+                          </span>
+                        )}
+                        <span className="flex items-center">
+                          <ThumbsUp size={10} className="mr-0.5" />
+                          {item.likes}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex items-center justify-center my-6 text-xs text-gray-400">
+              <div className="h-px bg-gray-200 flex-grow"></div>
+              <span className="mx-4">— 已经到底了 —</span>
+              <div className="h-px bg-gray-200 flex-grow"></div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <button 
+                onClick={() => navigate('/knowledge-base')}
+                className="py-3 px-4 rounded-full bg-blue-100 text-blue-500 font-medium flex items-center justify-center"
+              >
+                更多内容 <ArrowRight size={16} className="ml-1" />
+              </button>
+              <button 
+                onClick={() => navigate('/shop')}
+                className="py-3 px-4 rounded-full bg-green-100 text-green-500 font-medium flex items-center justify-center"
+              >
+                更多商品 <ArrowRight size={16} className="ml-1" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Floating Chatbot Button - 更现代化的语音助手浮动按钮 */}
