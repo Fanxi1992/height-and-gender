@@ -10,6 +10,15 @@ const HomePage: React.FC = () => {
   const chatbotRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [networkAnimate, setNetworkAnimate] = useState(false);
+  
+  // 语音相关状态
+  const [isRecording, setIsRecording] = useState(false);
+  const [showRecordingTooShort, setShowRecordingTooShort] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const recordingStartTime = useRef<number | null>(null);
+  const recordingTimer = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     const animationInterval = setInterval(() => {
@@ -37,9 +46,108 @@ const HomePage: React.FC = () => {
     }
   }, []);
 
-  const handleChatbotPress = () => {
-    console.log('Chatbot long press activated');
-    // Voice chat functionality would be implemented here
+  // 开始录音函数
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      audioChunksRef.current = [];
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      
+      setIsRecording(true);
+      recordingStartTime.current = Date.now();
+      
+      // 开始计时器，每100ms更新一次录音时长
+      recordingTimer.current = window.setInterval(() => {
+        if (recordingStartTime.current) {
+          const duration = (Date.now() - recordingStartTime.current) / 1000;
+          setRecordingDuration(duration);
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('无法获取麦克风权限:', error);
+    }
+  };
+
+  // 停止录音函数
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      
+      // 停止所有音轨
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+    
+    // 清除计时器
+    if (recordingTimer.current) {
+      clearInterval(recordingTimer.current);
+      recordingTimer.current = null;
+    }
+    
+    // 计算录音时长
+    const recordingDuration = recordingStartTime.current 
+      ? (Date.now() - recordingStartTime.current) / 1000 
+      : 0;
+    
+    setIsRecording(false);
+    
+    // 如果录音时间太短，显示提示
+    if (recordingDuration < 1) {
+      setShowRecordingTooShort(true);
+      setTimeout(() => setShowRecordingTooShort(false), 1500);
+      return;
+    }
+    
+    // 处理录音数据
+    if (audioChunksRef.current.length > 0) {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      console.log('录音完成，音频大小:', audioBlob.size);
+      
+      // 这里可以保存音频或发送到后端
+      // const audioUrl = URL.createObjectURL(audioBlob);
+      // 后续可以添加发送到后端的逻辑
+    }
+  };
+
+  // 处理按钮按下事件
+  const handleVoiceButtonTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    startRecording();
+  };
+  
+  // 处理按钮释放事件
+  const handleVoiceButtonTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    stopRecording();
+  };
+  
+  // 处理鼠标按下事件（用于桌面调试）
+  const handleVoiceButtonMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startRecording();
+  };
+  
+  // 处理鼠标释放事件（用于桌面调试）
+  const handleVoiceButtonMouseUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    stopRecording();
+  };
+
+  // 当用户离开页面时停止录音
+  const handleVoiceButtonTouchCancel = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (isRecording) {
+      stopRecording();
+    }
   };
 
   const goToHealthRiskReport = () => {
@@ -200,6 +308,49 @@ const HomePage: React.FC = () => {
     >
       <StatusBar />
       
+      {/* 录音弹出层 */}
+      {isRecording && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
+          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
+            
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
+              {/* 动态波浪效果 */}
+              <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-[ping_1.5s_ease-in-out_infinite]"></div>
+              <div className="absolute inset-[6px] rounded-full border-2 border-white/50 animate-[ping_2s_ease-in-out_infinite]"></div>
+              
+              <Mic size={40} className="text-white" />
+            </div>
+            
+            <p className="text-white font-medium text-lg mb-2">正在聆听...</p>
+            <p className="text-white/70 text-sm">请对我说出您的问题</p>
+            
+            <div className="mt-6 flex space-x-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div 
+                  key={i} 
+                  className="w-1.5 h-6 bg-white/70 rounded-full animate-[bounce_1.5s_ease-in-out_infinite]" 
+                  style={{animationDelay: `${i * 0.1}s`, height: `${Math.min(6 + Math.random() * 12, 18)}px`}}
+                ></div>
+              ))}
+            </div>
+            
+            <p className="absolute bottom-4 text-white/80 text-sm">
+              {recordingDuration.toFixed(1)}s
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* 录音时间太短提示 */}
+      {showRecordingTooShort && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-black/80 text-white px-6 py-4 rounded-xl animate-[fadeIn_0.2s_ease-out]">
+            说话时间太短
+          </div>
+        </div>
+      )}
+      
       <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-400">
           <img 
@@ -226,7 +377,11 @@ const HomePage: React.FC = () => {
       <div 
         ref={chatbotRef}
         className="relative w-40 h-40 mb-5 mx-auto"
-        onTouchStart={handleChatbotPress}
+        onTouchStart={handleVoiceButtonTouchStart}
+        onTouchEnd={handleVoiceButtonTouchEnd}
+        onTouchCancel={handleVoiceButtonTouchCancel}
+        onMouseDown={handleVoiceButtonMouseDown}
+        onMouseUp={handleVoiceButtonMouseUp}
       >
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md animate-pulse"></div>
         
@@ -616,7 +771,11 @@ const HomePage: React.FC = () => {
       </div>
       
       <div className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
-        onTouchStart={handleChatbotPress}
+        onTouchStart={handleVoiceButtonTouchStart}
+        onTouchEnd={handleVoiceButtonTouchEnd}
+        onTouchCancel={handleVoiceButtonTouchCancel}
+        onMouseDown={handleVoiceButtonMouseDown}
+        onMouseUp={handleVoiceButtonMouseUp}
       >
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
         <Mic size={20} className="text-white z-10" />
