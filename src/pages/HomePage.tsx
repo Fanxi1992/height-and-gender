@@ -4,6 +4,94 @@ import StatusBar from '../components/StatusBar';
 import { ArrowRight, Plus, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// WebSocket服务器地址
+const WS_URL = 'ws://localhost:8000/ws/audio';
+
+// 模拟语音数据的函数（仅用于测试）
+const MOCK_ENABLED = true; // 设置为true启用模拟数据，部署时需要设置为false
+
+// 创建模拟的音频数据
+// 这里创建的是基本的正弦波音频，实际使用中应该替换为真实的音频数据
+const createMockAudioData = () => {
+  // 创建模拟的音频数据 (简单的正弦波)
+  const sampleRate = 44100;  // 44.1 kHz
+  const duration = 0.5;      // 0.5秒
+  const frequency = 440;     // 440 Hz (A4音符)
+  
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  // 生成简单的正弦波
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate);
+  }
+  
+  // 将AudioBuffer转换为ArrayBuffer
+  const offlineContext = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+  const source = offlineContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(offlineContext.destination);
+  source.start(0);
+  
+  return offlineContext.startRendering();
+};
+
+// 模拟WebSocket服务器
+class MockWebSocket extends EventTarget {
+  url: string;
+  readyState: number = WebSocket.CONNECTING;
+  
+  constructor(url: string) {
+    super();
+    this.url = url;
+    
+    // 模拟连接建立
+    setTimeout(() => {
+      this.readyState = WebSocket.OPEN;
+      this.dispatchEvent(new Event('open'));
+      
+      // 模拟接收多个音频数据片段
+      this.mockStreamAudioChunks();
+    }, 500);
+  }
+  
+  async mockStreamAudioChunks() {
+    // 模拟服务器发送5段音频数据
+    for (let i = 0; i < 5; i++) {
+      // 等待一小段时间，模拟流式传输
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 创建模拟音频数据
+      const audioBuffer = await createMockAudioData();
+      
+      // 发送模拟音频数据
+      const messageEvent = new MessageEvent('message', {
+        data: audioBuffer
+      });
+      this.dispatchEvent(messageEvent);
+    }
+    
+    // 模拟连接关闭
+    setTimeout(() => {
+      this.readyState = WebSocket.CLOSED;
+      this.dispatchEvent(new Event('close'));
+    }, 2000);
+  }
+  
+  send(data: any) {
+    // 模拟发送数据
+    console.log('MockWebSocket发送数据:', data);
+  }
+  
+  close() {
+    if (this.readyState !== WebSocket.CLOSED) {
+      this.readyState = WebSocket.CLOSED;
+      this.dispatchEvent(new Event('close'));
+    }
+  }
+}
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [showFloatingButton, setShowFloatingButton] = useState(false);
@@ -19,6 +107,32 @@ const HomePage: React.FC = () => {
   const recordingTimer = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  // WebSocket和音频播放相关状态
+  const [isLoading, setIsLoading] = useState(false);  // 是否正在加载/处理中
+  const [isPlaying, setIsPlaying] = useState(false);  // 是否正在播放音频
+  const wsRef = useRef<WebSocket | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBufferQueue = useRef<ArrayBuffer[]>([]);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const isProcessingAudio = useRef<boolean>(false);
+
+  useEffect(() => {
+    // 初始化AudioContext
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    audioContextRef.current = new AudioContextClass();
+
+    return () => {
+      // 清理WebSocket连接
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      // 清理AudioContext
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const animationInterval = setInterval(() => {
@@ -46,16 +160,143 @@ const HomePage: React.FC = () => {
     }
   }, []);
 
+  // 初始化WebSocket连接
+  const setupWebSocket = () => {
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+
+    // 使用模拟WebSocket或真实WebSocket
+    const ws = MOCK_ENABLED ? new MockWebSocket(WS_URL) as unknown as WebSocket : new WebSocket(WS_URL);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('WebSocket连接已建立');
+    };
+
+    ws.onmessage = async (event) => {
+      // 接收二进制音频数据
+      const audioData = await event.data.arrayBuffer();
+      audioBufferQueue.current.push(audioData);
+      
+      // 如果当前没有在处理音频，开始处理
+      if (!isProcessingAudio.current) {
+        processAudioQueue();
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket连接已关闭');
+      setIsLoading(false);
+      setIsPlaying(false);
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket错误:', error);
+      setIsLoading(false);
+      setIsPlaying(false);
+    };
+  };
+
+  // 处理音频队列
+  const processAudioQueue = async () => {
+    if (audioBufferQueue.current.length === 0) {
+      isProcessingAudio.current = false;
+      return;
+    }
+
+    isProcessingAudio.current = true;
+    setIsPlaying(true);
+
+    // 取出队列中的第一条音频数据
+    const audioData = audioBufferQueue.current.shift();
+    
+    try {
+      // 解码音频数据
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(audioData!);
+      
+      // 创建音频源并播放
+      const source = audioContextRef.current!.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContextRef.current!.destination);
+      
+      audioSourceRef.current = source;
+      
+      // 监听播放结束事件
+      source.onended = () => {
+        // 播放完当前片段后继续处理队列中的下一个音频
+        processAudioQueue();
+      };
+      
+      source.start(0);
+    } catch (error) {
+      console.error('音频处理错误:', error);
+      processAudioQueue(); // 出错时继续处理下一个
+    }
+  };
+
   // 开始录音函数
   const startRecording = async () => {
     try {
+      console.log('Requesting microphone access...'); // <-- 添加日志
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted. Stream:', stream); // <-- 添加日志
+
+      const tracks = stream.getAudioTracks();
+      console.log('Audio Tracks:', tracks); // <-- 添加日志
+      if (tracks.length === 0) {
+          console.error('No audio tracks found in the stream!'); // <-- 添加错误检查
+          return; // 如果没有音轨，直接返回
+      }
+      console.log('First audio track settings:', tracks[0].getSettings()); // <-- 查看音轨设置
+
       const mediaRecorder = new MediaRecorder(stream);
-      
+      console.log('MediaRecorder created. State:', mediaRecorder.state); // <-- 确认初始状态是 inactive
+
       audioChunksRef.current = [];
       mediaRecorder.ondataavailable = (event) => {
+        // *** 这是关键的调试点 ***
+        console.log('ondataavailable event fired!'); // <-- 添加日志确认事件触发
+        console.log('event.data:', event.data);     // <-- 查看事件数据
+        console.log('event.data.size:', event.data?.size); // <-- 查看数据大小
+
         if (event.data.size > 0) {
+          console.log('Pushing audio chunk to array.'); // <-- 确认数据被添加
           audioChunksRef.current.push(event.data);
+        } else {
+          console.log('Skipping chunk because size is 0.'); // <-- 确认是否因为size为0被跳过
+        }
+      };
+      
+      // 添加onstop事件处理器，在所有录音数据收集完成后处理
+      mediaRecorder.onstop = () => {
+        console.log('MediaRecorder onstop event fired');
+        // 计算录音时长
+        const recordingDuration = recordingStartTime.current 
+          ? (Date.now() - recordingStartTime.current) / 1000 
+          : 0;
+        
+        console.log('Final recording duration:', recordingDuration);
+        
+        // 如果录音时间太短，显示提示
+        if (recordingDuration < 1) {
+          console.log('Recording too short in onstop handler.');
+          setShowRecordingTooShort(true);
+          setTimeout(() => setShowRecordingTooShort(false), 1500);
+          return;
+        }
+        
+        // 处理录音数据
+        console.log('Audio chunks in onstop:', audioChunksRef.current.length);
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          console.log('Audio Blob created in onstop, size:', audioBlob.size);
+          
+          // 发送录音数据到后端
+          sendAudioToServer(audioBlob);
+        } else {
+          console.log('No audio chunks found in onstop handler.');
         }
       };
       
@@ -78,8 +319,9 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // 停止录音函数
+  // 停止录音函数 - 简化版，移除音频处理逻辑
   const stopRecording = () => {
+    console.log('stopRecording called'); // <-- 添加日志
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       
@@ -93,28 +335,49 @@ const HomePage: React.FC = () => {
       recordingTimer.current = null;
     }
     
-    // 计算录音时长
-    const recordingDuration = recordingStartTime.current 
-      ? (Date.now() - recordingStartTime.current) / 1000 
-      : 0;
-    
     setIsRecording(false);
+    // 注意：音频处理逻辑已移至mediaRecorder.onstop事件处理器中
+  };
+
+  // 发送音频数据到后端
+  const sendAudioToServer = async (audioBlob: Blob) => {
+    setIsLoading(true);
     
-    // 如果录音时间太短，显示提示
-    if (recordingDuration < 1) {
-      setShowRecordingTooShort(true);
-      setTimeout(() => setShowRecordingTooShort(false), 1500);
-      return;
-    }
-    
-    // 处理录音数据
-    if (audioChunksRef.current.length > 0) {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      console.log('录音完成，音频大小:', audioBlob.size);
+    try {
+      // 1. 建立WebSocket连接
+      setupWebSocket();
       
-      // 这里可以保存音频或发送到后端
-      // const audioUrl = URL.createObjectURL(audioBlob);
-      // 后续可以添加发送到后端的逻辑
+      // 如果启用模拟模式，直接返回，不发送HTTP请求
+      if (MOCK_ENABLED) {
+        console.log('模拟模式：发送音频到后端');
+        return;
+      }
+      
+      // 2. 创建FormData对象发送音频数据
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      // 3. 使用fetch API发送数据到后端
+      const response = await fetch('http://localhost:8000/api/audio/process', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      console.log('音频成功发送到后端');
+      
+      // 注意：后端会通过WebSocket发送音频响应，不需要在这里处理response
+    } catch (error) {
+      console.error('发送音频到后端失败:', error);
+      setIsLoading(false);
+      
+      // 关闭WebSocket连接
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
     }
   };
 
@@ -338,6 +601,51 @@ const HomePage: React.FC = () => {
             <p className="absolute bottom-4 text-white/80 text-sm">
               {recordingDuration.toFixed(1)}s
             </p>
+          </div>
+        </div>
+      )}
+      
+      {/* AI回答播放状态弹出层 */}
+      {isLoading && !isPlaying && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
+          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
+            
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
+              <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-spin"></div>
+              <div className="absolute inset-[10px] rounded-full border-2 border-white/50 animate-pulse"></div>
+            </div>
+            
+            <p className="text-white font-medium text-lg mb-2">AI思考中...</p>
+            <p className="text-white/70 text-sm">正在为您生成回答</p>
+          </div>
+        </div>
+      )}
+      
+      {/* AI语音回答播放中状态 */}
+      {isPlaying && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
+          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
+            
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
+              {/* 动态波形效果 */}
+              <div className="flex space-x-1">
+                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <div 
+                    key={i} 
+                    className="w-1.5 h-12 bg-white/70 rounded-full animate-[bounce_1s_ease-in-out_infinite]" 
+                    style={{
+                      animationDelay: `${i * 0.1}s`, 
+                      height: `${Math.min(12 + Math.random() * 24, 36)}px`
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+            
+            <p className="text-white font-medium text-lg mb-2">AI正在回答...</p>
+            <p className="text-white/70 text-sm">请听取AI的回复</p>
           </div>
         </div>
       )}
