@@ -1,6 +1,5 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Plus, MessageCircle } from 'lucide-react';
 import ChatInput from '../components/ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -61,6 +60,7 @@ const getDateKey = (date: Date) => {
 
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -232,23 +232,37 @@ const AIChat: React.FC = () => {
   };
 
   // Handle sending message
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = useCallback((message: string) => {
     if (message.trim()) {
-      const newMessage = {
+      const newMessage: ChatMessage = {
         id: generateUniqueId(),
-        text: message,
+        text: message.trim(),
         isUser: true,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, newMessage]);
       
-      // Scroll to bottom after message is added
+      // --- TODO: 在这里添加调用实际 AI 接口的逻辑 ---
+      // 模拟 AI 回复
+      setTimeout(() => {
+         const aiResponse: ChatMessage = {
+             id: generateUniqueId(),
+             text: `收到你的问题："${message.trim()}" 正在处理中... (模拟回复)`,
+             isUser: false,
+             timestamp: new Date()
+         };
+         setMessages(prev => [...prev, aiResponse]);
+         // 确保滚动到底部
+         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 1000);
+
+      // 滚动到底部 (延迟确保DOM更新)
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  };
+  }, []);
 
   // Handle clicking on a common question
   const handleCommonQuestionClick = (question: string) => {
@@ -266,6 +280,21 @@ const AIChat: React.FC = () => {
   
   // Group chat history by date
   const groupedSessions = groupSessionsByDate(chatHistory);
+
+  // --- 新增：处理从 HomePage 传入的初始消息 ---
+  useEffect(() => {
+    // 检查 location.state 中是否有 initialMessage
+    const initialMessage = location.state?.initialMessage as string | undefined;
+
+    if (initialMessage && initialMessage.trim()) {
+      console.log('AIChat received initial message:', initialMessage); // 调试日志
+      // 发送消息
+      handleSendMessage(initialMessage);
+
+      // 清除 state，防止刷新重复发送
+      navigate('.', { replace: true, state: {} });
+    }
+  }, [location.state, navigate, handleSendMessage]);
 
   // Scroll to bottom on initial load
   useEffect(() => {
@@ -345,24 +374,33 @@ const AIChat: React.FC = () => {
           {/* Messages */}
           <div className="space-y-4">
             {messages.map((message) => (
-              <div 
+              <div
                 key={message.id}
                 className={`${
-                  message.isUser 
-                    ? 'flex justify-end' 
-                    : 'flex justify-center'
+                  message.isUser
+                    ? 'flex justify-end'
+                    : 'flex justify-start'
                 }`}
               >
-                <div
-                  className={`px-4 py-3 rounded-2xl max-w-[90%] ${
-                    message.isUser
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white text-black'
-                  }`}
-                >
-                  <p className="text-sm">{message.text}</p>
-                </div>
-              </div>
+                {!message.isUser && (
+                   <div className="w-8 h-8 rounded-full mr-2 flex-shrink-0 overflow-hidden border border-blue-400">
+                     <img
+                       src="/lovable-uploads/1bbfe88a-e9fb-4f56-a679-bb8f36a23055.png"
+                       alt="AI Avatar"
+                       className="w-full h-full object-cover"
+                     />
+                   </div>
+                 )}
+                 <div
+                   className={`px-4 py-3 rounded-2xl max-w-[85%] ${
+                     message.isUser
+                       ? 'bg-blue-500 text-white rounded-br-none'
+                       : 'bg-gray-700 text-white rounded-bl-none'
+                   }`}
+                 >
+                   <p className="text-sm">{message.text}</p>
+                 </div>
+               </div>
             ))}
           </div>
           
@@ -372,7 +410,7 @@ const AIChat: React.FC = () => {
               <button
                 key={index}
                 onClick={() => handleCommonQuestionClick(question)}
-                className="px-4 py-2 bg-white rounded-full text-black text-sm whitespace-nowrap"
+                className="px-4 py-2 bg-gray-700 rounded-full text-white text-sm whitespace-nowrap hover:bg-gray-600"
               >
                 {question}
               </button>
@@ -393,21 +431,15 @@ const AIChat: React.FC = () => {
       <div className="flex justify-around py-3 bg-black border-t border-gray-800">
         <button 
           onClick={() => navigate('/home')}
-          className="flex flex-col items-center space-y-1"
+          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          </svg>
-          <span className="text-xs text-gray-400">主页</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          <span className="text-xs">主页</span>
         </button>
         
-        <button className="flex flex-col items-center space-y-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="9" y1="21" x2="9" y2="9"></line>
-          </svg>
-          <span className="text-xs text-white">机器人</span>
+        <button className="flex flex-col items-center space-y-1 text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <span className="text-xs">机器人</span>
         </button>
         
         <button 

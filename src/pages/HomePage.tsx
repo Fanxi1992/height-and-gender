@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame } from 'lucide-react';
+import { ArrowRight, Plus, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame, Check, X as CancelIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // WebSocket服务器地址
 const WS_URL = 'ws://localhost:8000/ws/audio';
 
 // 模拟语音数据的函数（仅用于测试）
-const MOCK_ENABLED = true; // 设置为true启用模拟数据，部署时需要设置为false
+const MOCK_ENABLED = false; // 设置为false禁用模拟数据，部署时需要设置为false
 
 // 创建模拟的音频数据
 // 这里创建的是基本的正弦波音频，实际使用中应该替换为真实的音频数据
@@ -109,6 +109,19 @@ class MockWebSocket extends EventTarget {
   }
 }
 
+// --- Web Speech API Polyfill ---
+// 确保在所有环境中 window 对象下有 SpeechRecognition 和 SpeechGrammarList
+const BrowserSpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+const BrowserSpeechGrammarList = window.SpeechGrammarList || (window as any).webkitSpeechGrammarList;
+
+if (BrowserSpeechRecognition && !window.SpeechRecognition) {
+  window.SpeechRecognition = BrowserSpeechRecognition;
+}
+if (BrowserSpeechGrammarList && !window.SpeechGrammarList) {
+  window.SpeechGrammarList = BrowserSpeechGrammarList;
+}
+// --- End Polyfill ---
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [showFloatingButton, setShowFloatingButton] = useState(false);
@@ -133,6 +146,15 @@ const HomePage: React.FC = () => {
   const audioBufferQueue = useRef<ArrayBuffer[]>([]);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isProcessingAudio = useRef<boolean>(false);
+
+  // --- 新增：实时语音转文字 (STT) 相关状态 ---
+  const [isTranscribing, setIsTranscribing] = useState(false); // 是否正在进行语音识别
+  const [transcribedText, setTranscribedText] = useState(''); // 实时显示的转录文本
+  const [isTranscriptionFinal, setIsTranscriptionFinal] = useState(false); // 当前转录是否是最终结果
+  const [showConfirmation, setShowConfirmation] = useState(false); // 是否显示确认/取消按钮
+  const [finalTranscription, setFinalTranscription] = useState<string | null>(null); // 存储最终确认前的文本
+  const recognitionRef = useRef<SpeechRecognition | null>(null); // SpeechRecognition 实例
+  const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 用于处理识别结束后的延迟
 
   useEffect(() => {
     // 初始化AudioContext
@@ -440,35 +462,189 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // 处理按钮按下事件
+  // --- 语音转文字核心逻辑 ---
+
+  const startTranscription = useCallback(async () => {
+    // 重置状态
+    setTranscribedText('');
+    setIsTranscriptionFinal(false);
+    setShowConfirmation(false);
+    setFinalTranscription(null);
+    if (speechTimeoutRef.current) {
+      clearTimeout(speechTimeoutRef.current);
+    }
+
+    // 检查浏览器兼容性
+    if (!BrowserSpeechRecognition) {
+      console.error('浏览器不支持 Web Speech API');
+      alert('抱歉，您的浏览器不支持语音识别功能。');
+      return;
+    }
+
+    // 请求麦克风权限 (通常API会自动处理，但最好提前检查或处理错误)
+    try {
+      // 尝试获取权限，如果失败会抛出错误
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // 立即停止轨道，因为我们只需要权限，实际录音由SpeechRecognition处理
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        stream.getTracks().forEach(track => track.stop());
+      });
+    } catch (err) {
+      console.error('无法获取麦克风权限:', err);
+      alert('无法获取麦克风权限，请检查浏览器设置。');
+      return;
+    }
+
+
+    // 如果已有实例，先中止
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+    }
+
+    // 创建新实例
+    const recognition = new BrowserSpeechRecognition();
+    recognition.lang = 'zh-CN'; // 设置语言为中文
+    recognition.interimResults = true; // 获取中间结果
+    recognition.continuous = true; // 持续识别，直到手动停止
+
+    recognitionRef.current = recognition;
+    setIsRecording(true); // 控制UI显示录音状态
+    setIsTranscribing(true); // 标记正在进行语音转文字
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let interimTranscript = '';
+      let finalTranscriptResult = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscriptResult += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      console.log('Interim:', interimTranscript, 'Final:', finalTranscriptResult); // 调试日志
+      // 优先显示最终结果，否则显示中间结果
+      setTranscribedText(finalTranscriptResult || interimTranscript);
+      setIsTranscriptionFinal(!!finalTranscriptResult); // 如果有最终结果，标记为final
+
+      // 如果有最终结果，重置超时
+      if (finalTranscriptResult && speechTimeoutRef.current) {
+        clearTimeout(speechTimeoutRef.current);
+      }
+    };
+
+    recognition.onend = () => {
+      console.log('Speech recognition service disconnected.'); // 调试日志
+      setIsTranscribing(false);
+      // 不再在onend中设置isRecording=false，由按钮释放控制
+      // 如果在停止时有有效的转录文本，则显示确认
+      if (transcribedText.trim().length > 0 && !showConfirmation) {
+         setFinalTranscription(transcribedText.trim());
+         setShowConfirmation(true);
+      } else if (!showConfirmation) {
+         // 如果没有有效文本且未进入确认，则彻底结束
+         setIsRecording(false);
+      }
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Speech recognition error:', event.error, event.message);
+      setIsRecording(false);
+      setIsTranscribing(false);
+      setShowConfirmation(false);
+      // 可以根据错误类型显示不同提示
+       if (event.error === 'no-speech') {
+        setShowRecordingTooShort(true); // 复用 "说话时间太短" 的提示
+        setTimeout(() => setShowRecordingTooShort(false), 1500);
+      } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        alert('语音识别服务未授权或被禁用，请检查浏览器设置。');
+      } else {
+        alert(`语音识别出错: ${event.message}`);
+      }
+    };
+
+    try {
+      recognition.start();
+      console.log('Speech recognition started.'); // 调试日志
+    } catch (e) {
+       console.error('无法启动语音识别:', e);
+       setIsRecording(false);
+       setIsTranscribing(false);
+    }
+
+  }, [transcribedText, showConfirmation]); // 添加依赖项
+
+  const stopTranscription = useCallback(() => {
+    console.log('stopTranscription called'); // 调试日志
+    // 停止计时器（如果有）
+    // if (recordingTimer.current) {
+    //   clearInterval(recordingTimer.current);
+    //   recordingTimer.current = null;
+    // }
+
+    if (recognitionRef.current && isTranscribing) {
+      console.log('Stopping speech recognition...'); // 调试日志
+      recognitionRef.current.stop(); // 触发 onend 事件
+      // 注意：状态的改变（如isRecording, showConfirmation）现在主要由onend处理
+    } else {
+       // 如果没有在转录（例如，立即按下和释放），则直接重置状态
+       setIsRecording(false);
+       setIsTranscribing(false);
+       setShowConfirmation(false);
+    }
+    // setRecordingDuration(0); // 重置显示时长 (如果需要)
+  }, [isTranscribing]); // 添加依赖项
+
+  // --- 确认/取消处理 ---
+  const handleConfirmTranscription = useCallback(() => {
+    if (finalTranscription) {
+      console.log('Navigating to AIChat with message:', finalTranscription); // 调试日志
+      navigate('/aichat', { state: { initialMessage: finalTranscription } });
+    }
+    // 重置状态
+    setShowConfirmation(false);
+    setFinalTranscription(null);
+    setTranscribedText('');
+    setIsRecording(false); // 确认后彻底结束录音状态
+  }, [finalTranscription, navigate]); // 添加依赖项
+
+  const handleCancelTranscription = useCallback(() => {
+    console.log('Transcription cancelled.'); // 调试日志
+    // 重置状态
+    setShowConfirmation(false);
+    setFinalTranscription(null);
+    setTranscribedText('');
+    setIsRecording(false); // 取消后彻底结束录音状态
+  }, []); // 添加依赖项
+
+  // --- 更新事件处理程序 ---
   const handleVoiceButtonTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
-    startRecording();
-  };
-  
-  // 处理按钮释放事件
-  const handleVoiceButtonTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-    stopRecording();
-  };
-  
-  // 处理鼠标按下事件（用于桌面调试）
-  const handleVoiceButtonMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    startRecording();
-  };
-  
-  // 处理鼠标释放事件（用于桌面调试）
-  const handleVoiceButtonMouseUp = (e: React.MouseEvent) => {
-    e.preventDefault();
-    stopRecording();
+    startTranscription();
   };
 
-  // 当用户离开页面时停止录音
+  const handleVoiceButtonTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    // 延迟一点点停止，给API一点时间处理最后的语音
+    setTimeout(stopTranscription, 300);
+  };
+
+  const handleVoiceButtonMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startTranscription();
+  };
+
+  const handleVoiceButtonMouseUp = (e: React.MouseEvent) => {
+    e.preventDefault();
+     // 延迟一点点停止
+    setTimeout(stopTranscription, 300);
+  };
+
+  // 当用户意外离开按钮时也停止
   const handleVoiceButtonTouchCancel = (e: React.TouchEvent) => {
     e.preventDefault();
     if (isRecording) {
-      stopRecording();
+      // 延迟一点点停止
+      setTimeout(stopTranscription, 300);
     }
   };
 
@@ -631,80 +807,71 @@ const HomePage: React.FC = () => {
       <StatusBar />
       
       {/* 录音弹出层 */}
-      {isRecording && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
-          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
-            
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
-              {/* 动态波浪效果 */}
-              <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-[ping_1.5s_ease-in-out_infinite]"></div>
-              <div className="absolute inset-[6px] rounded-full border-2 border-white/50 animate-[ping_2s_ease-in-out_infinite]"></div>
-              
-              <Mic size={40} className="text-white" />
+      {(isRecording || showConfirmation) && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-sm">
+          <div className="w-72 min-h-[18rem] bg-gradient-to-br from-purple-900/90 to-blue-900/90 rounded-3xl flex flex-col items-center justify-between p-6 shadow-lg relative overflow-hidden">
+            {/* 背景装饰 */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 blur-md animate-pulse"></div>
+
+            {/* 图标区域 */}
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative shadow-inner">
+              {isTranscribing && !showConfirmation && (
+                <>
+                  {/* 动态波浪效果 */}
+                  <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-[ping_1.5s_ease-in-out_infinite]"></div>
+                  <div className="absolute inset-[6px] rounded-full border-2 border-white/50 animate-[ping_2s_ease-in-out_infinite]"></div>
+                </>
+              )}
+               {showConfirmation && (
+                  /* 显示确认图标或其他静态状态 */
+                  <Check size={40} className="text-white opacity-80" />
+               )}
+              <Mic size={40} className={cn("text-white", showConfirmation && "opacity-50")} />
             </div>
-            
-            <p className="text-white font-medium text-lg mb-2">正在聆听...</p>
-            <p className="text-white/70 text-sm">请对我说出您的问题</p>
-            
-            <div className="mt-6 flex space-x-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div 
-                  key={i} 
-                  className="w-1.5 h-6 bg-white/70 rounded-full animate-[bounce_1.5s_ease-in-out_infinite]" 
-                  style={{animationDelay: `${i * 0.1}s`, height: `${Math.min(6 + Math.random() * 12, 18)}px`}}
-                ></div>
-              ))}
+
+            {/* 状态文本/转录文本 */}
+            <div className="text-center flex-grow flex flex-col justify-center w-full mb-4">
+               {showConfirmation ? (
+                 <>
+                   <p className="text-white font-medium text-lg mb-2">识别完成</p>
+                   <p className="text-white/90 text-base break-words max-h-24 overflow-y-auto px-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-transparent">
+                     {finalTranscription || '...'}
+                   </p>
+                 </>
+               ) : isTranscribing ? (
+                 <>
+                    <p className="text-white font-medium text-lg mb-2">正在聆听...</p>
+                    <p className="text-white/90 text-base break-words max-h-24 overflow-y-auto px-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-transparent">
+                      {transcribedText || '请说话...'}
+                      {/* 添加一个闪烁的光标效果 */}
+                      <span className="inline-block w-1 h-4 bg-white/70 animate-pulse ml-1"></span>
+                    </p>
+                 </>
+               ) : (
+                  /* 初始状态或错误状态的文本 */
+                   <p className="text-white font-medium text-lg mb-2">准备就绪</p>
+               )}
             </div>
-            
-            <p className="absolute bottom-4 text-white/80 text-sm">
-              {recordingDuration.toFixed(1)}s
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {/* AI回答播放状态弹出层 */}
-      {isLoading && !isPlaying && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
-          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
-            
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
-              <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-spin"></div>
-              <div className="absolute inset-[10px] rounded-full border-2 border-white/50 animate-pulse"></div>
-            </div>
-            
-            <p className="text-white font-medium text-lg mb-2">AI思考中...</p>
-            <p className="text-white/70 text-sm">正在为您生成回答</p>
-          </div>
-        </div>
-      )}
-      
-      {/* AI语音回答播放中状态 */}
-      {isPlaying && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60">
-          <div className="w-64 h-64 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-md animate-pulse"></div>
-            
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4 relative">
-              {/* 动态波形效果 */}
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                  <div 
-                    key={i} 
-                    className="w-1.5 h-12 bg-white/70 rounded-full animate-[bounce_1s_ease-in-out_infinite]" 
-                    style={{
-                      animationDelay: `${i * 0.1}s`, 
-                      height: `${Math.min(12 + Math.random() * 24, 36)}px`
-                    }}
-                  ></div>
-                ))}
+
+             {/* 确认/取消按钮 */}
+            {showConfirmation && (
+              <div className="flex justify-around w-full mt-4">
+                <button
+                  onClick={handleCancelTranscription}
+                  className="flex items-center justify-center w-24 h-10 bg-red-600/80 hover:bg-red-500 rounded-full text-white font-medium transition-colors"
+                >
+                  <CancelIcon size={18} className="mr-1" />
+                  放弃
+                </button>
+                <button
+                  onClick={handleConfirmTranscription}
+                  className="flex items-center justify-center w-24 h-10 bg-green-600/80 hover:bg-green-500 rounded-full text-white font-medium transition-colors"
+                >
+                  <Check size={18} className="mr-1" />
+                  确定
+                </button>
               </div>
-            </div>
-            
-            <p className="text-white font-medium text-lg mb-2">AI正在回答...</p>
-            <p className="text-white/70 text-sm">请听取AI的回复</p>
+            )}
           </div>
         </div>
       )}
@@ -727,10 +894,6 @@ const HomePage: React.FC = () => {
           />
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-1 bg-gray-700 rounded-full text-sm flex items-center">
-            <Activity size={14} className="mr-1" />
-            历史对话
-          </button>
           <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
@@ -743,12 +906,20 @@ const HomePage: React.FC = () => {
       
       <div 
         ref={chatbotRef}
-        className="relative w-40 h-40 mb-5 mx-auto"
+        className={cn(
+          "relative w-40 h-40 mb-5 mx-auto transition-all duration-300 ease-in-out",
+          // isRecording ? 'scale-110' : 'scale-100' // 按下时放大效果 (可选)
+        )}
         onTouchStart={handleVoiceButtonTouchStart}
         onTouchEnd={handleVoiceButtonTouchEnd}
-        onTouchCancel={handleVoiceButtonTouchCancel}
+        onTouchCancel={handleVoiceButtonTouchCancel} // 处理触摸取消
         onMouseDown={handleVoiceButtonMouseDown}
         onMouseUp={handleVoiceButtonMouseUp}
+        // 添加 onMouseLeave 处理鼠标移出按钮区域的情况，行为同 MouseUp
+        onMouseLeave={(e: React.MouseEvent) => { if (isRecording) { e.preventDefault(); setTimeout(stopTranscription, 300); } }}
+        role="button" // 增加 role 属性
+        aria-pressed={isRecording} // 增加 aria-pressed 状态
+        tabIndex={0} // 使其可聚焦
       >
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-50 blur-md animate-pulse"></div>
         
@@ -775,8 +946,12 @@ const HomePage: React.FC = () => {
       </div>
       
       <p className="mt-2 mb-8 text-center font-medium relative">
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 animate-pulse">
-          AI健康助手长按语音提问 ✨
+        <span className={cn(
+            "bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300",
+             isRecording ? "" : "animate-pulse" // 录音时不闪烁
+          )}
+        >
+           {isRecording ? '松开结束识别' : 'AI健康助手长按语音提问 ✨'}
         </span>
       </p>
       
@@ -1137,17 +1312,26 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      <div className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-50 shadow-lg shadow-purple-500/20"
-        onTouchStart={handleVoiceButtonTouchStart}
-        onTouchEnd={handleVoiceButtonTouchEnd}
-        onTouchCancel={handleVoiceButtonTouchCancel}
-        onMouseDown={handleVoiceButtonMouseDown}
-        onMouseUp={handleVoiceButtonMouseUp}
-      >
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
-        <Mic size={20} className="text-white z-10" />
-      </div>
+      {/* 浮动语音按钮 (现在只做视觉触发，逻辑在主按钮) */}
+      {showFloatingButton && ( // 仅在主按钮滚动出屏幕时显示
+        <div className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-gradient-to-r from-purple-700 to-purple-900 border-2 border-purple-300 flex items-center justify-center z-30 shadow-lg shadow-purple-500/20" // 降低 z-index
+          onTouchStart={handleVoiceButtonTouchStart}
+          onTouchEnd={handleVoiceButtonTouchEnd}
+          onTouchCancel={handleVoiceButtonTouchCancel}
+          onMouseDown={handleVoiceButtonMouseDown}
+          onMouseUp={handleVoiceButtonMouseUp}
+          onMouseLeave={(e: React.MouseEvent) => { if (isRecording) { e.preventDefault(); setTimeout(stopTranscription, 300); } }}
+          role="button"
+          aria-pressed={isRecording}
+          tabIndex={0}
+          title="语音提问" // 添加 title
+        >
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-800 to-blue-900 opacity-70 animate-pulse"></div>
+          <Mic size={20} className="text-white z-10" />
+        </div>
+      )}
       
+      {/* 底部导航栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around py-2 z-40">
         <div className="flex flex-col items-center text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
