@@ -609,27 +609,34 @@ const HomePage: React.FC = () => {
     // 1. 标记用户已松手
     setIsRecording(false);
 
-    // 2. 检查是否有识别结果，如果有，则显示确认框
+    // 2. 检查是否有有效的识别结果（文本长度>=2）
     //    使用 functional update 来获取最新的 transcribedText 状态
     setTranscribedText(currentText => {
       const trimmedText = currentText.trim();
-      if (trimmedText.length > 0 && !showConfirmation) {
-         console.log('Showing confirmation dialog with text:', trimmedText);
-         setShowConfirmation(true);
-      } else if (trimmedText.length === 0) {
-         console.log('No text transcribed, aborting recognition.');
-         // 如果没有文本，直接中止识别，避免 onend 触发不必要的逻辑
-         recognitionRef.current?.abort();
-         setIsTranscribing(false); // 确保转录状态也关闭
+      
+      // 如果文本长度小于2，判定为识别失败
+      if (trimmedText.length < 2) {
+        console.log('识别结果太短或为空，视为识别失败');
+        // 显示识别问题提示
+        setShowRecordingTooShort(true);
+        setTimeout(() => setShowRecordingTooShort(false), 1500);
+        
+        // 中止识别流程
+        recognitionRef.current?.abort();
+        setIsTranscribing(false);
+        return ''; // 清空文本
+      } 
+      
+      // 文本长度足够，显示确认框
+      if (!showConfirmation) {
+        console.log('Showing confirmation dialog with text:', trimmedText);
+        setShowConfirmation(true);
       }
+      
       return currentText; // 必须返回当前状态
     });
 
-
-    // 3. 不要在这里调用 recognitionRef.current.stop() 或 abort()
-    //    让识别继续进行，直到自然结束 (onend) 或用户点击确认/取消
-
-    console.log('stopTranscription finished. isRecording: false, isTranscribing:', isTranscribing); // isTranscribing 仍然是 true (或即将变为true)
+    console.log('stopTranscription finished. isRecording: false, isTranscribing:', isTranscribing);
 
   }, [showConfirmation, isTranscribing]); // 依赖 showConfirmation 和 isTranscribing
 
@@ -960,11 +967,11 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 录音时间太短提示 (保持不变) */}
+      {/* 识别出现问题，请重试 (保持不变) */}
       {showRecordingTooShort && (
         <div className="fixed inset-0 flex items-center justify-center z-[110] pointer-events-none"> {/* 提高 z-index */}
           <div className="bg-black/80 text-white px-6 py-4 rounded-xl animate-[fadeIn_0.2s_ease-out]">
-            说话时间太短
+            识别出现问题，请重试
           </div>
         </div>
       )}
