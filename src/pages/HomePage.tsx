@@ -909,7 +909,8 @@ const HomePage: React.FC = () => {
       {/* 修改: 录音弹出层 */}
       {/* 条件变为 isTranscribing (API工作中) 或 showConfirmation (显示确认框) */}
       {(isTranscribing || showConfirmation) && (
-        <div className="fixed inset-0 flex items-center justify-center z-[100] bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-start justify-center pt-48 z-[100] bg-black/70 backdrop-blur-sm">
+
           <div className="w-72 min-h-[18rem] bg-gradient-to-br from-purple-900/90 to-blue-900/90 rounded-3xl flex flex-col items-center justify-between p-6 shadow-lg relative overflow-hidden">
             {/* 背景装饰 */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 blur-md animate-pulse"></div>
