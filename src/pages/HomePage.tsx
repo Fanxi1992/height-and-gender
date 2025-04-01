@@ -507,6 +507,9 @@ const HomePage: React.FC = () => {
     recognition.interimResults = true; // 获取中间结果
     recognition.continuous = true; // 持续识别，直到手动停止
 
+    // 用于累积最终结果的变量
+    let accumulatedTranscript = '';
+
     recognitionRef.current = recognition;
     setIsRecording(true); // 控制UI显示录音状态
     setIsTranscribing(true); // 标记正在进行语音转文字
@@ -514,16 +517,25 @@ const HomePage: React.FC = () => {
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interimTranscript = '';
       let finalTranscriptResult = '';
+      
+      // 检查是否有新的最终结果并累积
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscriptResult += event.results[i][0].transcript;
+          // 将最终结果累积到全局变量中
+          accumulatedTranscript += event.results[i][0].transcript + ' ';
+          finalTranscriptResult += event.results[i][0].transcript + ' ';
         } else {
           interimTranscript += event.results[i][0].transcript;
         }
       }
-      console.log('Interim:', interimTranscript, 'Final:', finalTranscriptResult); // 调试日志
-      // 优先显示最终结果，否则显示中间结果
-      setTranscribedText(finalTranscriptResult || interimTranscript);
+      
+      console.log('Accumulated:', accumulatedTranscript, 'Interim:', interimTranscript); // 调试日志
+      
+      // 组合完整的文本：累积的最终结果 + 当前的中间结果
+      const newText = accumulatedTranscript + interimTranscript;
+      console.log('设置新的transcribedText:', newText); // 添加详细日志
+      
+      setTranscribedText(newText.trim());
       setIsTranscriptionFinal(!!finalTranscriptResult); // 如果有最终结果，标记为final
 
       // 如果有最终结果，重置超时
@@ -534,14 +546,17 @@ const HomePage: React.FC = () => {
 
     recognition.onend = () => {
       console.log('Speech recognition service disconnected.'); // 调试日志
+      console.log('onend时的转录文本:', transcribedText, '长度:', transcribedText.trim().length, 'showConfirmation状态:', showConfirmation); // 添加详细日志
       setIsTranscribing(false);
       // 不再在onend中设置isRecording=false，由按钮释放控制
       // 如果在停止时有有效的转录文本，则显示确认
       if (transcribedText.trim().length > 0 && !showConfirmation) {
+         console.log('设置finalTranscription和showConfirmation为true'); // 添加详细日志
          setFinalTranscription(transcribedText.trim());
          setShowConfirmation(true);
       } else if (!showConfirmation) {
          // 如果没有有效文本且未进入确认，则彻底结束
+         console.log('没有有效文本或已在确认状态，结束录音'); // 添加详细日志
          setIsRecording(false);
       }
     };
@@ -571,7 +586,7 @@ const HomePage: React.FC = () => {
        setIsTranscribing(false);
     }
 
-  }, [transcribedText, showConfirmation]); // 添加依赖项
+  }, []); // 清空依赖项数组，避免闭包问题
 
   const stopTranscription = useCallback(() => {
     console.log('stopTranscription called'); // 调试日志
@@ -581,39 +596,60 @@ const HomePage: React.FC = () => {
     //   recordingTimer.current = null;
     // }
 
+    // 保存当前转录文本的引用，防止在异步操作中丢失
+    const currentText = transcribedText;
+    console.log('停止时保存当前转录文本:', currentText);
+
     if (recognitionRef.current && isTranscribing) {
       console.log('Stopping speech recognition...'); // 调试日志
+      // 如果当前有有效文本，提前设置确认状态，不等待onend
+      if (currentText.trim().length > 0 && !showConfirmation) {
+        console.log('停止前设置finalTranscription和showConfirmation');
+        setFinalTranscription(currentText.trim());
+        setShowConfirmation(true);
+      }
       recognitionRef.current.stop(); // 触发 onend 事件
-      // 注意：状态的改变（如isRecording, showConfirmation）现在主要由onend处理
     } else {
        // 如果没有在转录（例如，立即按下和释放），则直接重置状态
        setIsRecording(false);
        setIsTranscribing(false);
        setShowConfirmation(false);
     }
-    // setRecordingDuration(0); // 重置显示时长 (如果需要)
-  }, [isTranscribing]); // 添加依赖项
+  }, [isTranscribing, transcribedText, showConfirmation]); // 添加必要的依赖项
 
   // --- 确认/取消处理 ---
   const handleConfirmTranscription = useCallback(() => {
-    if (finalTranscription) {
-      console.log('Navigating to AIChat with message:', finalTranscription); // 调试日志
-      navigate('/aichat', { state: { initialMessage: finalTranscription } });
+    console.log('Confirm button clicked. Final text:', finalTranscription); // <--- 添加日志
+    try {
+      if (finalTranscription) {
+        console.log('Navigating to AIChat with message:', finalTranscription);
+        navigate('/aichat', { state: { initialMessage: finalTranscription } });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      alert('导航到AI聊天页面时出错，请重试');
+    } finally {
+      // 重置状态
+      setShowConfirmation(false);
+      setFinalTranscription(null);
+      setTranscribedText('');
+      setIsRecording(false); // 确认后彻底结束录音状态
     }
-    // 重置状态
-    setShowConfirmation(false);
-    setFinalTranscription(null);
-    setTranscribedText('');
-    setIsRecording(false); // 确认后彻底结束录音状态
   }, [finalTranscription, navigate]); // 添加依赖项
 
   const handleCancelTranscription = useCallback(() => {
-    console.log('Transcription cancelled.'); // 调试日志
-    // 重置状态
-    setShowConfirmation(false);
-    setFinalTranscription(null);
-    setTranscribedText('');
-    setIsRecording(false); // 取消后彻底结束录音状态
+    console.log('Cancel button clicked.'); // <--- 添加日志
+    try {
+      // 重置状态
+      setShowConfirmation(false);
+      setFinalTranscription(null);
+      setTranscribedText('');
+      setIsRecording(false); // 取消后彻底结束录音状态
+      
+      console.log('状态已重置'); // 添加调试日志
+    } catch (error) {
+      console.error('Error resetting state:', error);
+    }
   }, []); // 添加依赖项
 
   // --- 更新事件处理程序 ---
@@ -859,6 +895,7 @@ const HomePage: React.FC = () => {
                 <button
                   onClick={handleCancelTranscription}
                   className="flex items-center justify-center w-24 h-10 bg-red-600/80 hover:bg-red-500 rounded-full text-white font-medium transition-colors"
+                  type="button"
                 >
                   <CancelIcon size={18} className="mr-1" />
                   放弃
@@ -866,6 +903,7 @@ const HomePage: React.FC = () => {
                 <button
                   onClick={handleConfirmTranscription}
                   className="flex items-center justify-center w-24 h-10 bg-green-600/80 hover:bg-green-500 rounded-full text-white font-medium transition-colors"
+                  type="button"
                 >
                   <Check size={18} className="mr-1" />
                   确定
