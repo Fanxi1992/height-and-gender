@@ -618,39 +618,50 @@ const HomePage: React.FC = () => {
     //    使用 functional update 来获取最新的 transcribedText 状态
     setTranscribedText(currentText => {
       const trimmedText = currentText.trim();
-      
+      const recognition = recognitionRef.current; // 获取当前识别实例
+
       // 如果文本长度小于2，判定为识别失败
       if (trimmedText.length < 2) {
         console.log('识别结果太短或为空，视为识别失败');
+
+        // 重要: 中止识别并立即隐藏聆听模态框
+        if (recognition) {
+          recognition.abort(); // 强制停止
+        }
+        setIsTranscribing(false); // 立刻隐藏模态框
+
         // 显示识别问题提示
         setShowRecordingTooShort(true);
         setTimeout(() => setShowRecordingTooShort(false), 1500);
-        
-        // 中止识别流程
-        recognitionRef.current?.abort();
-        setIsTranscribing(false);
-        
-        // 延迟重置处理标志，避免事件冲突
+
+        // 延迟重置处理标志，避免事件冲突 (可以缩短延迟)
         setTimeout(() => {
           setIsProcessingRecognition(false);
           console.log("Recognition failed, reset processing flag");
-        }, 500);
-        
+        }, 50); // 缩短延迟
+
         return ''; // 清空文本
-      } 
-      
-      // 文本长度足够，显示确认框
+      }
+
+      // 文本长度足够，进入确认流程
+      // 优雅地停止识别，允许处理最终结果
+      if (recognition && isTranscribing) { // 仅在识别正在运行时停止
+         console.log('Calling recognition.stop() for confirmation');
+         recognition.stop(); // 停止聆听，但允许最终结果处理
+      }
+      // 注意: isTranscribing 会在 recognition.stop() 完成后的 onend 事件处理器中被设为 false
+
       if (!showConfirmation) {
         console.log('Showing confirmation dialog with text:', trimmedText);
-        setShowConfirmation(true);
+        setShowConfirmation(true); // 显示确认UI
       }
-      
+
       return currentText; // 必须返回当前状态
     });
 
-    console.log('stopTranscription finished. isRecording: false, isTranscribing:', isTranscribing);
+    console.log('stopTranscription finished. isRecording: false, isTranscribing (may change soon):', isTranscribing);
 
-  }, [showConfirmation, isTranscribing]); // 依赖 showConfirmation 和 isTranscribing
+  }, [showConfirmation, isTranscribing, isProcessingRecognition]); // 添加 isProcessingRecognition 依赖
 
   // --- 确认/取消处理 (修改) ---
   const handleConfirmTranscription = useCallback(() => {
