@@ -157,6 +157,9 @@ const HomePage: React.FC = () => {
   const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 用于处理识别结束后的延迟 (可能不再需要，待观察)
   const accumulatedTranscriptRef = useRef<string>(''); // 使用 Ref 来累积最终结果，避免闭包问题
 
+  // 首先，添加一个防止重复启动的标志
+  const [isProcessingRecognition, setIsProcessingRecognition] = useState(false);
+
   useEffect(() => {
     // 初始化AudioContext
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -477,6 +480,16 @@ const HomePage: React.FC = () => {
 
   const startTranscription = useCallback(async () => {
     console.log('startTranscription called');
+    
+    // 添加防重复状态检查
+    if (isProcessingRecognition) {
+      console.log('已有识别正在处理中，忽略此次调用');
+      return;
+    }
+    
+    // 设置处理中标志
+    setIsProcessingRecognition(true);
+    
     // 重置状态
     setTranscribedText('');
     accumulatedTranscriptRef.current = ''; // 重置累积文本 Ref
@@ -492,6 +505,7 @@ const HomePage: React.FC = () => {
       alert('抱歉，您的浏览器不支持语音识别功能。');
       setIsRecording(false); // 确保UI重置
       setIsTranscribing(false);
+      setIsProcessingRecognition(false); // 重置处理标志
       return;
     }
 
@@ -506,9 +520,9 @@ const HomePage: React.FC = () => {
       alert('无法获取麦克风权限，请检查浏览器设置。');
       setIsRecording(false); // 确保UI重置
       setIsTranscribing(false);
+      setIsProcessingRecognition(false); // 重置处理标志
       return;
     }
-
 
     // 如果已有实例，先中止
     if (recognitionRef.current) {
@@ -546,49 +560,39 @@ const HomePage: React.FC = () => {
 
       setTranscribedText(currentText); // 更新显示的文本
       setIsTranscriptionFinal(hasFinalInBatch); // 更新是否有最终结果的标记 (可选UI效果)
-
-      // 重置超时 (如果使用)
-      // if (hasFinalInBatch && speechTimeoutRef.current) {
-      //   clearTimeout(speechTimeoutRef.current);
-      // }
     };
 
     recognition.onend = () => {
       console.log('Speech recognition service disconnected (onend). isTranscribing:', isTranscribing, 'showConfirmation:', showConfirmation); // 调试日志
       // 仅在 onend 时设置 isTranscribing 为 false
-      // 不再自动显示确认框，由 stopTranscription (松手时) 控制
-      // 也不再设置 isRecording，由 stopTranscription 控制
       setIsTranscribing(false);
-      // 如果此时确认框还没显示 (可能因为某种原因提前结束)，并且有文本，则显示
-      // 但在 continuous 模式下，通常需要手动 stop 或 abort
-      // if (!showConfirmation && transcribedText.trim().length > 0) {
-      //    console.log("onend: Showing confirmation because it wasn't shown yet.");
-      //    setShowConfirmation(true);
-      // }
       console.log("onend: Recognition ended.");
+      
+      // 重置处理标志，允许新的录音开始
+      // 添加延迟以确保其他事件处理完成
+      setTimeout(() => {
+        setIsProcessingRecognition(false);
+        console.log("Reset processing flag, ready for new recognition");
+      }, 500);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error, event.message);
       setIsRecording(false); // 出错时重置按钮状态
       setIsTranscribing(false); // 停止转录状态
-      setShowConfirmation(false); // 关闭确认框
-
-      // 根据错误类型显示不同提示
-       if (event.error === 'no-speech') {
-        // 如果没有检测到语音，并且确认框没有显示，才提示时间短
-        if (!showConfirmation) {
-          setShowRecordingTooShort(true);
-          setTimeout(() => setShowRecordingTooShort(false), 1500);
-        }
-      } else if (event.error === 'aborted') {
-        console.log('Speech recognition aborted, likely by user action (confirm/cancel).');
-         // 用户主动中止，通常不需要提示错误
-      } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        alert('语音识别服务未授权或被禁用，请检查浏览器设置。');
-      } else {
-        alert(`语音识别出错: ${event.message}`);
+      
+      // 对所有错误类型统一处理，显示一条错误消息
+      if (!showConfirmation) { // 只有在确认框未显示时才显示错误
+        setShowRecordingTooShort(true);
+        setTimeout(() => setShowRecordingTooShort(false), 1500);
       }
+      
+      // 重置处理标志，允许新的录音开始
+      // 添加延迟以确保其他事件处理完成
+      setTimeout(() => {
+        setIsProcessingRecognition(false);
+        console.log("Error encountered, reset processing flag");
+      }, 500);
     };
 
     try {
@@ -598,9 +602,10 @@ const HomePage: React.FC = () => {
        console.error('无法启动语音识别:', e);
        setIsRecording(false); // 启动失败，重置状态
        setIsTranscribing(false);
+       setIsProcessingRecognition(false); // 重置处理标志
     }
 
-  }, [/* 依赖项保持为空，或按需添加非 state/ref 的外部依赖 */]); // 保持为空以避免不必要的重渲染
+  }, [isProcessingRecognition, isTranscribing, showConfirmation]); // 添加isProcessingRecognition作为依赖项
 
   // 修改: 用户松开按钮时触发
   const stopTranscription = useCallback(() => {
@@ -624,6 +629,13 @@ const HomePage: React.FC = () => {
         // 中止识别流程
         recognitionRef.current?.abort();
         setIsTranscribing(false);
+        
+        // 延迟重置处理标志，避免事件冲突
+        setTimeout(() => {
+          setIsProcessingRecognition(false);
+          console.log("Recognition failed, reset processing flag");
+        }, 500);
+        
         return ''; // 清空文本
       } 
       
@@ -666,6 +678,7 @@ const HomePage: React.FC = () => {
     setTranscribedText('');
     accumulatedTranscriptRef.current = ''; // 重置累积文本 Ref
     setIsTranscribing(false); // 确认后转录结束
+    setIsProcessingRecognition(false); // 重置处理标志
     // isRecording 应该已经是 false
 
   }, [navigate, transcribedText]); // 依赖 navigate 和 transcribedText
@@ -681,6 +694,7 @@ const HomePage: React.FC = () => {
     setTranscribedText('');
     accumulatedTranscriptRef.current = ''; // 重置累积文本 Ref
     setIsTranscribing(false); // 取消后转录结束
+    setIsProcessingRecognition(false); // 重置处理标志
     // isRecording 应该已经是 false
 
     console.log('State reset after cancel.'); // 添加调试日志
