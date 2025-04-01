@@ -464,7 +464,7 @@ const HomePage: React.FC = () => {
 
   // --- 语音转文字核心逻辑 ---
 
-  const startTranscription = async () => {
+  const startTranscription = useCallback(async () => {
     // 重置状态
     setTranscribedText('');
     setIsTranscriptionFinal(false);
@@ -545,40 +545,30 @@ const HomePage: React.FC = () => {
     };
 
     recognition.onend = () => {
-      console.log('Speech recognition service disconnected.');
-      // **重要：使用函数式更新或直接读取最新的 state ref (如果需要)**
-      // 这里直接读取 state 可能仍然不够及时，但至少闭包是最新的
-      // 更好的方式是依赖 stopTranscription 来处理确认逻辑
-      const currentFinalText = finalTranscription; // 或者用 ref 保存最新文本
-      const currentShowConfirmation = showConfirmation; // 读取最新状态
-
-      console.log('onend时的转录文本(尝试读取最新):', transcribedText, '长度:', transcribedText.trim().length, 'showConfirmation状态(尝试读取最新):', currentShowConfirmation);
+      console.log('Speech recognition service disconnected.'); // 调试日志
+      console.log('onend时的转录文本:', transcribedText, '长度:', transcribedText.trim().length, 'showConfirmation状态:', showConfirmation); // 添加详细日志
       setIsTranscribing(false);
-
-      // **建议：主要依赖 stopTranscription 处理确认逻辑，onend 只做清理**
-      // 简化 onend 逻辑，避免与 stopTranscription 冲突
-      // 如果 stopTranscription 已经处理了确认，这里就不需要再处理
-      // if (transcribedText.trim().length > 0 && !currentShowConfirmation) {
-      //    console.log('onend: 设置finalTranscription和showConfirmation为true (可能与stop冲突)');
-      //    setFinalTranscription(transcribedText.trim());
-      //    setShowConfirmation(true);
-      // } else if (!currentShowConfirmation) {
-      //    console.log('onend: 没有有效文本或已在确认状态，结束录音');
-      //    setIsRecording(false); // 这个 setIsRecording(false) 应该由确认/取消按钮触发
-      // }
-      // 如果 stopTranscription 没被调用（例如自动结束），可能需要在这里处理
-      // 但当前设计是按钮释放调用 stopTranscription，所以这里应该简化
+      // 不再在onend中设置isRecording=false，由按钮释放控制
+      // 如果在停止时有有效的转录文本，则显示确认
+      if (transcribedText.trim().length > 0 && !showConfirmation) {
+         console.log('设置finalTranscription和showConfirmation为true'); // 添加详细日志
+         setFinalTranscription(transcribedText.trim());
+         setShowConfirmation(true);
+      } else if (!showConfirmation) {
+         // 如果没有有效文本且未进入确认，则彻底结束
+         console.log('没有有效文本或已在确认状态，结束录音'); // 添加详细日志
+         setIsRecording(false);
+      }
     };
-
-
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error, event.message);
       setIsRecording(false);
       setIsTranscribing(false);
       setShowConfirmation(false);
+      // 可以根据错误类型显示不同提示
        if (event.error === 'no-speech') {
-        setShowRecordingTooShort(true);
+        setShowRecordingTooShort(true); // 复用 "说话时间太短" 的提示
         setTimeout(() => setShowRecordingTooShort(false), 1500);
       } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         alert('语音识别服务未授权或被禁用，请检查浏览器设置。');
@@ -596,7 +586,7 @@ const HomePage: React.FC = () => {
        setIsTranscribing(false);
     }
 
-  }; // 清空依赖项数组，避免闭包问题
+  }, []); // 清空依赖项数组，避免闭包问题
 
   const stopTranscription = useCallback(() => {
     console.log('stopTranscription called'); // 调试日志
@@ -664,30 +654,30 @@ const HomePage: React.FC = () => {
 
   // --- 更新事件处理程序 ---
   const handleVoiceButtonTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // e.preventDefault(); 删除此行
     startTranscription();
   };
 
   const handleVoiceButtonTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // e.preventDefault(); 删除此行
     // 延迟一点点停止，给API一点时间处理最后的语音
     setTimeout(stopTranscription, 300);
   };
 
   const handleVoiceButtonMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
+    // e.preventDefault(); 删除此行
     startTranscription();
   };
 
   const handleVoiceButtonMouseUp = (e: React.MouseEvent) => {
-    e.preventDefault();
+    // e.preventDefault(); 删除此行
      // 延迟一点点停止
     setTimeout(stopTranscription, 300);
   };
 
   // 当用户意外离开按钮时也停止
   const handleVoiceButtonTouchCancel = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // e.preventDefault(); 删除此行
     if (isRecording) {
       // 延迟一点点停止
       setTimeout(stopTranscription, 300);
@@ -964,7 +954,12 @@ const HomePage: React.FC = () => {
         onMouseDown={handleVoiceButtonMouseDown}
         onMouseUp={handleVoiceButtonMouseUp}
         // 添加 onMouseLeave 处理鼠标移出按钮区域的情况，行为同 MouseUp
-        onMouseLeave={(e: React.MouseEvent) => { if (isRecording) { e.preventDefault(); setTimeout(stopTranscription, 300); } }}
+        onMouseLeave={(e: React.MouseEvent) => { 
+          if (isRecording) { 
+            // e.preventDefault(); 删除这里的preventDefault
+            setTimeout(stopTranscription, 300); 
+          } 
+        }}
         role="button" // 增加 role 属性
         aria-pressed={isRecording} // 增加 aria-pressed 状态
         tabIndex={0} // 使其可聚焦
@@ -1368,7 +1363,12 @@ const HomePage: React.FC = () => {
           onTouchCancel={handleVoiceButtonTouchCancel}
           onMouseDown={handleVoiceButtonMouseDown}
           onMouseUp={handleVoiceButtonMouseUp}
-          onMouseLeave={(e: React.MouseEvent) => { if (isRecording) { e.preventDefault(); setTimeout(stopTranscription, 300); } }}
+          onMouseLeave={(e: React.MouseEvent) => { 
+            if (isRecording) { 
+              // e.preventDefault(); 删除这里的preventDefault
+              setTimeout(stopTranscription, 300); 
+            } 
+          }}
           role="button"
           aria-pressed={isRecording}
           tabIndex={0}
