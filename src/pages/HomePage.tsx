@@ -844,7 +844,7 @@ const HomePage: React.FC = () => {
       
       {/* 录音弹出层 */}
       {(isRecording || showConfirmation) && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center z-[100] bg-black/70 backdrop-blur-sm">
           <div className="w-72 min-h-[18rem] bg-gradient-to-br from-purple-900/90 to-blue-900/90 rounded-3xl flex flex-col items-center justify-between p-6 shadow-lg relative overflow-hidden">
             {/* 背景装饰 */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 blur-md animate-pulse"></div>
@@ -891,18 +891,26 @@ const HomePage: React.FC = () => {
 
              {/* 确认/取消按钮 */}
             {showConfirmation && (
-              <div className="flex justify-around w-full mt-4">
+              <div className="flex justify-around w-full mt-4 relative z-10">
                 <button
-                  onClick={handleCancelTranscription}
-                  className="flex items-center justify-center w-24 h-10 bg-red-600/80 hover:bg-red-500 rounded-full text-white font-medium transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    console.log('取消按钮被点击!!!');
+                    handleCancelTranscription();
+                  }}
+                  className="flex items-center justify-center w-24 h-10 bg-red-600 hover:bg-red-500 rounded-full text-white font-medium transition-colors cursor-pointer"
                   type="button"
                 >
                   <CancelIcon size={18} className="mr-1" />
                   放弃
                 </button>
                 <button
-                  onClick={handleConfirmTranscription}
-                  className="flex items-center justify-center w-24 h-10 bg-green-600/80 hover:bg-green-500 rounded-full text-white font-medium transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    console.log('确认按钮被点击!!!');
+                    handleConfirmTranscription();
+                  }}
+                  className="flex items-center justify-center w-24 h-10 bg-green-600 hover:bg-green-500 rounded-full text-white font-medium transition-colors cursor-pointer"
                   type="button"
                 >
                   <Check size={18} className="mr-1" />
