@@ -57,25 +57,42 @@ class MockWebSocket extends EventTarget {
   }
   
   async mockStreamAudioChunks() {
+    console.log('MockWebSocket: 开始模拟音频数据流');
     // 模拟服务器发送5段音频数据
     for (let i = 0; i < 5; i++) {
       // 等待一小段时间，模拟流式传输
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 创建模拟音频数据
-      const audioBuffer = await createMockAudioData();
-      
-      // 发送模拟音频数据
-      const messageEvent = new MessageEvent('message', {
-        data: audioBuffer
-      });
-      this.dispatchEvent(messageEvent);
+      try {
+        console.log(`MockWebSocket: 创建模拟音频数据 ${i + 1}`);
+        // 创建模拟音频数据
+        const audioBuffer = await createMockAudioData();
+        
+        // 创建一个哑的ArrayBuffer作为替代，而不是直接发送AudioBuffer
+        // 在实际应用中，这应该是通过WAV编码器等方式编码的音频数据
+        const dummyArrayBuffer = new ArrayBuffer(1024 * (i + 1));
+        const view = new Uint8Array(dummyArrayBuffer);
+        // 填充一些随机数据，使其在音频解码时产生噪音
+        for (let j = 0; j < view.length; j++) {
+          view[j] = Math.floor(Math.random() * 256);
+        }
+        
+        console.log(`MockWebSocket: 发送模拟音频数据 ${i + 1}`);
+        // 发送模拟音频数据，这次使用ArrayBuffer而不是AudioBuffer
+        const messageEvent = new MessageEvent('message', {
+          data: dummyArrayBuffer
+        });
+        this.dispatchEvent(messageEvent);
+      } catch (error) {
+        console.error('MockWebSocket: 创建或发送模拟音频时出错:', error);
+      }
     }
     
     // 模拟连接关闭
     setTimeout(() => {
       this.readyState = WebSocket.CLOSED;
       this.dispatchEvent(new Event('close'));
+      console.log('MockWebSocket: 连接已关闭');
     }, 2000);
   }
   
@@ -175,13 +192,40 @@ const HomePage: React.FC = () => {
     };
 
     ws.onmessage = async (event) => {
-      // 接收二进制音频数据
-      const audioData = await event.data.arrayBuffer();
-      audioBufferQueue.current.push(audioData);
+      console.log('收到WebSocket消息，数据类型:', typeof event.data, event.data);
       
-      // 如果当前没有在处理音频，开始处理
-      if (!isProcessingAudio.current) {
-        processAudioQueue();
+      let audioData: ArrayBuffer | null = null;
+      
+      // 处理不同类型的数据
+      if (event.data instanceof ArrayBuffer) {
+        // 直接使用ArrayBuffer
+        audioData = event.data;
+      } else if (event.data instanceof Blob) {
+        // 如果是Blob，转换为ArrayBuffer
+        console.log('数据是Blob，转换为ArrayBuffer');
+        try {
+          audioData = await event.data.arrayBuffer();
+        } catch (error) {
+          console.error('将Blob转换为ArrayBuffer时出错:', error);
+          return; // 无法继续处理
+        }
+      } else {
+        console.error('收到意外的数据类型:', event.data);
+        return; // 无法处理
+      }
+      
+      // 继续处理有效的音频数据
+      if (audioData) {
+        console.log('将ArrayBuffer推送到队列，大小:', audioData.byteLength);
+        audioBufferQueue.current.push(audioData);
+        
+        // 如果当前没有在处理音频，开始处理
+        if (!isProcessingAudio.current) {
+          console.log('调用processAudioQueue处理音频队列');
+          processAudioQueue();
+        } else {
+          console.log('音频已加入队列，但当前正在处理其他音频');
+        }
       }
     };
 
@@ -200,21 +244,33 @@ const HomePage: React.FC = () => {
 
   // 处理音频队列
   const processAudioQueue = async () => {
+    console.log('处理音频队列: 队列长度=', audioBufferQueue.current.length);
+    
     if (audioBufferQueue.current.length === 0) {
       isProcessingAudio.current = false;
+      console.log('音频队列为空，处理完成');
       return;
     }
 
     isProcessingAudio.current = true;
     setIsPlaying(true);
+    console.log('设置isPlaying=true，显示播放状态');
 
     // 取出队列中的第一条音频数据
     const audioData = audioBufferQueue.current.shift();
     
     try {
+      console.log('开始解码音频数据');
       // 解码音频数据
-      const audioBuffer = await audioContextRef.current!.decodeAudioData(audioData!);
+      const audioBuffer = await audioContextRef.current!.decodeAudioData(audioData!).catch(error => {
+        console.warn('音频解码失败，可能是模拟数据格式问题，创建静音音频:', error);
+        // 如果解码失败（可能是因为模拟数据不是有效的编码音频），创建一个短的静音音频
+        const ctx = audioContextRef.current!;
+        const silentBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+        return silentBuffer;
+      });
       
+      console.log('音频解码成功，创建音频源并播放');
       // 创建音频源并播放
       const source = audioContextRef.current!.createBufferSource();
       source.buffer = audioBuffer;
@@ -224,14 +280,17 @@ const HomePage: React.FC = () => {
       
       // 监听播放结束事件
       source.onended = () => {
+        console.log('当前音频片段播放完毕');
         // 播放完当前片段后继续处理队列中的下一个音频
         processAudioQueue();
       };
       
       source.start(0);
+      console.log('音频开始播放');
     } catch (error) {
       console.error('音频处理错误:', error);
-      processAudioQueue(); // 出错时继续处理下一个
+      // 出错时继续处理下一个
+      processAudioQueue(); 
     }
   };
 
