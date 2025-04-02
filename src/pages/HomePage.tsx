@@ -1071,51 +1071,123 @@ const HomePage: React.FC = () => {
 
       {/* 健康风险网络图模块 (修改后) */}
       <div className="w-full px-5 mb-4">
-        <div className="bg-gradient-to-r from-blue-800 to-purple-900 rounded-xl overflow-hidden shadow-lg">
-          <div className="p-4 flex flex-col relative">
-            {/* 右上角放置背景图 */}
-            <div className="absolute top-0 right-0 w-1/2 h-3/5 overflow-hidden rounded-bl-3xl">
-              <img
-                src="/健康风险报告图.jpg"
-                alt="疾病风险网络"
-                className="w-full h-full object-cover"
-              />
-              {/* 图片上的渐变遮罩 */}
-              <div className="absolute inset-0 bg-gradient-to-bl from-transparent to-purple-900"></div>
-            </div>
+        {/* 修改: 移除具体图片，使用更抽象的背景效果，调整内部布局 */}
+        <div className="relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 rounded-xl overflow-hidden shadow-lg p-4 min-h-[220px] flex flex-col justify-between">
+          {/* 添加模糊的径向渐变作为背景点缀，模拟网络感 */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(109,40,217,0.3)_0%,_transparent_70%)] opacity-80"></div>
+          {/* 再添加一个左下角的点缀 */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(59,130,246,0.2)_0%,_transparent_70%)] opacity-70"></div>
+          
+          {/* 添加 SVG 网络图背景 */}
+          <svg
+            className="absolute inset-0 w-full h-full opacity-30 pointer-events-none z-0"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 800 400"
+          >
+            {/* 定义渐变 */}
+            <defs>
+              <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="#fff" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+              </radialGradient>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.1" />
+              </linearGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            
+            {/* 连接线 - 设计成不规则的六边形网络，有一些随机变化 */}
+            <line x1="150" y1="100" x2="280" y2="140" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="280" y1="140" x2="350" y2="220" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="350" y1="220" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="320" y1="300" x2="200" y2="280" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="200" y1="280" x2="150" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="150" y1="180" x2="150" y2="100" stroke="url(#lineGradient)" strokeWidth="1" />
+            
+            {/* 外部连接 - 突出显示一些点 */}
+            <line x1="280" y1="140" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="450" y1="90" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="600" y1="130" x2="650" y2="220" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="650" y1="220" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="500" y1="300" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="350" y1="220" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="500" y1="180" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="450" y1="90" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
+            <line x1="500" y1="180" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
+            
+            {/* 额外的斜线连接，增加复杂性 */}
+            <line x1="150" y1="100" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="0.7" />
+            <line x1="200" y1="280" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="0.7" />
+            <line x1="280" y1="140" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="0.7" />
+            
+            {/* 节点 - 有不同大小，表示不同的重要性 */}
+            <circle cx="150" cy="100" r="5" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="280" cy="140" r="8" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="350" cy="220" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="320" cy="300" r="6" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="200" cy="280" r="6" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="150" cy="180" r="4" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="450" cy="90" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="600" cy="130" r="8" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="650" cy="220" r="5" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="500" cy="300" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="500" cy="180" r="9" fill="url(#nodeGlow)" filter="url(#glow)" />
+            
+            {/* 添加更多小节点，增加复杂性 */}
+            <circle cx="220" cy="120" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="400" cy="150" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="550" cy="160" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="480" cy="240" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="180" cy="220" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="260" cy="240" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="380" cy="270" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="580" cy="200" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+          </svg>
 
+          <div className="relative z-10">
             {/* 标题区域 */}
-            <div className="flex-1 relative z-10 mb-8 flex items-center justify-between">
-              <span className="text-xl font-medium text-white">点击查看详细风险报告</span>
+            {/* 修改: 减少底部间距, 使其可点击 */}
+            <div className="mb-4 flex items-center justify-between cursor-pointer" onClick={goToHealthRiskReport}>
+              <span className="text-lg font-medium text-white">点击查看详细风险报告</span>
               <ArrowRight size={20} className="text-white" />
             </div>
 
-            {/* 底部内容区域 */}
-            <div className="flex items-center mt-2 relative z-10">
-              <div 
-                className="flex items-center bg-white/20 px-4 py-2 cursor-pointer hover:bg-white/30 transition-colors rounded-lg"
+            {/* "测一测您的健康风险" 按钮 */}
+            {/* 修改: 调整样式，使其更突出 */}
+            <div className="mt-6">
+              <div
+                className="inline-flex items-center bg-white/25 px-4 py-2 cursor-pointer hover:bg-white/40 transition-colors rounded-lg backdrop-blur-sm"
                 onClick={goToDetailedRisk}
               >
-                <span className="text-base text-white">测一测您的健康风险</span>
+                <span className="text-base font-medium text-white">测一测您的健康风险</span>
               </div>
             </div>
+          </div>
 
+          <div className="relative z-10 mt-auto">
             {/* 风险标签 - 修改为水平排列（同一行），位于"测一测"按钮下方 */}
-            <div className="flex flex-row space-x-3 mt-3 relative z-10">
-              <div className="bg-red-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white">
+            <div className="flex flex-row space-x-3 mt-4">
+              <div className="bg-red-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white backdrop-blur-sm">
                 <Heart size={12} className="mr-1" />
                 高风险: 2 项
               </div>
-              <div className="bg-yellow-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white">
+              <div className="bg-yellow-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white backdrop-blur-sm">
                 <Activity size={12} className="mr-1" />
-                中风险: 3 项
+                中风险: 3 项 {/* 保持与截图一致 */}
               </div>
             </div>
-            
+
             {/* 重新测算 - 移至风险标签下方，使用白色背景 */}
-            <div className="mt-6 relative z-10">
+            <div className="mt-5">
               <div
-                className="flex items-center bg-white px-5 py-2 rounded-full cursor-pointer hover:bg-white/90 transition-colors w-fit"
+                className="inline-flex items-center bg-white px-5 py-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors shadow"
                 onClick={restartRiskAssessment}
               >
                 <RotateCw size={14} className="mr-2 text-blue-600" />
