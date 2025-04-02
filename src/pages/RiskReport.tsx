@@ -1,27 +1,28 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
 import BackButton from '../components/BackButton';
 import ProgressIndicator from '../components/ProgressIndicator';
-import { Heart, ArrowRight } from 'lucide-react';
-import * as d3 from 'd3';
+import { Heart } from 'lucide-react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Line, Text } from '@react-three/drei';
+import * as THREE from 'three';
 
-const DiseaseData = [
-  { id: 1, name: "二型糖尿病", risk: 0.73, category: "代谢疾病", x: 0, y: 0 },
-  { id: 2, name: "高血压", risk: 0.61, category: "心血管疾病", x: 0, y: 0 },
-  { id: 3, name: "肾结石", risk: 0.55, category: "泌尿系统疾病", x: 0, y: 0 },
-  { id: 4, name: "高血糖", risk: 0.43, category: "代谢疾病", x: 0, y: 0 },
-  { id: 5, name: "肠易激综合征", risk: 0.31, category: "消化系统疾病", x: 0, y: 0 },
-  { id: 6, name: "浅表性胃炎", risk: 0.28, category: "消化系统疾病", x: 0, y: 0 },
-  { id: 7, name: "偏头痛", risk: 0.16, category: "神经系统疾病", x: 0, y: 0 },
-  { id: 8, name: "前列腺炎", risk: 0.11, category: "泌尿系统疾病", x: 0, y: 0 },
-  { id: 9, name: "胆囊炎", risk: 0.04, category: "消化系统疾病", x: 0, y: 0 },
-  { id: 10, name: "肝硬化", risk: 0.02, category: "消化系统疾病", x: 0, y: 0 },
+const DiseaseDataInput = [
+  { id: 1, name: "二型糖尿病", risk: 0.73, category: "代谢疾病" },
+  { id: 2, name: "高血压", risk: 0.61, category: "心血管疾病" },
+  { id: 3, name: "肾结石", risk: 0.55, category: "泌尿系统疾病" },
+  { id: 4, name: "高血糖", risk: 0.43, category: "代谢疾病" },
+  { id: 5, name: "肠易激综合征", risk: 0.31, category: "消化系统疾病" },
+  { id: 6, name: "浅表性胃炎", risk: 0.28, category: "消化系统疾病" },
+  { id: 7, name: "偏头痛", risk: 0.16, category: "神经系统疾病" },
+  { id: 8, name: "前列腺炎", risk: 0.11, category: "泌尿系统疾病" },
+  { id: 9, name: "胆囊炎", risk: 0.04, category: "消化系统疾病" },
+  { id: 10, name: "肝硬化", risk: 0.02, category: "消化系统疾病" },
 ];
 
-// 定义网络连接
-const DiseaseLinks = [
-  { source: 0, target: 3, strength: 0.9 }, // 二型糖尿病 - 高血糖
+const DiseaseLinksInput = [
+  { source: 0, target: 3, strength: 0.9 }, // 二型糖尿病 - 高血糖 (Index based)
   { source: 0, target: 1, strength: 0.7 }, // 二型糖尿病 - 高血压
   { source: 1, target: 3, strength: 0.6 }, // 高血压 - 高血糖
   { source: 1, target: 9, strength: 0.4 }, // 高血压 - 肝硬化
@@ -35,195 +36,397 @@ const DiseaseLinks = [
   { source: 3, target: 6, strength: 0.2 }, // 高血糖 - 偏头痛
 ];
 
-const RiskReport: React.FC = () => {
-  const navigate = useNavigate();
-  const svgRef = useRef<SVGSVGElement>(null);
-  const height = 320;
+// 3D 可视化配置
+const NETWORK_RADIUS = 8; // 网络分布半径
+const CATEGORY_COLORS = { // 疾病类别颜色映射
+  "代谢疾病": "#FF6B6B",
+  "心血管疾病": "#4ECDC4",
+  "泌尿系统疾病": "#45B7D1",
+  "消化系统疾病": "#FFA500",
+  "神经系统疾病": "#9370DB",
+  "default": "#AAAAAA"
+};
+const NODE_BASE_RADIUS = 0.25; // 节点基础半径
+const NODE_RADIUS_SCALE = 0.6; // 节点半径风险缩放因子
+const NODE_MOVEMENT_SPEED = 0.08; // 节点移动速度
+const NODE_MOVEMENT_AMOUNT = 0.1; // 节点最大移动距离
+const NETWORK_ROTATION_SPEED = 0.03; // 整体网络旋转速度
 
-  useEffect(() => {
-    if (!svgRef.current) return;
+// 数据处理: 生成节点和边数据 (用于 Three.js)
+function processNetworkData(diseases, links) {
+  const nodes = diseases.map((disease, i) => {
+    const numNodes = diseases.length;
+    // 使用斐波那契球体算法 (Fibonacci sphere) 分配初始位置
+    const phi = Math.acos(-1 + (2 * i) / numNodes);
+    const theta = Math.sqrt(numNodes * Math.PI) * phi;
+    const position = [
+        NETWORK_RADIUS * Math.sin(phi) * Math.cos(theta),
+        NETWORK_RADIUS * Math.sin(phi) * Math.sin(theta),
+        NETWORK_RADIUS * Math.cos(phi)
+    ];
+    return {
+      ...disease, // 保留原始数据
+      index: i, // 添加索引，方便连接边
+      position: new THREE.Vector3(...position), // 3D 坐标
+      color: CATEGORY_COLORS[disease.category] || CATEGORY_COLORS.default, // 颜色
+      radius: NODE_BASE_RADIUS + disease.risk * NODE_RADIUS_SCALE // 半径基于风险
+    };
+  });
 
-    // 清除之前的内容
-    d3.select(svgRef.current).selectAll("*").remove();
+  const edges = links.map(link => ({
+      source: link.source, // 使用原始索引
+      target: link.target, // 使用原始索引
+      weight: link.strength // 使用强度作为权重
+  }));
 
-    const svg = d3.select(svgRef.current);
-    const width = svgRef.current.clientWidth;
+  return { nodes, edges };
+}
 
-    // 创建力导向图
-    const simulation = d3.forceSimulation(DiseaseData)
-      .force("link", d3.forceLink(DiseaseLinks).id(d => (d as any).id - 1).distance(d => 100 - (d as any).strength * 50))
-      .force("charge", d3.forceManyBody().strength(-80))
-      .force("center", d3.forceCenter(width / 2, height / 2.5))
-      .force("collide", d3.forceCollide().radius(d => Math.sqrt((d as any).risk * 100) + 15));
+const { nodes: processedNodes, edges: processedEdges } = processNetworkData(DiseaseDataInput, DiseaseLinksInput);
 
-    // 定义疾病类别的颜色
-    const colorScale = d3.scaleOrdinal<string>()
-      .domain(["代谢疾病", "心血管疾病", "泌尿系统疾病", "消化系统疾病", "神经系统疾病"])
-      .range(["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA500", "#9370DB"]);
+// Node Component
+function Node({ node, onNodeHover, onNodeClick, isHighlighted, isSelected }) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const [isHovered, setIsHovered] = useState(false);
+  const initialPos = useRef(node.position.clone());
+  const randomOffset = useRef(Math.random() * 1000);
 
-    // 绘制连接线
-    const links = svg.append("g")
-      .selectAll("line")
-      .data(DiseaseLinks)
-      .enter()
-      .append("line")
-      .attr("stroke", "#aaa")
-      .attr("stroke-opacity", d => (d as any).strength)
-      .attr("stroke-width", d => (d as any).strength * 2);
-
-    // 创建节点组
-    const nodes = svg.append("g")
-      .selectAll("g")
-      .data(DiseaseData)
-      .enter()
-      .append("g")
-      .call(d3.drag<SVGGElement, any>()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
-
-    // 添加圆圈
-    nodes.append("circle")
-      .attr("r", d => Math.sqrt(d.risk * 100) + 10)
-      .attr("fill", d => colorScale(d.category))
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1.5)
-      .attr("opacity", 0.8);
-
-    // 添加疾病名称
-    nodes.append("text")
-      .text(d => d.name)
-      .attr("font-size", "8px")
-      .attr("text-anchor", "middle")
-      .attr("fill", "#fff")
-      .attr("dy", "0.3em");
-
-    // 动画效果
-    simulation.nodes(DiseaseData).on("tick", () => {
-      links
-        .attr("x1", d => (d.source as any).x)
-        .attr("y1", d => (d.source as any).y)
-        .attr("x2", d => (d.target as any).x)
-        .attr("y2", d => (d.target as any).y);
-
-      nodes.attr("transform", d => `translate(${d.x},${d.y})`);
-    });
-
-    // 拖拽函数
-    function dragstarted(event: any) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
+  // 节点轻微随机移动和自转动画
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * 0.1;
+      const time = state.clock.elapsedTime + randomOffset.current;
+      const x = Math.sin(time * NODE_MOVEMENT_SPEED) * NODE_MOVEMENT_AMOUNT;
+      const y = Math.cos(time * NODE_MOVEMENT_SPEED * 1.1) * NODE_MOVEMENT_AMOUNT;
+      const z = Math.sin(time * NODE_MOVEMENT_SPEED * 0.9) * NODE_MOVEMENT_AMOUNT;
+      meshRef.current.position.lerp(initialPos.current.clone().add(new THREE.Vector3(x, y, z)), 0.1); // 平滑移动
     }
+  });
 
-    function dragged(event: any) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
+  // 悬浮和选中时的放大效果
+  const targetScale = isHovered || isSelected ? 1.5 : (isHighlighted ? 1.2 : 1); // 选中 > 悬浮 > 邻居 > 默认
+  useFrame(() => {
+      if (meshRef.current) {
+         meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      }
+  });
 
-    function dragended(event: any) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
+  // 事件处理
+  const handlePointerOver = useCallback((e) => {
+    e.stopPropagation();
+    setIsHovered(true);
+    onNodeHover(node, e.clientX, e.clientY);
+    document.body.style.cursor = 'pointer';
+  }, [node, onNodeHover]);
 
-    // 添加缩放功能
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 3])
-      .on("zoom", (event) => {
-        svg.selectAll("g").attr("transform", event.transform);
-      });
+  const handlePointerOut = useCallback((e) => {
+    e.stopPropagation();
+    setIsHovered(false);
+    onNodeHover(null, 0, 0);
+    document.body.style.cursor = 'auto';
+  }, [onNodeHover]);
 
-    svg.call(zoom);
-
-    // 添加周期性的动画以保持图形活跃
-    setInterval(() => {
-      simulation.alpha(0.3).restart();
-    }, 3000);
-
-  }, []);
-
-  const handleExploreHealthTrajectory = () => {
-    navigate('/health-trajectory');
-  };
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    onNodeClick(node.index); // 传递节点索引
+  }, [node.index, onNodeClick]);
 
   return (
-    <div className="page-container bg-black">
+    <mesh
+      ref={meshRef}
+      position={node.position} // 使用传入的初始位置
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
+      onClick={handleClick}
+    >
+      <sphereGeometry args={[node.radius, 32, 32]} />
+      <meshStandardMaterial
+         color={node.color}
+         roughness={0.4}
+         metalness={0.1}
+         emissive={(isHovered || isSelected) ? node.color : '#000000'} // 悬浮或选中时发光
+         emissiveIntensity={(isHovered || isSelected) ? 0.7 : 0}
+         transparent={!isHighlighted && !isSelected} // 未高亮且未选中时半透明
+         opacity={isHighlighted || isSelected ? 1 : 0.3} // 高亮或选中时完全不透明，否则半透明
+      />
+       {/* 简单显示疾病名称 - 可选，可能影响性能 */}
+       {/* <Text
+         position={[0, node.radius + 0.2, 0]} // Position text above the node
+         fontSize={0.2}
+         color="white"
+         anchorX="center"
+         anchorY="middle"
+         visible={isHovered || isSelected} // Only show on hover/select
+       >
+         {node.name}
+       </Text> */}
+    </mesh>
+  );
+}
+
+// Edge Component
+function Edge({ startNode, endNode, weight, isHighlighted }) {
+    // 显式声明 points 的类型为包含两个 THREE.Vector3 的元组
+    const points: [THREE.Vector3, THREE.Vector3] = useMemo(() => [startNode.position, endNode.position], [startNode, endNode]);
+    const baseWidth = 1;
+    const scaleFactor = 3;
+    const lineWidth = baseWidth + weight * scaleFactor;
+    const opacity = isHighlighted ? (0.5 + weight * 0.5) : 0.08; // 高亮时更明显，否则很暗淡
+    const color = isHighlighted ? "#ffffff" : "#aaaaaa";
+
+    // 使用 Line 组件绘制边
+    return (
+        <Line
+            points={points} // Line 需要点的位置数组
+            color={color}
+            lineWidth={isHighlighted ? lineWidth : 1} // 高亮时根据权重调整粗细
+            transparent={true}
+            opacity={opacity}
+            depthWrite={false}
+        />
+    );
+}
+
+// Network Container (for global rotation)
+function NetworkContainer({ children }) {
+  const groupRef = useRef<THREE.Group>(null!);
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * NETWORK_ROTATION_SPEED;
+    }
+  });
+  return <group ref={groupRef}>{children}</group>;
+}
+
+// Main Network Graph Component
+function NetworkGraph({ nodes, edges, onNodeHover, onNodeClick, selectedNodeIndex }) {
+  // 创建节点索引到节点数据的映射，方便查找
+  const nodeMap = useMemo(() => {
+    const map = new Map();
+    nodes.forEach(node => map.set(node.index, node));
+    return map;
+  }, [nodes]);
+
+  // 确定哪些节点和边需要高亮
+  const { highlightedNodes, highlightedEdges } = useMemo(() => {
+    if (selectedNodeIndex === null) {
+      // 没有选中节点，所有节点和边都"高亮"（即正常显示）
+      return {
+        highlightedNodes: new Set(nodes.map(n => n.index)),
+        highlightedEdges: new Set(edges.map((_, i) => i))
+      };
+    }
+    // 选中了节点，找出选中节点及其直接邻居和相关边
+    const hn = new Set([selectedNodeIndex]);
+    const he = new Set();
+    edges.forEach((edge, index) => {
+      if (edge.source === selectedNodeIndex) {
+        hn.add(edge.target);
+        he.add(index);
+      } else if (edge.target === selectedNodeIndex) {
+        hn.add(edge.source);
+        he.add(index);
+      }
+    });
+    return { highlightedNodes: hn, highlightedEdges: he };
+  }, [selectedNodeIndex, nodes, edges]);
+
+
+  return (
+    <group>
+      {/* Render Edges */}
+      {edges.map((edge, index) => {
+        const sourceNode = nodeMap.get(edge.source);
+        const targetNode = nodeMap.get(edge.target);
+        if (sourceNode && targetNode) {
+          return (
+            <Edge
+              key={`edge-${edge.source}-${edge.target}-${index}`}
+              startNode={sourceNode} // 传递整个节点对象
+              endNode={targetNode}   // 传递整个节点对象
+              weight={edge.weight}
+              isHighlighted={highlightedEdges.has(index)} // 传递高亮状态
+            />
+          );
+        }
+        return null;
+      })}
+
+      {/* Render Nodes */}
+      {nodes.map(node => (
+        <Node
+          key={`node-${node.index}`}
+          node={node}
+          onNodeHover={onNodeHover}
+          onNodeClick={onNodeClick}
+          isSelected={node.index === selectedNodeIndex} // 是否是当前选中的节点
+          isHighlighted={highlightedNodes.has(node.index)} // 是否需要高亮（选中节点或其邻居）
+        />
+      ))}
+    </group>
+  );
+}
+
+const RiskReport: React.FC = () => {
+  const [hoveredNodeData, setHoveredNodeData] = useState<any>(null); // 存储悬浮节点信息
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 }); // Tooltip 位置
+  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(null); // 存储选中节点的索引
+
+  // 节点悬浮处理
+  const handleNodeHover = useCallback((nodeData, screenX, screenY) => {
+    setHoveredNodeData(nodeData);
+    if (nodeData) {
+        setTooltipPosition({ x: screenX + 10, y: screenY - 10 }); // 调整 Tooltip 位置
+    }
+  }, []);
+
+  // 节点点击处理
+  const handleNodeClick = useCallback((nodeIndex: number) => {
+    setSelectedNodeIndex(prev => (prev === nodeIndex ? null : nodeIndex)); // 点击已选中的节点则取消选中
+  }, []);
+
+  // 点击 Canvas 空白处取消选中
+  const handleCanvasClick = useCallback(() => {
+      if (selectedNodeIndex !== null) {
+          //   setSelectedNodeIndex(null); // 取消选中
+      }
+      // console.log("Canvas clicked");
+       // 这里可以添加逻辑，比如如果鼠标没有点在任何node上，则取消选中
+       // 但需要更复杂的事件处理来区分节点点击和背景点击
+       // 暂时保持简单，点击节点切换选中状态
+  }, [selectedNodeIndex]);
+
+   // 获取选中的节点数据
+   const selectedNode = selectedNodeIndex !== null ? processedNodes[selectedNodeIndex] : null;
+
+   // 对疾病数据按风险排序，并包含原始索引，用于列表显示
+   const sortedDiseaseData = useMemo(() => {
+        // 映射原始数据，添加 index
+        const indexedData = DiseaseDataInput.map((disease, index) => ({
+             ...disease,
+             index: index // 添加原始索引
+        }));
+        // 基于风险排序
+        return indexedData.sort((a, b) => b.risk - a.risk);
+   }, []);
+
+  return (
+    <div className="page-container bg-black text-white flex flex-col h-screen overflow-hidden">
       <StatusBar />
-      
-      <div className="mt-10 px-4 flex justify-between items-center">
+
+      {/* Header */}
+      <div className="mt-10 px-4 flex justify-between items-center flex-shrink-0">
         <BackButton />
         <h1 className="text-center text-xl font-medium">建立疾病风险报告</h1>
-        <div className="w-8"></div> {/* 占位，使标题居中 */}
+        <div className="w-8"></div> {/* Placeholder */}
       </div>
-      
-      <ProgressIndicator currentStep={6} totalSteps={7} />
-      
-      <div className="mx-2 mt-2 bg-gradient-to-b from-gray-900 to-black rounded-3xl p-4 shadow-lg border border-gray-800">
-        <h2 className="text-2xl font-bold mb-3 text-center text-white flex items-center justify-center">
-          <Heart className="text-red-500 mr-2" />
-          潜在疾病风险网络
-        </h2>
-        
-        {/* 疾病网络可视化 */}
-        <div className="w-full mb-3 overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl">
-          <svg 
-            ref={svgRef} 
-            width="100%" 
-            height={height} 
-            className="touch-none"
-          />
-        </div>
-        
-        {/* 疾病风险排名 */}
-        <div className="w-full mt-3">
-          <h3 className="text-lg font-semibold mb-2 text-white">疾病风险排名</h3>
-          <div className="bg-gray-800 rounded-xl p-3">
-            <div className="grid grid-cols-12 text-sm font-medium text-white mb-2">
-              <div className="col-span-2 text-center">排名</div>
-              <div className="col-span-7 text-center">疾病名称</div>
-              <div className="col-span-3 text-center">风险</div>
-            </div>
 
-            {DiseaseData.map((disease, index) => (
-              <div 
-                key={disease.id} 
-                className={`grid grid-cols-12 text-sm py-2 ${index % 2 === 0 ? 'bg-gray-700/40' : 'bg-gray-800/40'} rounded-lg mb-1 items-center`}
+      {/* Progress Indicator */}
+      <ProgressIndicator currentStep={6} totalSteps={7} />
+
+      {/* Main Content Area (Network and Ranking) */}
+      <div className="flex-grow flex flex-col md:flex-row overflow-hidden mt-4 mx-2 gap-4">
+
+        {/* 3D Network Visualization Area */}
+        <div className="flex-grow md:w-2/3 relative rounded-3xl bg-gradient-to-br from-gray-900 via-black to-indigo-900 border border-gray-800 shadow-lg overflow-hidden">
+          <h2 className="absolute top-4 left-4 text-lg font-semibold z-10 text-white bg-black/30 px-3 py-1 rounded-lg flex items-center">
+            <Heart className="text-red-500 mr-2 w-5 h-5" />
+            潜在疾病风险网络
+          </h2>
+
+           {/* HTML Tooltip */}
+            {hoveredNodeData && (
+                <div style={{
+                    position: 'absolute',
+                    left: `${tooltipPosition.x}px`,
+                    top: `${tooltipPosition.y}px`,
+                    background: 'rgba(0, 0, 0, 0.8)',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none', // 重要：允许事件穿透
+                    transform: 'translateY(-100%)', // 显示在鼠标上方
+                    zIndex: 1000, // 确保在最上层
+                    fontFamily: 'sans-serif'
+                 }}>
+                    {hoveredNodeData.name} (风险: {(hoveredNodeData.risk * 100).toFixed(1)}%)
+                 </div>
+            )}
+
+            {/* Selection Info Panel */}
+            {selectedNode && (
+                 <div className="absolute bottom-4 left-4 z-10 bg-black/50 p-3 rounded-lg text-sm shadow-md max-w-xs">
+                    <h4 className="font-semibold mb-1 text-base" style={{color: selectedNode.color}}>{selectedNode.name}</h4>
+                    <p><span className="font-medium">风险等级:</span> <span className="text-yellow-400 font-bold">{(selectedNode.risk * 100).toFixed(1)}%</span></p>
+                    <p><span className="font-medium">类别:</span> {selectedNode.category}</p>
+                    {/* 可以添加更多信息 */}
+                     <button
+                        onClick={() => setSelectedNodeIndex(null)}
+                        className="mt-2 text-xs bg-gray-600 hover:bg-gray-500 px-2 py-1 rounded"
+                    >
+                         清除选择
+                     </button>
+                 </div>
+             )}
+
+
+          <Canvas
+            camera={{ position: [0, 0, NETWORK_RADIUS * 2.2], fov: 50 }} // 调整相机位置和视野
+            style={{ background: 'transparent' }} // 画布背景透明，由父 div 控制渐变
+            onClick={handleCanvasClick} // 点击画布空白处
+          >
+            {/* 光照设置 */}
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[5, 10, 8]} intensity={1.0} />
+            <pointLight position={[-5, -5, -5]} intensity={0.4} color="#ffdddd" />
+            <hemisphereLight args={["#ffffff", "#555555", 0.3]} />
+            {/* <fog attach="fog" args={['#0a0a1a', NETWORK_RADIUS * 1.5, NETWORK_RADIUS * 3]} /> */}
+
+             <NetworkContainer>
+               <NetworkGraph
+                   nodes={processedNodes}
+                   edges={processedEdges}
+                   onNodeHover={handleNodeHover}
+                   onNodeClick={handleNodeClick}
+                   selectedNodeIndex={selectedNodeIndex} // 传递选中节点索引
+               />
+             </NetworkContainer>
+
+            {/* 交互控制 */}
+            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={3} maxDistance={NETWORK_RADIUS * 3} />
+          </Canvas>
+        </div>
+
+        {/* Disease Risk Ranking Area */}
+        <div className="flex-shrink-0 md:w-1/3 h-full flex flex-col bg-gray-900 rounded-3xl p-4 shadow-lg border border-gray-800 overflow-hidden">
+          <h3 className="text-lg font-semibold mb-3 text-white text-center flex-shrink-0">疾病风险排名</h3>
+          <div className="flex-grow overflow-y-auto pr-1"> {/* 添加滚动条 */}
+            {/* Header Row */}
+            <div className="grid grid-cols-12 text-sm font-medium text-gray-400 mb-2 sticky top-0 bg-gray-900 py-1">
+              <div className="col-span-1 text-center">#</div>
+              <div className="col-span-7">疾病名称</div>
+              <div className="col-span-4 text-right pr-2">风险值</div>
+            </div>
+            {/* Data Rows */}
+            {sortedDiseaseData.map((disease, index) => (
+              <div
+                key={disease.id}
+                className={`grid grid-cols-12 text-sm py-2 px-2 ${selectedNodeIndex === disease.index ? 'bg-indigo-800/60 ring-1 ring-indigo-500' : (index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900/50')} rounded-lg mb-1 items-center transition-colors duration-200 cursor-pointer hover:bg-gray-700/70`}
+                onClick={() => handleNodeClick(disease.index)} // 点击列表项也能选中节点
               >
-                <div className="col-span-2 font-bold text-white text-center">{index + 1}</div>
-                <div className="col-span-7 text-gray-200 text-center">{disease.name}</div>
-                <div className="col-span-3 text-center font-mono text-yellow-400">{(disease.risk * 100).toFixed(2)}%</div>
+                <div className={`col-span-1 font-bold text-center ${selectedNodeIndex === disease.index ? 'text-white' : 'text-gray-400'}`}>{index + 1}</div>
+                <div className={`col-span-7 ${selectedNodeIndex === disease.index ? 'text-white font-medium' : 'text-gray-200'}`}>{disease.name}</div>
+                <div className={`col-span-4 text-right font-mono pr-2 ${selectedNodeIndex === disease.index ? 'text-yellow-300 font-bold' : 'text-yellow-400'}`}>
+                  {(disease.risk * 100).toFixed(1)}%
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-      
-      {/* 健康评估与引导 */}
-      <div className="mx-2 mt-4 bg-gradient-to-r from-blue-900 to-purple-900 rounded-3xl p-5 shadow-lg">
-        <h3 className="text-lg font-semibold mb-2 text-white">健康状况评估</h3>
-        <p className="text-gray-200 text-sm mb-4">
-          基于您的体重指数(BMI)分析，您当前处于<span className="text-yellow-300 font-bold">超重</span>状态，这显著增加了您患上代谢性疾病和心血管疾病的风险。
-        </p>
-        <p className="text-gray-200 text-sm">
-          研究表明，减轻5-10%的体重可以显著降低二型糖尿病和高血压等慢性疾病的发生风险。
-        </p>
-      </div>
-      
-      {/* 引导按钮 */}
-      <div className="mx-2 mt-4 bg-gradient-to-b from-indigo-900 to-indigo-950 rounded-3xl p-5 shadow-lg cursor-pointer" onClick={handleExploreHealthTrajectory}>
-        <div className="flex items-center">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <ArrowRight className="text-white" size={20} />
-          </div>
-          <div className="ml-4 flex-1">
-            <h3 className="text-lg font-semibold text-white">探索减重效果</h3>
-            <p className="text-gray-300 text-sm">
-              了解减轻体重将如何降低您的疾病风险，提升健康状况
-            </p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
