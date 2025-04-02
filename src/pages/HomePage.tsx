@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame, Check, X as CancelIcon } from 'lucide-react';
+import { ArrowRight, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame, Check, X as CancelIcon, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QRCodeScannerIcon from '../components/QRCodeScannerIcon';
 
@@ -1129,10 +1129,10 @@ const HomePage: React.FC = () => {
       {/* 工具模块网格布局 (保持不变) */}
       <div className="w-full px-5 mb-4">
          {/* ... */}
-         <div className="grid grid-cols-4 grid-rows-[auto_auto_auto] gap-4 auto-rows-min">
+         <div className="grid grid-cols-4 gap-4 auto-rows-min">
           {/* 我的每周饮食模块 */}
           <div
-            className="col-span-2 row-span-2 bg-gradient-to-br from-indigo-500/90 to-indigo-600/90 rounded-2xl p-4 flex flex-col overflow-hidden relative shadow-lg"
+            className="col-span-2 bg-gradient-to-br from-indigo-500/90 to-indigo-600/90 rounded-2xl p-4 flex flex-col overflow-hidden relative shadow-lg h-auto"
             onClick={goToKnowledgeBase}
           >
             <div className="absolute top-0 right-0 left-2 text-left py-2  rounded-t-2xl">
@@ -1201,166 +1201,126 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 卡路里打卡模块 */}
-          <div className="col-span-2 row-span-3 bg-white rounded-xl overflow-hidden shadow-lg">
-            <div className="p-4 flex flex-col h-full">
-              <div className="flex justify-between items-start">
+          {/* 卡路里打卡模块 - 修改后 */}
+          {/* 修改: 调整布局跨度，更改背景渐变和圆角 */}
+          <div className="col-span-2 bg-gradient-to-br from-blue-900 to-purple-900 rounded-2xl overflow-hidden shadow-lg h-auto">
+            <div className="p-2 flex flex-col">
+              {/* 修改: 调整标题区域布局和样式 */}
+              <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="text-lg font-medium text-black">卡路里打卡</h3>
-                  <p className="text-xs text-gray-500">5:30更新</p>
+                  {/* 修改: 移动更新时间到左上角，更改文本颜色 */}
+                  <p className="text-xs text-white/70 mb-1">5:50更新</p>
+                  {/* 修改: 更改标题文本颜色和大小 */}
+                  <h3 className="text-xl font-semibold text-white">卡路里打卡</h3>
                 </div>
-                <ArrowRight size={20} className="text-black" />
+                {/* 修改: 确保箭头颜色为白色 */}
+                <ArrowRight size={20} className="text-white mt-4 cursor-pointer" />
               </div>
 
-              <div className="flex items-center justify-between mt-3">
-                <div className="flex items-center">
-                  <Flame size={20} className="text-orange-500 mr-2" />
-                  <div>
-                    <p className="text-3xl font-bold text-purple-500">15</p>
-                    <p className="text-xs text-gray-500">连续打卡天</p>
+              {/* 修改: 添加 "立即拍摄" 按钮 */}
+              <button className="w-full bg-white text-blue-700 py-2.5 px-4 rounded-full font-medium flex items-center justify-center my-4 hover:bg-gray-100 transition-colors shadow-md">
+                <Camera size={18} className="mr-2" /> {/* 或使用 Search icon */}
+                立即拍摄
+              </button>
+              {/* 修改: 添加统计数据块 - 优化宽度适应半屏显示 */}
+              <div className="flex items-center mt-2 mb-5 space-x-2">
+                {/* 连续打卡 - 减小内边距和高度 */}
+                <div className="flex-1 bg-blue-800/60 rounded-lg p-2 flex flex-col items-center justify-center min-h-[80px] text-center">
+                  <p className="text-3xl font-bold text-white">15</p>
+                  <div className="flex flex-col items-center mt-1">
+                    <Flame size={12} className="text-orange-400 mb-1" />
+                    <p className="text-sm text-white/80">连续</p>
+                    <p className="text-sm text-white/80">打卡</p>
                   </div>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-purple-500">300</p>
-                  <p className="text-xs text-gray-500">还可吃千卡</p>
+                {/* 还可吃千卡 - 减小内边距和高度 */}
+                <div className="flex-1 bg-blue-800/60 rounded-lg p-2 flex flex-col items-center justify-center min-h-[80px] text-center">
+                  <p className="text-3xl font-bold text-white">300</p>
+                  <div className="flex flex-col items-center mt-1">
+                    <Utensils size={12} className="text-green-400 mb-1" /> {/* 使用 Utensils 图标 */}
+                    <p className="text-sm text-white/80">还可吃</p>
+                    <p className="text-sm text-white/80">千卡</p>
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-4 space-y-3 flex-grow">
+              {/* 修改: 调整餐饮列表布局和样式，更新数据 */}
+              <div className="space-y-3">
                 {[
-                  {meal: '早餐', kcal: 300, img: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '午餐', kcal: 300, img: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '晚餐', kcal: 300, img: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'},
-                  {meal: '小吃', kcal: 300, img: 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}
+                  // 修改: 更新卡路里数据和图片 URL 以匹配参考图
+                  {meal: '早餐', kcal: 300, img: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}, // 示例早餐图片
+                  {meal: '小吃', kcal: 300, img: 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}, // 示例小吃图片 (青团)
+                  {meal: '午餐', kcal: 650, img: 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}, // 示例午餐图片
+                  {meal: '晚餐', kcal: 400, img: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'}  // 示例晚餐图片
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center bg-gray-50 p-2 rounded-lg">
-                    <div className="w-16 h-16 bg-gray-100 mr-3 flex-shrink-0 rounded-lg overflow-hidden">
+                  // 修改: 更改背景、内边距、圆角和内部布局，优化宽度适应半屏显示
+                  <div key={index} className="bg-white/10 rounded-lg p-2 relative flex items-center">
+                    {/* 餐类型标签 (放置在左上角) */}
+                    <span className="absolute top-1 left-1 text-[10px] bg-black/40 text-white/90 px-1 py-0.5 rounded z-10">{item.meal}</span>
+                    {/* 图片容器 - 减小宽度 */}
+                    <div className="w-16 h-14 bg-gray-700 mr-2 flex-shrink-0 rounded-lg overflow-hidden">
                       <img src={item.img} alt={item.meal} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base text-black truncate font-medium">{item.meal}</p>
-                      <p className="text-2xl text-purple-500 font-bold">{item.kcal} <span className="text-sm">千卡</span></p>
+                    {/* 卡路里信息 (靠右对齐) - 调整文字大小 */}
+                    <div className="flex-1 text-right">
+                      <p className="text-2xl text-white font-bold">{item.kcal}</p>
+                      <p className="text-xs text-white/80 -mt-1">千卡</p>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <button className="mt-4 w-full bg-purple-500 text-white py-3 rounded-full font-medium">
-                立即拍照
-              </button>
             </div>
           </div>
 
-          {/* 健康星球模块 */}
-          <div className="col-span-2 row-span-1 bg-green-500 rounded-xl overflow-hidden shadow-lg relative"
-               onClick={goToKnowledgeBase}>
-            <div className="p-4">
-              <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-black flex items-center">
-                  健康星球
-                  <Globe size={16} className="text-blue-500 ml-1" />
-                </h3>
-                <ArrowRight size={20} className="text-black" />
+          {/* 新增: 舌苔检测模块 */}
+          <div className="col-span-2 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700/60 dark:to-gray-800/60 rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden min-h-[160px]">
+            {/* 背景图案 (简化) */}
+            <div className="absolute inset-0 opacity-10 dark:opacity-5 bg-[radial-gradient(#aaa_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white">舌苔检测</h3>
+                <ArrowRight size={20} className="text-gray-600 dark:text-gray-300" />
               </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">观察舌苔变化评估健康</p>
             </div>
+            {/* 可以在这里添加舌头相关的图标或图案 */}
+          </div>
 
-            <div className="relative">
-              <div className="w-full h-44 overflow-hidden">
-                <img
-                  src="/lovable-uploads/be42a73c-38a7-4a03-a374-602de676ec36.png"
-                  alt="健康星球"
-                  className="w-full h-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex flex-col justify-end p-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
-                      10MIN
-                    </div>
-                    <Play size={16} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mt-2">有氧减脂太快了</h3>
-                  <p className="text-sm text-white/80">1分钟=跑步1小时</p>
-                </div>
-
-                <div className="absolute bottom-6 right-6 bg-blue-500/80 px-2 py-1 rounded text-xs text-white">
-                  巨量精选
-                </div>
+          {/* 新增: 面相检测模块 */}
+          <div className="col-span-2 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800/70 dark:to-purple-900/70 rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden min-h-[160px]">
+            {/* 背景图案 (简化) */}
+            <div className="absolute bottom-0 right-0 w-2/3 h-2/3 opacity-10 dark:opacity-20">
+              {/* Placeholder for face pattern */}
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-blue-400 dark:text-blue-300">
+                <path d="M 50 20 C 30 20 20 40 20 60 C 20 80 30 100 50 100 C 70 100 80 80 80 60 C 80 40 70 20 50 20 M 35 50 Q 40 55 45 50 M 55 50 Q 60 55 65 50 M 40 70 Q 50 80 60 70" fill="none" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white">面相检测</h3>
+                <ArrowRight size={20} className="text-gray-600 dark:text-gray-300" />
               </div>
-
-              <div className="absolute top-6 left-6 flex flex-col items-start space-y-1">
-                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
-                  🔥 巨燃脂
-                </div>
-                <div className="px-2 py-1 bg-blue-500/70 backdrop-blur-sm rounded text-white text-xs">
-                  💧 巨减肥
-                </div>
-              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">通过面色判断健康状况</p>
             </div>
           </div>
 
-          {/* 我的圈子模块 */}
-          <div
-            className="col-span-2 row-span-1 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-xl p-4 flex flex-col overflow-hidden shadow-lg relative"
-            onClick={goToCircle}
-          >
-            <div className="flex justify-between items-start">
-              <h3 className="text-lg font-semibold text-black">我的圈子</h3>
-              <ArrowRight size={20} className="text-black" />
-            </div>
-
-            <div className="flex flex-wrap mt-4 gap-2">
-              {[
-                'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
-                'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
-                'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1',
-                'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1'
-              ].map((img, idx) => (
-                <div key={idx} className="w-12 h-12 rounded-full overflow-hidden border-2 border-white">
-                  <img src={img} alt={`User ${idx + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex items-center">
-              <div className="p-2 bg-orange-500 rounded-full">
-                <Flame size={16} className="text-white" />
+          {/* 新增: 手相检测模块 */}
+          <div className="col-span-2 bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-800/70 dark:to-indigo-900/70 rounded-2xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden min-h-[160px]">
+             {/* 背景图案 (简化) */}
+             <div className="absolute bottom-0 left-0 w-2/3 h-2/3 opacity-10 dark:opacity-20 transform scale-x-[-1]">
+              {/* Placeholder for hand pattern */}
+               <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-purple-400 dark:text-purple-300">
+                 <path d="M 30 90 C 20 90 10 80 10 70 C 10 60 15 50 25 45 M 25 45 C 35 40 40 30 40 20 M 25 45 C 30 55 35 65 35 75 C 35 85 30 90 30 90 M 40 85 C 45 85 50 80 50 75 C 50 70 48 65 45 60 M 55 80 C 60 80 65 75 65 70 C 65 65 63 60 60 55 M 70 75 C 75 75 80 70 80 65 C 80 60 78 55 75 50" fill="none" stroke="currentColor" strokeWidth="2"/>
+               </svg>
+             </div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white">手相检测</h3>
+                <ArrowRight size={20} className="text-gray-600 dark:text-gray-300" />
               </div>
-              <p className="ml-2 text-black font-medium">当前挑战：低糖饮食</p>
-            </div>
-
-            <div className="mt-4 flex items-center">
-              <div className="p-2 bg-blue-500 rounded-full">
-                <User size={16} className="text-white" />
-              </div>
-              <p className="ml-2 text-black font-medium">今日已打卡圈友 <span className="text-xl font-bold text-purple-600">6</span> 人</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">分析手部特征提示体质</p>
             </div>
           </div>
 
-          {/* 其他工具模块 */}
-          <div className="col-span-2 row-span-1 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">其他工具</h3>
-              <ArrowRight size={20} className="text-white" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '舌苔检测', bg: 'bg-yellow-500' },
-                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '喝水记录', bg: 'bg-blue-500' },
-                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>, name: 'AI面诊', bg: 'bg-purple-500' },
-                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M17.5 6.5 12 2 6.5 6.5"></path><path d="m4.5 10 3.5-3.5"></path><path d="m19.5 10-3.5-3.5"></path><path d="M14.5 19.5 12 22l-2.5-2.5"></path><path d="m4.5 14 7.5 7.5 7.5-7.5"></path><path d="M4.5 14V6.5l7.5 7.5 7.5-7.5V14"></path></svg>, name: '看看手相', bg: 'bg-yellow-500' },
-                { icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>, name: '专家门诊', bg: 'bg-blue-500' },
-              ].map((tool, idx) => (
-                <div key={idx} className="flex flex-col items-center">
-                  <div className={`${tool.bg} w-12 h-12 rounded-full flex items-center justify-center mb-1`}>
-                    {tool.icon}
-                  </div>
-                  <span className="text-xs text-gray-300">{tool.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
