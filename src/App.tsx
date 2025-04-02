@@ -9,7 +9,6 @@ import GenderSelection from "./pages/GenderSelection";
 import HeightSelection from "./pages/HeightSelection";
 import WeightSelection from "./pages/WeightSelection";
 import HeightWeightSelection from "./pages/HeightWeightSelection";
-import TargetWeightSelection from "./pages/TargetWeightSelection";
 import BirthdateSelection from "./pages/BirthdateSelection";
 import DiseaseSelection from "./pages/DiseaseSelection";
 import RiskReport from "./pages/RiskReport";

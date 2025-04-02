@@ -324,11 +324,11 @@ const RiskReport: React.FC = () => {
       {/* Progress Indicator */}
       <ProgressIndicator currentStep={6} totalSteps={7} />
 
-      {/* Main Content Area (Network and Ranking) */}
-      <div className="flex-grow flex flex-col md:flex-row overflow-hidden mt-4 mx-2 gap-4">
+      {/* Main Content Area (Network and Ranking) - 修改为响应式上下布局 */}
+      <div className="flex-grow flex flex-col overflow-hidden mt-4 mx-2 gap-4">
 
-        {/* 3D Network Visualization Area */}
-        <div className="flex-grow md:w-2/3 relative rounded-3xl bg-gradient-to-br from-gray-900 via-black to-indigo-900 border border-gray-800 shadow-lg overflow-hidden">
+        {/* 3D Network Visualization Area - 调整为在移动端占满宽度且有足够高度 */}
+        <div className="flex-grow min-h-[50vh] md:min-h-0 relative rounded-3xl bg-gradient-to-br from-gray-900 via-black to-indigo-900 border border-gray-800 shadow-lg overflow-hidden">
           <h2 className="absolute top-4 left-4 text-lg font-semibold z-10 text-white bg-black/30 px-3 py-1 rounded-lg flex items-center">
             <Heart className="text-red-500 mr-2 w-5 h-5" />
             潜在疾病风险网络
@@ -372,60 +372,60 @@ const RiskReport: React.FC = () => {
              )}
 
 
-          <Canvas
-            camera={{ position: [0, 0, NETWORK_RADIUS * 2.2], fov: 50 }} // 调整相机位置和视野
-            style={{ background: 'transparent' }} // 画布背景透明，由父 div 控制渐变
-            onClick={handleCanvasClick} // 点击画布空白处
-          >
-            {/* 光照设置 */}
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[5, 10, 8]} intensity={1.0} />
-            <pointLight position={[-5, -5, -5]} intensity={0.4} color="#ffdddd" />
-            <hemisphereLight args={["#ffffff", "#555555", 0.3]} />
-            {/* <fog attach="fog" args={['#0a0a1a', NETWORK_RADIUS * 1.5, NETWORK_RADIUS * 3]} /> */}
+    <Canvas
+      camera={{ position: [0, 0, NETWORK_RADIUS * 2.2], fov: 50 }} // 调整相机位置和视野
+      style={{ background: 'transparent' }} // 画布背景透明，由父 div 控制渐变
+      onClick={handleCanvasClick} // 点击画布空白处
+    >
+      {/* 光照设置 */}
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 10, 8]} intensity={1.0} />
+      <pointLight position={[-5, -5, -5]} intensity={0.4} color="#ffdddd" />
+      <hemisphereLight args={["#ffffff", "#555555", 0.3]} />
+      {/* <fog attach="fog" args={['#0a0a1a', NETWORK_RADIUS * 1.5, NETWORK_RADIUS * 3]} /> */}
 
-             <NetworkContainer>
-               <NetworkGraph
-                   nodes={processedNodes}
-                   edges={processedEdges}
-                   onNodeHover={handleNodeHover}
-                   onNodeClick={handleNodeClick}
-                   selectedNodeIndex={selectedNodeIndex} // 传递选中节点索引
-               />
-             </NetworkContainer>
+       <NetworkContainer>
+         <NetworkGraph
+             nodes={processedNodes}
+             edges={processedEdges}
+             onNodeHover={handleNodeHover}
+             onNodeClick={handleNodeClick}
+             selectedNodeIndex={selectedNodeIndex} // 传递选中节点索引
+         />
+       </NetworkContainer>
 
-            {/* 交互控制 */}
-            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={3} maxDistance={NETWORK_RADIUS * 3} />
-          </Canvas>
-        </div>
+      {/* 交互控制 */}
+      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={3} maxDistance={NETWORK_RADIUS * 3} />
+    </Canvas>
+  </div>
 
-        {/* Disease Risk Ranking Area */}
-        <div className="flex-shrink-0 md:w-1/3 h-full flex flex-col bg-gray-900 rounded-3xl p-4 shadow-lg border border-gray-800 overflow-hidden">
-          <h3 className="text-lg font-semibold mb-3 text-white text-center flex-shrink-0">疾病风险排名</h3>
-          <div className="flex-grow overflow-y-auto pr-1"> {/* 添加滚动条 */}
-            {/* Header Row */}
-            <div className="grid grid-cols-12 text-sm font-medium text-gray-400 mb-2 sticky top-0 bg-gray-900 py-1">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-7">疾病名称</div>
-              <div className="col-span-4 text-right pr-2">风险值</div>
-            </div>
-            {/* Data Rows */}
-            {sortedDiseaseData.map((disease, index) => (
-              <div
-                key={disease.id}
-                className={`grid grid-cols-12 text-sm py-2 px-2 ${selectedNodeIndex === disease.index ? 'bg-indigo-800/60 ring-1 ring-indigo-500' : (index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900/50')} rounded-lg mb-1 items-center transition-colors duration-200 cursor-pointer hover:bg-gray-700/70`}
-                onClick={() => handleNodeClick(disease.index)} // 点击列表项也能选中节点
-              >
-                <div className={`col-span-1 font-bold text-center ${selectedNodeIndex === disease.index ? 'text-white' : 'text-gray-400'}`}>{index + 1}</div>
-                <div className={`col-span-7 ${selectedNodeIndex === disease.index ? 'text-white font-medium' : 'text-gray-200'}`}>{disease.name}</div>
-                <div className={`col-span-4 text-right font-mono pr-2 ${selectedNodeIndex === disease.index ? 'text-yellow-300 font-bold' : 'text-yellow-400'}`}>
-                  {(disease.risk * 100).toFixed(1)}%
-                </div>
-              </div>
-            ))}
+  {/* Disease Risk Ranking Area - 调整为在移动端占满宽度且有合适高度 */}
+  <div className="h-[40vh] md:h-auto flex-shrink-0 flex flex-col bg-gray-900 rounded-3xl p-4 shadow-lg border border-gray-800 overflow-hidden">
+    <h3 className="text-lg font-semibold mb-3 text-white text-center flex-shrink-0">疾病风险排名</h3>
+    <div className="flex-grow overflow-y-auto pr-1"> {/* 添加滚动条 */}
+      {/* Header Row */}
+      <div className="grid grid-cols-12 text-sm font-medium text-gray-400 mb-2 sticky top-0 bg-gray-900 py-1">
+        <div className="col-span-1 text-center">#</div>
+        <div className="col-span-7">疾病名称</div>
+        <div className="col-span-4 text-right pr-2">风险值</div>
+      </div>
+      {/* Data Rows */}
+      {sortedDiseaseData.map((disease, index) => (
+        <div
+          key={disease.id}
+          className={`grid grid-cols-12 text-sm py-2 px-2 ${selectedNodeIndex === disease.index ? 'bg-indigo-800/60 ring-1 ring-indigo-500' : (index % 2 === 0 ? 'bg-gray-800/50' : 'bg-gray-900/50')} rounded-lg mb-1 items-center transition-colors duration-200 cursor-pointer hover:bg-gray-700/70`}
+          onClick={() => handleNodeClick(disease.index)} // 点击列表项也能选中节点
+        >
+          <div className={`col-span-1 font-bold text-center ${selectedNodeIndex === disease.index ? 'text-white' : 'text-gray-400'}`}>{index + 1}</div>
+          <div className={`col-span-7 ${selectedNodeIndex === disease.index ? 'text-white font-medium' : 'text-gray-200'}`}>{disease.name}</div>
+          <div className={`col-span-4 text-right font-mono pr-2 ${selectedNodeIndex === disease.index ? 'text-yellow-300 font-bold' : 'text-yellow-400'}`}>
+            {(disease.risk * 100).toFixed(1)}%
           </div>
         </div>
-      </div>
+      ))}
+    </div>
+  </div>
+</div>
 
     </div>
   );
