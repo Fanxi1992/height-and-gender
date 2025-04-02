@@ -1145,52 +1145,54 @@ const HomePage: React.FC = () => {
             </div>
             
             <div className="mt-4">
-              <div className="rounded-full bg-white/20 flex justify-center py-3 mb-6">
+              <div className="rounded-full bg-white flex justify-center py-3 mb-6">
                 <div className="flex items-center">
                   <div className="w-6 h-6 flex items-center justify-center">
-                    <QRCodeScannerIcon size={20} className="text-white" />
+                    <QRCodeScannerIcon size={20} className="text-blue-600" />
                   </div>
-                  <span className="text-white ml-1">扫描食材</span>
+                  <span className="text-blue-600 ml-1">扫描食材</span>
                 </div>
               </div>
               
               <p className="text-sm font-medium text-white">每日推荐</p>
-              
               <div className="mt-2 space-y-3">
-                <div>
-                  <p className="text-lg font-bold text-white">早餐</p>
-                  <div className="flex space-x-2 mt-1">
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                {/* 早餐模块 */}
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-lg font-bold text-white mb-2">早餐</p>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🌾 燕麦粥</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🫐 蓝莓</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🥚 煮鸡蛋</span>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-lg font-bold text-white">午餐</p>
-                  <div className="flex space-x-2 mt-1">
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                {/* 午餐模块 */}
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-lg font-bold text-white mb-2">午餐</p>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🥗 鸡胸肉沙拉</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🍞 全麦面包</span>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-lg font-bold text-white">晚餐</p>
-                  <div className="flex space-x-2 mt-1">
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                {/* 晚餐模块 */}
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-lg font-bold text-white mb-2">晚餐</p>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🥗 鸡胸肉沙拉</span>
                     </div>
-                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center border border-white">
                       <span className="text-white text-sm">🍞 全麦面包</span>
                     </div>
                   </div>
