@@ -195,7 +195,7 @@ const GenderSelection: React.FC = () => {
       <BackButton />
       <SkipButton onClick={handleSkip} />
 
-      <div className="mt-16 w-full">
+      <div className="mt-10 w-full">
         <h1 className="text-center text-xl font-medium">建立个人报告</h1>
         <ProgressIndicator currentStep={1} totalSteps={7} />
 
@@ -244,8 +244,7 @@ const GenderSelection: React.FC = () => {
           </div>
 
           {/* 出生日期部分 */}
-          <h2 className="text-center text-2xl font-bold mb-6 mt-8">您的出生日期是</h2>
-
+          <h2 className="text-center text-2xl font-bold mt-4">您的出生日期是</h2>
           <div className="date-selector-container">
             {/* 年份选择器 */}
             <div className="date-column">
@@ -291,7 +290,7 @@ const GenderSelection: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-6">
           <div className="flex items-center justify-center bg-[#1e4e79] py-3 px-6 rounded-full">
             <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center mr-4">
               <img 

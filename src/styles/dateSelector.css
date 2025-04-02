@@ -3,7 +3,7 @@
 .date-selector-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 2.5rem;
+  margin-top: 1.5rem;
   /* padding: 0 0.5rem; */
   position: relative;
   height: 10rem;

@@ -86,7 +86,7 @@ const HeightSelection: React.FC = () => {
       <BackButton />
       <SkipButton onClick={handleSkip} />
 
-      <div className="mt-16 w-full">
+      <div className="mt-10 w-full">
         <h1 className="text-center text-xl font-medium">建立个人报告</h1>
         <ProgressIndicator currentStep={2} totalSteps={7} />
 
