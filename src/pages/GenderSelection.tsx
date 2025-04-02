@@ -57,14 +57,16 @@ const GenderSelection: React.FC = () => {
     if (selectedGender) {
       saveGender(selectedGender);
       saveBirthdate(year, month, day);
+      // 在导航前滚动到顶部
       window.scrollTo(0, 0);
-      navigate('/height');
+      navigate('/height-weight'); // 修改为导航到合并的身高体重页面
     }
   };
 
   const handleSkip = () => {
+    // 在导航前滚动到顶部
     window.scrollTo(0, 0);
-    navigate('/height');
+    navigate('/height-weight'); // 修改为导航到合并的身高体重页面
   };
 
   // 日期选择器滚动处理

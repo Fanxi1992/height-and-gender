@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import Login from "./pages/Login";
 import GenderSelection from "./pages/GenderSelection";
 import HeightSelection from "./pages/HeightSelection";
 import WeightSelection from "./pages/WeightSelection";
+import HeightWeightSelection from "./pages/HeightWeightSelection";
 import TargetWeightSelection from "./pages/TargetWeightSelection";
 import BirthdateSelection from "./pages/BirthdateSelection";
 import DiseaseSelection from "./pages/DiseaseSelection";
@@ -104,6 +104,14 @@ const App = () => (
             } 
           />
           <Route 
+            path="/height-weight" 
+            element={
+              <PageWrapper>
+                <HeightWeightSelection />
+              </PageWrapper>
+            } 
+          />
+          <Route 
             path="/height" 
             element={
               <PageWrapper>
@@ -116,14 +124,6 @@ const App = () => (
             element={
               <PageWrapper>
                 <WeightSelection />
-              </PageWrapper>
-            } 
-          />
-          <Route 
-            path="/target-weight" 
-            element={
-              <PageWrapper>
-                <TargetWeightSelection />
               </PageWrapper>
             } 
           />

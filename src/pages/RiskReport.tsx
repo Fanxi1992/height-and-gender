@@ -151,7 +151,7 @@ const RiskReport: React.FC = () => {
     <div className="page-container bg-black">
       <StatusBar />
       
-      <div className="mt-16 px-4 flex justify-between items-center">
+      <div className="mt-10 px-4 flex justify-between items-center">
         <BackButton />
         <h1 className="text-center text-xl font-medium">建立疾病风险报告</h1>
         <div className="w-8"></div> {/* 占位，使标题居中 */}

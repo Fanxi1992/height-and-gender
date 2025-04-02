@@ -48,7 +48,7 @@ const DiseaseSelection: React.FC = () => {
     <div className="page-container bg-black">
       <StatusBar />
       
-      <div className="mt-16 px-4 flex justify-between items-center">
+      <div className="mt-10 px-4 flex justify-between items-center">
         <BackButton />
         <h1 className="text-xl font-medium text-white">建立个人报告</h1>
         <SkipButton onClick={handleSkip} />
@@ -82,23 +82,26 @@ const DiseaseSelection: React.FC = () => {
         </div>
         
         <button
-          className="w-full py-3 px-4 rounded-full bg-gray-100 text-gray-700 mb-5"
+          className="w-full py-3 px-4 rounded-full bg-gray-100 text-gray-700 mb-2"
           onClick={handleNone}
         >
           以上均无
         </button>
       </div>
       
-      <div className="mx-4 mt-6 mb-4 bg-[#26355A] rounded-3xl p-4 flex items-center">
-        <div className="w-16 h-16 mr-4 flex-shrink-0">
-          <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center text-white text-xs">
-            智能
+      <div className="mt-6">
+          <div className="flex items-center justify-center bg-[#1e4e79] py-3 px-6 rounded-full">
+            <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center mr-4">
+              <img 
+                src="/医师头像.jpg" 
+                alt="医师头像" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <p className="text-white text-base">我可以根据您已有的疾病预测其他潜在的疾病，您提供的信息越精确，生成的结果越精确哦！
+            </p>
           </div>
         </div>
-        <p className="text-white text-sm">
-          我可以根据您已有的疾病预测其他潜在的疾病，您提供的信息越精确，生成的结果越精确哦！
-        </p>
-      </div>
       
       <button 
         onClick={handleNext}
