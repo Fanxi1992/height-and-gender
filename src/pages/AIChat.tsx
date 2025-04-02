@@ -481,6 +481,14 @@ const AIChat: React.FC = () => {
         </Sheet>
         
         <h1 className="text-lg font-medium text-white">你的健康顾问</h1>
+        
+        <button 
+          onClick={handleNewChat}
+          className="absolute right-4 p-2"
+          title="新建聊天"
+        >
+          <Plus size={24} />
+        </button>
       </div>
       
       {/* Chat container */}
