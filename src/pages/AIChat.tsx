@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Plus, MessageCircle, Trash2 } from 'lucide-react';
+import { Menu, X, Plus, MessageCircle, Trash2, MessageSquarePlus } from 'lucide-react';
 import ChatInput from '../components/ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -113,6 +113,8 @@ const getSessionTitle = (session: ChatSession): string => {
 const AIChat: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // --- 核心状态 ---
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -128,7 +130,6 @@ const AIChat: React.FC = () => {
     }
   ]);
   
-  // Chat history state
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([
     {
       id: '1',
@@ -286,6 +287,8 @@ const AIChat: React.FC = () => {
   // --- 新增状态 ---
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Handle sending message
   const handleSendMessage = useCallback((message: string, files?: File[]) => {
@@ -304,48 +307,64 @@ const AIChat: React.FC = () => {
         timestamp: new Date(),
       };
 
-      // 检查这是否是一个新会话的开始 (在添加用户消息之前检查)
-      const isNewSessionStart = messages.length === chatHistory.length;
-
+      // 更新当前聊天窗口的消息
       setMessages(prev => [...prev, userMessage]);
       setAttachedFiles([]);
-
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
 
-      // --- TODO: 调用实际 AI 接口 ---
+      // --- 模拟 AI 回复 ---
       console.log("Sending message:", trimmedMessage, "Files:", files);
       setTimeout(() => {
         const aiResponse: ChatMessage = {
           id: generateUniqueId(),
-          text: `收到你的问题：\"${trimmedMessage}\" ${hasFiles ? `和 ${files.length} 个文件。` : ''}正在处理中... (模拟回复)`,
+          text: `收到你的问题："${trimmedMessage}" ${hasFiles ? `和 ${files.length} 个文件。` : ''}正在处理中... (模拟回复)`,
           isUser: false,
           timestamp: new Date()
         };
+
+        // 更新当前聊天窗口的消息 (加入 AI 回复)
         setMessages(prev => [...prev, aiResponse]);
 
-        // --- 更新聊天历史 ---
-        if (isNewSessionStart && trimmedMessage) { // 如果是新会话且有文本消息
-          // 创建新会话记录
+        // --- 更新聊天历史记录 ---
+        const now = new Date();
+        if (activeSessionId === null && trimmedMessage) {
+          // --- 情况1: 当前是新聊天，且发送了文本消息 ---
           const newSession: ChatSession = {
-            id: generateUniqueId(), // 使用唯一 ID
-            // 使用辅助函数生成标题，并提供完整结构以满足类型检查
-            title: getSessionTitle({ id: '', title: '', messages: [userMessage], date: new Date() }),
-            messages: [userMessage, aiResponse], // 包含用户和AI的消息
-            date: new Date()
+            id: generateUniqueId(),
+            messages: [...messages, userMessage, aiResponse],
+            date: now,
+            title: '', // 临时 title
           };
-          setChatHistory(prev => [newSession, ...prev]); // 添加到历史记录顶部
-        } else {
-          // TODO: 更新当前活动会话的 messages 和 date
-          // 需要引入 activeSessionId 状态来跟踪当前是哪个会话
-          // 并找到对应的会话进行更新
-          console.log("TODO: Update existing chat session history");
+          newSession.title = getSessionTitle(newSession); // 生成标题
+
+          setChatHistory(prev => [newSession, ...prev].sort((a, b) => b.date.getTime() - a.date.getTime())); // 添加并排序
+          setActiveSessionId(newSession.id); // 将新创建的会话设为活动会话
+
+        } else if (activeSessionId !== null) {
+          // --- 情况2: 当前是已存在的聊天 ---
+          setChatHistory(prevHistory => {
+            const newHistory = prevHistory.map(session => {
+              if (session.id === activeSessionId) {
+                // 找到活动会话，创建新对象并更新消息和日期
+                return {
+                  ...session,
+                  messages: [...session.messages, userMessage, aiResponse], // 追加消息
+                  date: now, // 更新时间戳
+                };
+              }
+              return session; // 其他会话保持不变
+            });
+            // 按日期重新排序，确保更新后的会话移动到顶部
+             return newHistory.sort((a, b) => b.date.getTime() - a.date.getTime());
+          });
         }
+        // else: 新聊天只发文件，暂不处理历史记录
 
         setIsSubmitting(false);
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      }, 1500);
+      }, 1500); // 模拟延迟
     }
-  }, [isSubmitting, messages, chatHistory.length]);
+  }, [isSubmitting, messages, chatHistory.length, activeSessionId]);
 
   // --- 新增：处理停止生成 ---
   const handleStopGenerating = useCallback(() => {
@@ -359,12 +378,12 @@ const AIChat: React.FC = () => {
   };
   
   // Load chat history
-  const handleSelectChatSession = (session: ChatSession) => {
+  const handleSelectChatSession = useCallback((session: ChatSession) => {
+    setActiveSessionId(session.id);
     setMessages(session.messages);
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
+    setIsSidebarOpen(false);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  }, []);
   
   // Group chat history by date
   const groupedSessions = groupSessionsByDate(chatHistory);
@@ -390,7 +409,8 @@ const AIChat: React.FC = () => {
   }, []);
 
   // --- 新增：处理新建聊天 ---
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
+    setActiveSessionId(null);
     setMessages([
       {
         id: '1',
@@ -405,17 +425,18 @@ const AIChat: React.FC = () => {
         timestamp: new Date()
       }
     ]);
+    setIsSidebarOpen(false);
     navigate('.', { replace: true, state: {} });
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView();
     }, 0);
-  };
+  }, [navigate]);
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       {/* Header */}
       <div className="relative flex items-center justify-center py-4 border-b border-gray-800 flex-shrink-0">
-        <Sheet>
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetTrigger asChild>
             <button className="absolute left-4 p-2">
               <Menu size={24} />
@@ -428,10 +449,10 @@ const AIChat: React.FC = () => {
             <div className="p-3 flex-shrink-0">
               <Button
                 variant="outline"
-                className="w-full border-gray-600 hover:bg-gray-700"
+                className="w-full border-gray-600 hover:bg-gray-700 justify-start"
                 onClick={handleNewChat}
               >
-                <Plus size={16} className="mr-2" />
+                <MessageSquarePlus size={16} className="mr-2" />
                 新建聊天
               </Button>
             </div>
@@ -444,7 +465,9 @@ const AIChat: React.FC = () => {
                   {sessions.map(session => (
                     <button
                       key={session.id}
-                      className="w-full text-left px-3 py-2.5 rounded-lg mb-1 hover:bg-gray-700 focus:outline-none focus:bg-gray-700 transition-colors duration-150 truncate"
+                      className={`w-full text-left px-3 py-2.5 rounded-lg mb-1 hover:bg-gray-700 focus:outline-none focus:bg-gray-700 transition-colors duration-150 truncate ${
+                        session.id === activeSessionId ? 'bg-gray-600' : ''
+                      }`}
                       onClick={() => handleSelectChatSession(session)}
                       title={getSessionTitle(session)}
                     >
@@ -522,7 +545,7 @@ const AIChat: React.FC = () => {
             )}
           </div>
           
-          {/* Common questions */}
+          {/* Common questions
           <div className="flex space-x-3 overflow-x-auto py-2 scrollbar-none mt-auto">
             {commonQuestions.map((question, index) => (
               <button
@@ -533,7 +556,7 @@ const AIChat: React.FC = () => {
                 {question}
               </button>
             ))}
-          </div>
+          </div> */}
           
           {/* Auto-scroll anchor */}
           <div ref={messagesEndRef} />
