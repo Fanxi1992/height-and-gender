@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StatusBar from '../components/StatusBar';
-import { ArrowRight, Plus, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame, Check, X as CancelIcon } from 'lucide-react';
+import { ArrowRight, MessageCircle, Mic, Activity, Heart, Database, ThumbsUp, Play, RotateCw, User, Utensils, Globe, Flame, Check, X as CancelIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import QRCodeScannerIcon from '../components/QRCodeScannerIcon';
 
 // WebSocket服务器地址
 const WS_URL = 'ws://localhost:8000/ws/audio';
@@ -1005,18 +1006,7 @@ const HomePage: React.FC = () => {
       {/* 页面顶部内容 (保持不变) */}
       <div className="w-full px-5 py-2 pt-10 flex justify-between items-center">
         {/* ... */}
-         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-400">
-          <img
-            src="/lovable-uploads/74077656-41ec-4ddd-9a44-e3279a8ff31c.png"
-            alt="用户头像"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="flex gap-2">
-          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          </button>
-        </div>
+
       </div>
 
       <div className="mt-6 mb-8 text-center w-full px-5">
@@ -1075,68 +1065,62 @@ const HomePage: React.FC = () => {
              !isRecording && !showConfirmation ? "animate-pulse" : "" // 仅在空闲时闪烁
           )}
         >
-           {isRecording ? '正在聆听，松开结束...' : (showConfirmation ? '请确认或放弃识别结果' : 'AI健康助手长按语音提问 ✨')}
+           {isRecording ? '正在聆听，松开结束...' : (showConfirmation ? '请确认或放弃识别结果' : '长按语音提问AI健康助手 ✨')}
         </span>
       </p>
 
-      {/* 健康风险网络图模块 (保持不变) */}
+      {/* 健康风险网络图模块 (修改后) */}
       <div className="w-full px-5 mb-4">
-         {/* ... */}
-         <div className="bg-gradient-to-r from-gray-900 to-black rounded-xl overflow-hidden shadow-lg border border-gray-800">
-          <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white px-4 py-3 flex justify-between items-center">
-            <div className="flex-1">
-              <span className="text-sm font-medium">测一测您的健康风险</span>
-            </div>
-            <div
-              className="flex items-center bg-black/30 px-3 py-1 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
-              onClick={restartRiskAssessment}
-            >
-              <RotateCw size={14} className="mr-1 text-blue-300" />
-              <span className="text-xs">重新测算</span>
-            </div>
-          </div>
-
-          <div
-            className="relative overflow-hidden cursor-pointer"
-            onClick={goToDetailedRisk}
-          >
-            <div className="relative w-full h-48 flex items-center justify-center overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-800 to-purple-900 rounded-xl overflow-hidden shadow-lg">
+          <div className="p-4 flex flex-col relative">
+            {/* 右上角放置背景图 */}
+            <div className="absolute top-0 right-0 w-1/2 h-3/5 overflow-hidden rounded-bl-3xl">
               <img
                 src="/健康风险报告图.jpg"
                 alt="疾病风险网络"
-                className={cn(
-                  "w-full h-auto object-cover transition-all duration-500 ease-in-out",
-                  networkAnimate ? "scale-110 blur-sm" : "scale-100"
-                )}
+                className="w-full h-full object-cover"
               />
+              {/* 图片上的渐变遮罩 */}
+              <div className="absolute inset-0 bg-gradient-to-bl from-transparent to-purple-900"></div>
+            </div>
 
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 transition-opacity duration-500",
-                networkAnimate ? "opacity-70" : "opacity-0"
-              )}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className={cn(
-                    "text-white text-center transition-all duration-500",
-                    networkAnimate ? "opacity-100 scale-100" : "opacity-0 scale-90"
-                  )}>
-                    <div className="text-lg font-bold">分析中...</div>
-                  </div>
-                </div>
+            {/* 标题区域 */}
+            <div className="flex-1 relative z-10 mb-8 flex items-center justify-between">
+              <span className="text-xl font-medium text-white">点击查看详细风险报告</span>
+              <ArrowRight size={20} className="text-white" />
+            </div>
+
+            {/* 底部内容区域 */}
+            <div className="flex items-center mt-2 relative z-10">
+              <div 
+                className="flex items-center bg-white/20 px-4 py-2 cursor-pointer hover:bg-white/30 transition-colors rounded-lg"
+                onClick={goToDetailedRisk}
+              >
+                <span className="text-base text-white">测一测您的健康风险</span>
               </div>
+            </div>
 
-              <div className="absolute bottom-3 right-3 bg-red-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium">
+            {/* 风险标签 - 修改为水平排列（同一行），位于"测一测"按钮下方 */}
+            <div className="flex flex-row space-x-3 mt-3 relative z-10">
+              <div className="bg-red-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white">
                 <Heart size={12} className="mr-1" />
                 高风险: 2 项
               </div>
-              <div className="absolute bottom-3 left-3 bg-yellow-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium">
+              <div className="bg-yellow-500/80 px-3 py-1 rounded-full flex items-center text-xs font-medium text-white">
                 <Activity size={12} className="mr-1" />
                 中风险: 3 项
               </div>
             </div>
-
-            <div className="px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 flex justify-between items-center">
-              <span className="text-sm text-gray-300">点击查看详细风险报告</span>
-              <ArrowRight size={16} className="text-blue-400" />
+            
+            {/* 重新测算 - 移至风险标签下方，使用白色背景 */}
+            <div className="mt-6 relative z-10">
+              <div
+                className="flex items-center bg-white px-5 py-2 rounded-full cursor-pointer hover:bg-white/90 transition-colors w-fit"
+                onClick={restartRiskAssessment}
+              >
+                <RotateCw size={14} className="mr-2 text-blue-600" />
+                <span className="text-sm text-blue-600 font-medium">重新测算</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1148,32 +1132,69 @@ const HomePage: React.FC = () => {
          <div className="grid grid-cols-4 grid-rows-[auto_auto_auto] gap-4 auto-rows-min">
           {/* 我的每周饮食模块 */}
           <div
-            className="col-span-2 row-span-2 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-4 flex flex-col overflow-hidden relative shadow-lg"
+            className="col-span-2 row-span-2 bg-gradient-to-br from-indigo-500/90 to-indigo-600/90 rounded-2xl p-4 flex flex-col overflow-hidden relative shadow-lg"
             onClick={goToKnowledgeBase}
           >
-            <div className="flex justify-between items-start z-10">
-              <h3 className="text-lg font-semibold text-white">我的每周饮食</h3>
+            <div className="absolute top-0 right-0 left-2 text-left py-2  rounded-t-2xl">
+              <p className="text-xs text-white/80">* 扫描食材生成详细菜谱</p>
+            </div>
+            
+            <div className="flex justify-between items-start z-10 mt-5">
+              <h3 className="text-xl font-semibold text-white">我的<br/>每周饮食 </h3>
               <ArrowRight size={20} className="text-white" />
             </div>
-            <p className="text-xs text-white/80 mt-1 mb-4">点击生成适合的菜谱</p>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium text-white">每日推荐</p>
-                <div className="mt-1">
-                  <p className="text-base font-bold text-white">早餐</p>
-                  <p className="text-sm text-white/90">燕麦粥 🌾 + 蓝莓 🫐 + 煮鸡蛋 🥚</p>
+            
+            <div className="mt-4">
+              <div className="rounded-full bg-white/20 flex justify-center py-3 mb-6">
+                <div className="flex items-center">
+                  <div className="w-6 h-6 flex items-center justify-center">
+                    <QRCodeScannerIcon size={20} className="text-white" />
+                  </div>
+                  <span className="text-white ml-1">扫描食材</span>
                 </div>
               </div>
+              
+              <p className="text-sm font-medium text-white">每日推荐</p>
+              
+              <div className="mt-2 space-y-3">
+                <div>
+                  <p className="text-lg font-bold text-white">早餐</p>
+                  <div className="flex space-x-2 mt-1">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🌾 燕麦粥</span>
+                    </div>
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🫐 蓝莓</span>
+                    </div>
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🥚 煮鸡蛋</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div>
-                <p className="text-base font-bold text-white">午餐</p>
-                <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
-              </div>
+                <div>
+                  <p className="text-lg font-bold text-white">午餐</p>
+                  <div className="flex space-x-2 mt-1">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🥗 鸡胸肉沙拉</span>
+                    </div>
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🍞 全麦面包</span>
+                    </div>
+                  </div>
+                </div>
 
-              <div>
-                <p className="text-base font-bold text-white">晚餐</p>
-                <p className="text-sm text-white/90">鸡胸肉沙拉 🥗 + 全麦面包 🍞</p>
+                <div>
+                  <p className="text-lg font-bold text-white">晚餐</p>
+                  <div className="flex space-x-2 mt-1">
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🥗 鸡胸肉沙拉</span>
+                    </div>
+                    <div className="bg-white/20 rounded-full px-3 py-1 flex items-center">
+                      <span className="text-white text-sm">🍞 全麦面包</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
