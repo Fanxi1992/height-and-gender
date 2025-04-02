@@ -311,27 +311,29 @@ const RiskReport: React.FC = () => {
    }, []);
 
   return (
-    <div className="page-container bg-black text-white flex flex-col h-screen overflow-hidden">
+    <div className="px-4 relative bg-black text-white flex flex-col h-screen overflow-y-auto">
       <StatusBar />
 
       {/* Header */}
       <div className="mt-10 px-4 flex justify-between items-center flex-shrink-0">
         <BackButton />
-        <h1 className="text-center text-xl font-medium">建立疾病风险报告</h1>
+        <h1 className="absolute left-1/2 transform -translate-x-1/2 text-xl font-medium"></h1>
         <div className="w-8"></div> {/* Placeholder */}
       </div>
 
       {/* Progress Indicator */}
-      <ProgressIndicator currentStep={6} totalSteps={7} />
+      <div className="mt-10"> {/* 添加上边距，让进度条下移 */}
+        <ProgressIndicator currentStep={6} totalSteps={7} />
+      </div>
 
       {/* Main Content Area (Network and Ranking) - 修改为响应式上下布局 */}
-      <div className="flex-grow flex flex-col overflow-hidden mt-4 mx-2 gap-4">
+      <div className="flex flex-col mt-4 gap-4 pb-6">
 
-        {/* 3D Network Visualization Area - 调整为在移动端占满宽度且有足够高度 */}
-        <div className="flex-grow min-h-[50vh] md:min-h-0 relative rounded-3xl bg-gradient-to-br from-gray-900 via-black to-indigo-900 border border-gray-800 shadow-lg overflow-hidden">
-          <h2 className="absolute top-4 left-4 text-lg font-semibold z-10 text-white bg-black/30 px-3 py-1 rounded-lg flex items-center">
+        {/* 3D Network Visualization Area - 调整为固定高度 */}
+        <div className="h-[60vh] md:h-[65vh] relative rounded-3xl bg-gradient-to-br from-gray-900 via-black to-indigo-900 border border-gray-800 shadow-lg overflow-hidden">
+          <h2 className="absolute top-4 left-4 right-4 text-2xl font-bold z-10 text-white bg-black/30 px-3 py-1 rounded-lg flex items-center justify-center">
             <Heart className="text-red-500 mr-2 w-5 h-5" />
-            潜在疾病风险网络
+            疾病风险网络
           </h2>
 
            {/* HTML Tooltip */}
@@ -399,10 +401,10 @@ const RiskReport: React.FC = () => {
     </Canvas>
   </div>
 
-  {/* Disease Risk Ranking Area - 调整为在移动端占满宽度且有合适高度 */}
-  <div className="h-[40vh] md:h-auto flex-shrink-0 flex flex-col bg-gray-900 rounded-3xl p-4 shadow-lg border border-gray-800 overflow-hidden">
-    <h3 className="text-lg font-semibold mb-3 text-white text-center flex-shrink-0">疾病风险排名</h3>
-    <div className="flex-grow overflow-y-auto pr-1"> {/* 添加滚动条 */}
+  {/* Disease Risk Ranking Area - 修改为全部显示，不使用滚动条 */}
+  <div className="bg-gray-900 rounded-3xl p-4 shadow-lg border border-gray-800">
+    <h3 className="text-lg font-semibold mb-3 text-white text-center">疾病风险排名</h3>
+    <div>
       {/* Header Row */}
       <div className="grid grid-cols-12 text-sm font-medium text-gray-400 mb-2 sticky top-0 bg-gray-900 py-1">
         <div className="col-span-1 text-center">#</div>
