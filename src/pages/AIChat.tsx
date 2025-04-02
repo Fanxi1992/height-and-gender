@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Plus, MessageCircle } from 'lucide-react';
+import { Menu, X, Plus, MessageCircle, Trash2 } from 'lucide-react';
 import ChatInput from '../components/ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 // Define chat history types
 interface FilePreview {
@@ -28,12 +29,14 @@ interface ChatSession {
 }
 
 // Group chat sessions by date
-const groupSessionsByDate = (sessions: ChatSession[]) => {
+const groupSessionsByDate = (sessions: ChatSession[]): Record<string, ChatSession[]> => {
   const groups: Record<string, ChatSession[]> = {};
   
-  sessions.forEach(session => {
-    const date = new Date(session.date);
-    const dateKey = getDateKey(date);
+  // 按日期降序排序会话
+  const sortedSessions = [...sessions].sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  sortedSessions.forEach(session => {
+    const dateKey = getDateKey(session.date);
     
     if (!groups[dateKey]) {
       groups[dateKey] = [];
@@ -41,12 +44,29 @@ const groupSessionsByDate = (sessions: ChatSession[]) => {
     
     groups[dateKey].push(session);
   });
-  
-  return groups;
+
+  // 定义期望的分组顺序
+  const groupOrder = ['今天', '昨天', '过去7天', '过去30天', '更早之前']; // 可以根据需要扩展
+  const orderedGroups: Record<string, ChatSession[]> = {};
+
+  groupOrder.forEach(key => {
+      if (groups[key]) {
+          orderedGroups[key] = groups[key];
+      }
+  });
+
+  // 添加其他可能的分组（例如月份）
+  Object.keys(groups).forEach(key => {
+      if (!groupOrder.includes(key)) {
+          orderedGroups[key] = groups[key]; // 将未在 groupOrder 中的分组添加到末尾
+      }
+  });
+
+  return orderedGroups;
 };
 
 // Get the date key string
-const getDateKey = (date: Date) => {
+const getDateKey = (date: Date): string => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -61,8 +81,33 @@ const getDateKey = (date: Date) => {
   } else if (inputDate.getTime() === yesterday.getTime()) {
     return '昨天';
   } else {
+    // 简化分组，符合 librechat 风格，但可按需调整
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    if (inputDate.getTime() >= sevenDaysAgo.getTime()) {
+      return '过去7天';
+    }
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    if (inputDate.getTime() >= thirtyDaysAgo.getTime()) {
+        return '过去30天';
+    }
+    // 可根据 librechat 添加更细致的月份分组
     return '更早之前';
   }
+};
+
+// --- 辅助函数：获取会话标题 ---
+const getSessionTitle = (session: ChatSession): string => {
+  const firstUserMessage = session.messages.find(m => m.isUser);
+  if (firstUserMessage && firstUserMessage.text) {
+    // 截取前10个字符
+    return firstUserMessage.text.length > 10
+      ? firstUserMessage.text.substring(0, 10) + '...'
+      : firstUserMessage.text;
+  }
+  // 如果没有用户消息或消息为空，提供一个默认标题
+  return session.title || '新对话'; // 可以使用原始 title 作为后备
 };
 
 const AIChat: React.FC = () => {
@@ -244,43 +289,63 @@ const AIChat: React.FC = () => {
 
   // Handle sending message
   const handleSendMessage = useCallback((message: string, files?: File[]) => {
-    // 仅在非提交状态下发送
     if (isSubmitting) return;
 
-    // 检查是否有文本或文件
-    if (message.trim() || (files && files.length > 0)) {
-      setIsSubmitting(true); // 开始提交
+    const trimmedMessage = message.trim();
+    const hasFiles = files && files.length > 0;
 
-      // 构造用户消息
+    if (trimmedMessage || hasFiles) {
+      setIsSubmitting(true);
+
       const userMessage: ChatMessage = {
         id: generateUniqueId(),
-        text: message.trim(),
+        text: trimmedMessage,
         isUser: true,
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, userMessage]);
+      // 检查这是否是一个新会话的开始 (在添加用户消息之前检查)
+      const isNewSessionStart = messages.length === chatHistory.length;
 
-      // 滚动到底部
+      setMessages(prev => [...prev, userMessage]);
+      setAttachedFiles([]);
+
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
 
       // --- TODO: 调用实际 AI 接口 ---
-      console.log("Sending message:", message, "Files:", files); // 打印文件信息
+      console.log("Sending message:", trimmedMessage, "Files:", files);
       setTimeout(() => {
-         const aiResponse: ChatMessage = {
-             id: generateUniqueId(),
-             text: `收到你的问题："${message.trim()}" ${files && files.length > 0 ? `和 ${files.length} 个文件。` : ''}正在处理中... (模拟回复)`,
-             isUser: false,
-             timestamp: new Date()
-         };
-         setMessages(prev => [...prev, aiResponse]);
-         setIsSubmitting(false); // 结束提交
-         // 确保滚动到底部
-         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      }, 1500); // 增加延迟以模拟处理
+        const aiResponse: ChatMessage = {
+          id: generateUniqueId(),
+          text: `收到你的问题：\"${trimmedMessage}\" ${hasFiles ? `和 ${files.length} 个文件。` : ''}正在处理中... (模拟回复)`,
+          isUser: false,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiResponse]);
 
+        // --- 更新聊天历史 ---
+        if (isNewSessionStart && trimmedMessage) { // 如果是新会话且有文本消息
+          // 创建新会话记录
+          const newSession: ChatSession = {
+            id: generateUniqueId(), // 使用唯一 ID
+            // 使用辅助函数生成标题，并提供完整结构以满足类型检查
+            title: getSessionTitle({ id: '', title: '', messages: [userMessage], date: new Date() }),
+            messages: [userMessage, aiResponse], // 包含用户和AI的消息
+            date: new Date()
+          };
+          setChatHistory(prev => [newSession, ...prev]); // 添加到历史记录顶部
+        } else {
+          // TODO: 更新当前活动会话的 messages 和 date
+          // 需要引入 activeSessionId 状态来跟踪当前是哪个会话
+          // 并找到对应的会话进行更新
+          console.log("TODO: Update existing chat session history");
+        }
+
+        setIsSubmitting(false);
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }, 1500);
     }
-  }, [isSubmitting]);
+  }, [isSubmitting, messages, chatHistory.length]);
 
   // --- 新增：处理停止生成 ---
   const handleStopGenerating = useCallback(() => {
@@ -296,7 +361,6 @@ const AIChat: React.FC = () => {
   // Load chat history
   const handleSelectChatSession = (session: ChatSession) => {
     setMessages(session.messages);
-    // Scroll to bottom after messages are loaded
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -325,57 +389,75 @@ const AIChat: React.FC = () => {
     messagesEndRef.current?.scrollIntoView();
   }, []);
 
+  // --- 新增：处理新建聊天 ---
+  const handleNewChat = () => {
+    setMessages([
+      {
+        id: '1',
+        text: '我是你的健康助手小张医生，很高兴见到你！',
+        isUser: false,
+        timestamp: new Date()
+      },
+      {
+        id: '2',
+        text: '我可以帮你预测风险、推荐食谱、分析营养、制定健身计划、欢迎向我提问，还有更多等你来发现～',
+        isUser: false,
+        timestamp: new Date()
+      }
+    ]);
+    navigate('.', { replace: true, state: {} });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView();
+    }, 0);
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="flex flex-col h-screen bg-black text-white">
       {/* Header */}
-      <div className="relative flex items-center justify-center py-4 border-b border-gray-800">
+      <div className="relative flex items-center justify-center py-4 border-b border-gray-800 flex-shrink-0">
         <Sheet>
           <SheetTrigger asChild>
             <button className="absolute left-4 p-2">
-              <Menu size={24} className="text-white" />
+              <Menu size={24} />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="bg-black text-white p-0 w-[85%] border-r border-gray-800">
-            <div className="flex flex-col h-full">
-              <div className="p-4 border-b border-gray-800">
-                <h2 className="text-lg font-medium">聊天历史</h2>
-              </div>
-              <ScrollArea className="flex-1 px-2">
-                {Object.entries(groupedSessions).map(([dateKey, sessions]) => (
-                  <div key={dateKey} className="mb-4">
-                    <h3 className="text-xs text-gray-400 px-3 py-2">{dateKey}</h3>
-                    {sessions.map(session => (
-                      <button
-                        key={session.id}
-                        className="w-full text-left px-3 py-3 rounded-xl mb-2 bg-[#3b2c71] text-white"
-                        onClick={() => handleSelectChatSession(session)}
-                      >
-                        <p className="text-sm truncate">{session.title}</p>
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </ScrollArea>
-              <div className="border-t border-gray-800 p-4">
-                <button className="flex items-center text-blue-400">
-                  <MessageCircle size={18} className="mr-2" />
-                  <span>新建聊天</span>
-                </button>
-              </div>
+          <SheetContent side="left" className="bg-[#171717] text-white p-0 w-[85%] max-w-xs border-r border-gray-800 flex flex-col">
+            <div className="p-4 flex justify-between items-center border-b border-gray-800 flex-shrink-0">
+              <h2 className="text-lg font-medium">聊天历史</h2>
             </div>
+            <div className="p-3 flex-shrink-0">
+              <Button
+                variant="outline"
+                className="w-full border-gray-600 hover:bg-gray-700"
+                onClick={handleNewChat}
+              >
+                <Plus size={16} className="mr-2" />
+                新建聊天
+              </Button>
+            </div>
+            <ScrollArea className="flex-1 px-2 py-2">
+              {Object.entries(groupedSessions).map(([dateKey, sessions]) => (
+                <div key={dateKey} className="mb-3">
+                  <h3 className="text-xs text-gray-400 px-3 py-2 font-medium uppercase tracking-wider">
+                    {dateKey}
+                  </h3>
+                  {sessions.map(session => (
+                    <button
+                      key={session.id}
+                      className="w-full text-left px-3 py-2.5 rounded-lg mb-1 hover:bg-gray-700 focus:outline-none focus:bg-gray-700 transition-colors duration-150 truncate"
+                      onClick={() => handleSelectChatSession(session)}
+                      title={getSessionTitle(session)}
+                    >
+                      <p className="text-sm">{getSessionTitle(session)}</p>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </ScrollArea>
           </SheetContent>
         </Sheet>
         
-        <h1 className="text-lg font-medium text-white">健康顾问</h1>
-        
-        <div className="absolute right-4 flex space-x-4">
-          <button className="p-2">
-            <X size={24} className="text-white" />
-          </button>
-          <button className="p-2">
-            <Plus size={24} className="text-white" />
-          </button>
-        </div>
+        <h1 className="text-lg font-medium text-white">你的健康顾问</h1>
       </div>
       
       {/* Chat container */}
@@ -422,10 +504,22 @@ const AIChat: React.FC = () => {
                        : 'bg-gray-700 text-white rounded-bl-none'
                    }`}
                  >
-                   <p className="text-sm">{message.text}</p>
+                   <p className="text-sm break-words">{message.text}</p>
                  </div>
                </div>
             ))}
+            {isSubmitting && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStopGenerating}
+                  className="border-gray-600 hover:bg-gray-700 text-white"
+                >
+                  停止生成
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Common questions */}
@@ -456,43 +550,34 @@ const AIChat: React.FC = () => {
       />
       
       {/* Bottom tab bar */}
-      <div className="flex justify-around py-3 bg-black border-t border-gray-800">
+      <div className="flex justify-around py-3 bg-black border-t border-gray-800 flex-shrink-0">
         <button 
           onClick={() => navigate('/home')}
           className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           <span className="text-xs">主页</span>
         </button>
         
         <button className="flex flex-col items-center space-y-1 text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 0-8.5 14.8L12 22l8.5-5.2A10 10 0 0 0 12 2zM12 7a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
           <span className="text-xs">机器人</span>
         </button>
         
         <button 
           onClick={() => navigate('/circle')}
-          className="flex flex-col items-center space-y-1"
+          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          <span className="text-xs text-gray-400">圈子</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className=""><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span className="text-xs">圈子</span>
         </button>
         
         <button 
           onClick={() => navigate('/my')}
-          className="flex flex-col items-center space-y-1"
+          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="10" r="3"></circle>
-            <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
-          </svg>
-          <span className="text-xs text-gray-400">我的</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className=""><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg>
+          <span className="text-xs">我的</span>
         </button>
       </div>
     </div>
