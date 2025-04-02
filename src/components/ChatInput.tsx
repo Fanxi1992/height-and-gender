@@ -1,6 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Plus, Send, Square, Paperclip, Mic, X, Image as ImageIcon } from 'lucide-react';
 import TextareaAutosize from 'react-textarea-autosize'; // 需要安装： npm install react-textarea-autosize
+import useSpeechToText from '@/hooks/useSpeechToText'; // --- 新增：导入语音识别 Hook ---
+import AudioRecorderButton from './AudioRecorderButton'; // --- 新增：导入按钮组件 ---
 
 // 文件预览接口
 interface FilePreview {
@@ -28,6 +30,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [inputText, setInputText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- 新增：语音识别 Hook ---
+  const {
+    isListening,
+    isLoading: isSpeechLoading, // 重命名避免与 isSubmitting 冲突
+    toggleRecording,
+    browserSupportsSpeechRecognition,
+  } = useSpeechToText({
+    setText: setInputText, // 将识别的文本直接设置到输入框状态
+    // onTranscriptionComplete: handleSend, // 如果需要识别完成自动发送，取消注释这行
+  });
 
   // 处理文本变化
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -129,7 +142,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           <button
             type="button"
             onClick={triggerFileInput}
-            disabled={isSubmitting || filesLoading}
+            disabled={isSubmitting || filesLoading || isListening} // --- 修改：录音时禁用附件 ---
             className="p-2 text-gray-400 hover:text-white disabled:opacity-50 flex-shrink-0"
             aria-label="Attach image"
           >
@@ -143,7 +156,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             accept="image/*" // 只接受图片
             onChange={handleFileChange}
             style={{ display: 'none' }}
-            disabled={isSubmitting || filesLoading}
+            disabled={isSubmitting || filesLoading || isListening} // --- 修改：录音时禁用 ---
           />
 
           {/* 文本输入框 (TextareaAutosize) */}
@@ -151,18 +164,22 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={inputText}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
-            placeholder="给 Healthbot 发送消息"
+            placeholder={isListening ? "正在听你说话..." : "给 Healthbot 发送消息"} // --- 修改：根据状态改变 placeholder ---
             className="flex-1 bg-transparent text-white border-none outline-none text-sm resize-none max-h-40 overflow-y-auto px-2 py-1.5 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
             rows={1}
-            disabled={isSubmitting || filesLoading}
+            disabled={isSubmitting || filesLoading || isSpeechLoading} // --- 修改：语音加载时也禁用 ---
           />
 
-          {/* 语音按钮 (AudioRecorder placeholder) - 可选 */}
-           {/*
-           <button type="button" className="p-2 text-gray-400 hover:text-white disabled:opacity-50 flex-shrink-0" disabled={isSubmitting || filesLoading}>
-             <Mic size={20} />
-           </button>
-           */}
+          {/* --- 新增：语音按钮 --- */}
+          {browserSupportsSpeechRecognition && ( // 仅在浏览器支持时显示
+             <AudioRecorderButton
+               isListening={isListening}
+               isLoading={isSpeechLoading}
+               onClick={toggleRecording}
+               disabled={isSubmitting || filesLoading} // 提交或文件加载时禁用
+               ariaLabel={isListening ? '停止语音输入' : '开始语音输入'}
+             />
+          )}
 
           {/* 发送/停止按钮 (SendButton/StopButton simulation) */}
           <div className="flex-shrink-0">
@@ -178,7 +195,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={(!(inputText.trim()) && !(files && files.length > 0)) || filesLoading}
+                disabled={(!(inputText.trim()) && !(files && files.length > 0)) || filesLoading || isListening || isSpeechLoading}
                 className="bg-blue-500 text-white rounded-full p-2 disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600"
                 aria-label="Send message"
               >
