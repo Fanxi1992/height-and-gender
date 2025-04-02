@@ -6,11 +6,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // Define chat history types
+interface FilePreview {
+  id: string;
+  file: File;
+  previewUrl: string;
+}
+
 interface ChatMessage {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
+  files?: FilePreview[];
 }
 
 interface ChatSession {
@@ -232,8 +239,8 @@ const AIChat: React.FC = () => {
   };
 
   // Handle sending message
-  const handleSendMessage = useCallback((message: string) => {
-    if (message.trim()) {
+  const handleSendMessage = useCallback((message: string, files?: File[]) => {
+    if (message.trim() || (files && files.length > 0)) {
       const newMessage: ChatMessage = {
         id: generateUniqueId(),
         text: message.trim(),
@@ -248,14 +255,14 @@ const AIChat: React.FC = () => {
       setTimeout(() => {
          const aiResponse: ChatMessage = {
              id: generateUniqueId(),
-             text: `收到你的问题："${message.trim()}" 正在处理中... (模拟回复)`,
+             text: `收到你的问题："${message.trim()}" ${files && files.length > 0 ? `和 ${files.length} 个文件。` : ''}正在处理中... (模拟回复)`,
              isUser: false,
              timestamp: new Date()
          };
          setMessages(prev => [...prev, aiResponse]);
          // 确保滚动到底部
          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 1000);
+      }, 1500);
 
       // 滚动到底部 (延迟确保DOM更新)
       setTimeout(() => {
