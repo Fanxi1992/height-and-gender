@@ -300,11 +300,26 @@ const AIChat: React.FC = () => {
     if (trimmedMessage || hasFiles) {
       setIsSubmitting(true);
 
+      // 创建文件预览对象
+      const filesPreviews: FilePreview[] = [];
+      if (hasFiles && files) {
+        files.forEach(file => {
+          if (file.type.startsWith('image/')) {
+            filesPreviews.push({
+              id: `${file.name}-${Date.now()}`,
+              file: file,
+              previewUrl: URL.createObjectURL(file)
+            });
+          }
+        });
+      }
+
       const userMessage: ChatMessage = {
         id: generateUniqueId(),
         text: trimmedMessage,
         isUser: true,
         timestamp: new Date(),
+        files: filesPreviews.length > 0 ? filesPreviews : undefined,
       };
 
       // 更新当前聊天窗口的消息
@@ -529,13 +544,37 @@ const AIChat: React.FC = () => {
                    </div>
                  )}
                  <div
-                   className={`px-4 py-3 rounded-2xl max-w-[85%] ${
+                   className={`flex flex-col ${
                      message.isUser
-                       ? 'bg-blue-500 text-white rounded-br-none'
-                       : 'bg-gray-700 text-white rounded-bl-none'
+                       ? 'items-end'
+                       : 'items-start'
                    }`}
                  >
-                   <p className="text-sm break-words">{message.text}</p>
+                   {/* 图片显示区域 */}
+                   {message.files && message.files.length > 0 && (
+                     <div className={`flex flex-wrap gap-2 mb-2 ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                       {message.files.map((file) => (
+                         <div key={file.id} className="w-32 h-32 overflow-hidden rounded-lg border border-gray-600">
+                           <img
+                             src={file.previewUrl}
+                             alt="Attached media"
+                             className="w-full h-full object-cover"
+                           />
+                         </div>
+                       ))}
+                     </div>
+                   )}
+
+                   {/* 文本消息 */}
+                   <div
+                     className={`px-4 py-3 rounded-2xl ${
+                       message.isUser
+                         ? 'bg-blue-500 text-white rounded-br-none'
+                         : 'bg-gray-700 text-white rounded-bl-none'
+                     }`}
+                   >
+                     <p className="text-sm break-words">{message.text}</p>
+                   </div>
                  </div>
                </div>
             ))}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Plus, Send, Square, Paperclip, Mic, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Send, Square, Mic, X, Image as ImageIcon, Camera } from 'lucide-react';
 import TextareaAutosize from 'react-textarea-autosize'; // 需要安装： npm install react-textarea-autosize
 import useSpeechToText from '@/hooks/useSpeechToText'; // --- 新增：导入语音识别 Hook ---
 import AudioRecorderButton from './AudioRecorderButton'; // --- 新增：导入按钮组件 ---
@@ -9,6 +9,7 @@ interface FilePreview {
   id: string;
   file: File;
   previewUrl: string;
+  progress?: number; // 新增：上传进度属性 (0-1)
 }
 
 interface ChatInputProps {
@@ -30,6 +31,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [inputText, setInputText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false); // 新增：是否正在上传的状态
 
   // --- 新增：语音识别 Hook ---
   const {
@@ -49,7 +51,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   // 处理发送
   const handleSend = useCallback(() => {
-    if (!isSubmitting && (inputText.trim() || (files && files.length > 0))) {
+    // 修改：当有图片上传时也需要有文字才能发送
+    const hasText = inputText.trim().length > 0;
+    const hasFiles = files && files.length > 0;
+    
+    if (!isSubmitting && hasText && (hasFiles || !hasFiles)) {
       // 提取 File 对象列表
       const fileList = files.map(f => f.file);
       onSendMessage(inputText.trim(), fileList);
@@ -66,6 +72,29 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  // 模拟上传进度
+  const simulateUploadProgress = (fileId: string) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 0.1;
+      if (progress >= 1) {
+        clearInterval(interval);
+        setIsUploading(false);
+        setFiles(prev => 
+          prev.map(f => 
+            f.id === fileId ? {...f, progress: 1} : f
+          )
+        );
+      } else {
+        setFiles(prev => 
+          prev.map(f => 
+            f.id === fileId ? {...f, progress} : f
+          )
+        );
+      }
+    }, 200);
+  };
+
   // 处理文件选择
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
      if (event.target.files) {
@@ -73,22 +102,62 @@ const ChatInput: React.FC<ChatInputProps> = ({
        const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
 
        if (imageFiles.length > 0) {
+         setIsUploading(true);
          const newFilePreviews = imageFiles.map(file => ({
            id: `${file.name}-${Date.now()}`, // 简单唯一 ID
            file: file,
            previewUrl: URL.createObjectURL(file),
+           progress: 0, // 初始进度为0
          }));
+         
          // 附加新文件，而不是替换
          setFiles(prev => [...prev, ...newFilePreviews]);
+         
+         // 为每个文件模拟上传进度
+         newFilePreviews.forEach(file => {
+           simulateUploadProgress(file.id);
+         });
        }
        // 清空 input value 允许再次选择相同文件
        event.target.value = '';
      }
   };
 
-  // 触发文件输入点击
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  // 移动端图片选择
+  const handleMobileImageCapture = (source: 'camera' | 'gallery') => {
+    if (fileInputRef.current) {
+      // 根据来源设置accept和capture属性
+      if (source === 'camera') {
+        fileInputRef.current.setAttribute('capture', 'environment');
+        fileInputRef.current.click();
+      } else {
+        fileInputRef.current.removeAttribute('capture');
+        fileInputRef.current.click();
+      }
+    }
+  };
+
+  // 打开移动端图片选择菜单
+  const openImageUploadMenu = () => {
+    // 检测是否为移动设备
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // 移动端显示选择菜单
+      const result = window.confirm("选择图片来源:\n\n拍摄 / 相册");
+      if (result) {
+        // 确认对应拍摄
+        handleMobileImageCapture('camera');
+      } else {
+        // 取消对应相册
+        handleMobileImageCapture('gallery');
+      }
+    } else {
+      // PC端直接打开文件选择
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    }
   };
 
   // 移除文件
@@ -101,6 +170,44 @@ const ChatInput: React.FC<ChatInputProps> = ({
        }
        return prevFiles.filter(f => f.id !== fileId);
      });
+  };
+
+  // 进度圈组件
+  const ProgressCircle = ({ progress }: { progress: number }) => {
+    const radius = 18;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - progress * circumference;
+    
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-md">
+        <svg width="40" height="40" viewBox="0 0 40 40">
+          <circle 
+            className="text-gray-300"
+            strokeWidth="3"
+            stroke="currentColor"
+            fill="transparent"
+            r={radius}
+            cx="20"
+            cy="20"
+          />
+          <circle
+            className="text-blue-500"
+            strokeWidth="3"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            stroke="currentColor"
+            fill="transparent"
+            r={radius}
+            cx="20"
+            cy="20"
+            style={{
+              transition: 'stroke-dashoffset 0.3s'
+            }}
+          />
+        </svg>
+      </div>
+    );
   };
 
   // --- 模拟 LibreChat 结构 ---
@@ -123,6 +230,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
                    alt={filePreview.file.name}
                    className="w-full h-full object-cover rounded-md border border-gray-600"
                  />
+                 {/* 进度显示 */}
+                 {(filePreview.progress !== undefined && filePreview.progress < 1) && (
+                   <ProgressCircle progress={filePreview.progress} />
+                 )}
                  <button
                    type="button"
                    onClick={() => removeFile(filePreview.id)}
@@ -138,15 +249,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
         {/* 输入框和按钮区域 */}
         <div className="flex items-end gap-2 bg-[#1e1e1e] rounded-3xl p-2 border border-gray-700 focus-within:border-blue-500 transition-colors">
-           {/* 附件按钮 (AttachFile simulation) */}
+           {/* 附件按钮 (AttachFile simulation) - 修改为图片上传按钮 */}
           <button
             type="button"
-            onClick={triggerFileInput}
+            onClick={openImageUploadMenu}
             disabled={isSubmitting || filesLoading || isListening} // --- 修改：录音时禁用附件 ---
             className="p-2 text-gray-400 hover:text-white disabled:opacity-50 flex-shrink-0"
-            aria-label="Attach image"
+            aria-label="上传图片"
           >
-            <Paperclip size={20} />
+            <ImageIcon size={20} />
           </button>
           {/* 隐藏的原生文件输入 */}
           <input
@@ -195,7 +306,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={(!(inputText.trim()) && !(files && files.length > 0)) || filesLoading || isListening || isSpeechLoading}
+                // 修改：当有图片时也必须输入文本才能发送
+                disabled={!inputText.trim() || filesLoading || isListening || isSpeechLoading || isUploading}
                 className="bg-blue-500 text-white rounded-full p-2 disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600"
                 aria-label="Send message"
               >
