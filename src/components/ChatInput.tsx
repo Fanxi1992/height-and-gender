@@ -22,7 +22,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   isSubmitting,
   onStopGenerating,
-  files,
+  files = [], // 默认为空数组，避免 undefined
   setFiles,
   filesLoading = false, // 默认值
 }) => {
@@ -36,7 +36,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   // 处理发送
   const handleSend = useCallback(() => {
-    if ((inputText.trim() || files.length > 0) && !isSubmitting) {
+    if (!isSubmitting && (inputText.trim() || (files && files.length > 0))) {
       // 提取 File 对象列表
       const fileList = files.map(f => f.file);
       onSendMessage(inputText.trim(), fileList);
@@ -101,7 +101,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         className="flex flex-col gap-2"
       >
         {/* 文件预览区域 (FileFormChat simulation) */}
-        {files.length > 0 && (
+        {files && files.length > 0 && (
            <div className="mx-2 flex flex-wrap gap-2 px-3">
              {files.map((filePreview) => (
                <div key={filePreview.id} className="relative group w-16 h-16">
@@ -178,7 +178,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={(!inputText.trim() && files.length === 0) || filesLoading}
+                disabled={(!(inputText.trim()) && !(files && files.length > 0)) || filesLoading}
                 className="bg-blue-500 text-white rounded-full p-2 disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600"
                 aria-label="Send message"
               >

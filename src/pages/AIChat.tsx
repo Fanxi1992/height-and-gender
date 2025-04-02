@@ -238,20 +238,34 @@ const AIChat: React.FC = () => {
     navigate('/home');
   };
 
+  // --- 新增状态 ---
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<FilePreview[]>([]);
+
   // Handle sending message
   const handleSendMessage = useCallback((message: string, files?: File[]) => {
+    // 仅在非提交状态下发送
+    if (isSubmitting) return;
+
+    // 检查是否有文本或文件
     if (message.trim() || (files && files.length > 0)) {
-      const newMessage: ChatMessage = {
+      setIsSubmitting(true); // 开始提交
+
+      // 构造用户消息
+      const userMessage: ChatMessage = {
         id: generateUniqueId(),
         text: message.trim(),
         isUser: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      
-      setMessages(prev => [...prev, newMessage]);
-      
-      // --- TODO: 在这里添加调用实际 AI 接口的逻辑 ---
-      // 模拟 AI 回复
+
+      setMessages(prev => [...prev, userMessage]);
+
+      // 滚动到底部
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+
+      // --- TODO: 调用实际 AI 接口 ---
+      console.log("Sending message:", message, "Files:", files); // 打印文件信息
       setTimeout(() => {
          const aiResponse: ChatMessage = {
              id: generateUniqueId(),
@@ -260,15 +274,18 @@ const AIChat: React.FC = () => {
              timestamp: new Date()
          };
          setMessages(prev => [...prev, aiResponse]);
+         setIsSubmitting(false); // 结束提交
          // 确保滚动到底部
-         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 1500);
+         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }, 1500); // 增加延迟以模拟处理
 
-      // 滚动到底部 (延迟确保DOM更新)
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
     }
+  }, [isSubmitting]);
+
+  // --- 新增：处理停止生成 ---
+  const handleStopGenerating = useCallback(() => {
+    console.log("Stopping generation..."); // 实现停止逻辑 (例如取消 API 请求)
+    setIsSubmitting(false); // 强制结束提交状态
   }, []);
 
   // Handle clicking on a common question
@@ -430,8 +447,12 @@ const AIChat: React.FC = () => {
       </ScrollArea>
       
       {/* Chat input */}
-      <ChatInput 
+      <ChatInput
         onSendMessage={handleSendMessage}
+        isSubmitting={isSubmitting}
+        onStopGenerating={handleStopGenerating}
+        files={attachedFiles}
+        setFiles={setAttachedFiles}
       />
       
       {/* Bottom tab bar */}
