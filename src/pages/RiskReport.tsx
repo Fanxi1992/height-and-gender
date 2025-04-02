@@ -268,6 +268,7 @@ function NetworkGraph({ nodes, edges, onNodeHover, onNodeClick, selectedNodeInde
 }
 
 const RiskReport: React.FC = () => {
+  const navigate = useNavigate();
   const [hoveredNodeData, setHoveredNodeData] = useState<any>(null); // 存储悬浮节点信息
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 }); // Tooltip 位置
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number | null>(null); // 存储选中节点的索引
@@ -309,6 +310,12 @@ const RiskReport: React.FC = () => {
         // 基于风险排序
         return indexedData.sort((a, b) => b.risk - a.risk);
    }, []);
+
+  // 处理下一步按钮点击
+  const handleNext = useCallback(() => {
+    window.scrollTo(0, 0);
+    navigate('/health-trajectory');
+  }, [navigate]);
 
   return (
     <div className="px-4 relative bg-black text-white flex flex-col h-screen overflow-y-auto">
@@ -428,6 +435,16 @@ const RiskReport: React.FC = () => {
     </div>
   </div>
 </div>
+
+  {/* 下一步按钮 - 移出了上面的flex容器，现在是独立的 */}
+  <div className="flex justify-center mt-4 mb-8">
+    <button 
+        onClick={handleNext}
+        className="primary-button"
+      >
+        下一步
+      </button>
+  </div>
 
     </div>
   );
