@@ -1078,24 +1078,37 @@ const HomePage: React.FC = () => {
           {/* 再添加一个左下角的点缀 */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(59,130,246,0.2)_0%,_transparent_70%)] opacity-70"></div>
           
-          {/* 添加 SVG 网络图背景 */}
+          {/* 添加 SVG 网络图背景 - 提高透明度 */}
           <svg
-            className="absolute inset-0 w-full h-full opacity-30 pointer-events-none z-0"
+            className="absolute inset-0 w-full h-full opacity-70 pointer-events-none z-0 ml-20" // 添加了 ml-4 使SVG右移
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 800 400"
           >
             {/* 定义渐变 */}
             <defs>
-              <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <stop offset="0%" stopColor="#fff" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+              {/* 高风险节点渐变 */}
+              <radialGradient id="nodeGlowRed" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity="0.1" />
               </radialGradient>
+              {/* 中风险节点渐变 */}
+              <radialGradient id="nodeGlowYellow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#eab308" stopOpacity="0.1" />
+              </radialGradient>
+              {/* 低风险节点渐变 */}
+              <radialGradient id="nodeGlowBlue" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
+              </radialGradient>
+              {/* 线条渐变 - 增强对比度 */}
               <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.7" />
               </linearGradient>
+              {/* 加强发光效果 */}
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                 <feMerge>
                   <feMergeNode in="coloredBlur" />
                   <feMergeNode in="SourceGraphic" />
@@ -1103,52 +1116,76 @@ const HomePage: React.FC = () => {
               </filter>
             </defs>
             
-            {/* 连接线 - 设计成不规则的六边形网络，有一些随机变化 */}
-            <line x1="150" y1="100" x2="280" y2="140" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="280" y1="140" x2="350" y2="220" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="350" y1="220" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="320" y1="300" x2="200" y2="280" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="200" y1="280" x2="150" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="150" y1="180" x2="150" y2="100" stroke="url(#lineGradient)" strokeWidth="1" />
+            {/* 连接线 - 加粗线条 */}
+            <line x1="150" y1="100" x2="280" y2="140" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="280" y1="140" x2="350" y2="220" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="350" y1="220" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="320" y1="300" x2="200" y2="280" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="200" y1="280" x2="150" y2="180" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="150" y1="180" x2="150" y2="100" stroke="url(#lineGradient)" strokeWidth="2" />
             
-            {/* 外部连接 - 突出显示一些点 */}
-            <line x1="280" y1="140" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="450" y1="90" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="600" y1="130" x2="650" y2="220" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="650" y1="220" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="500" y1="300" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="350" y1="220" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="500" y1="180" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="450" y1="90" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="1" />
-            <line x1="500" y1="180" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="1" />
+            {/* 外部连接 - 加粗线条 */}
+            <line x1="280" y1="140" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="450" y1="90" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="600" y1="130" x2="650" y2="220" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="650" y1="220" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="500" y1="300" x2="320" y2="300" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="350" y1="220" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="500" y1="180" x2="600" y2="130" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="450" y1="90" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="2" />
+            <line x1="500" y1="180" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="2" />
             
-            {/* 额外的斜线连接，增加复杂性 */}
-            <line x1="150" y1="100" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="0.7" />
-            <line x1="200" y1="280" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="0.7" />
-            <line x1="280" y1="140" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="0.7" />
+            {/* 额外的斜线连接 - 加粗线条 */}
+            <line x1="150" y1="100" x2="450" y2="90" stroke="url(#lineGradient)" strokeWidth="1.5" />
+            <line x1="200" y1="280" x2="500" y2="300" stroke="url(#lineGradient)" strokeWidth="1.5" />
+            <line x1="280" y1="140" x2="500" y2="180" stroke="url(#lineGradient)" strokeWidth="1.5" />
             
-            {/* 节点 - 有不同大小，表示不同的重要性 */}
-            <circle cx="150" cy="100" r="5" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="280" cy="140" r="8" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="350" cy="220" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="320" cy="300" r="6" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="200" cy="280" r="6" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="150" cy="180" r="4" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="450" cy="90" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="600" cy="130" r="8" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="650" cy="220" r="5" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="500" cy="300" r="7" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="500" cy="180" r="9" fill="url(#nodeGlow)" filter="url(#glow)" />
+            {/* 节点 - 增大节点尺寸并添加标签 */}
+            {/* 高风险节点 - 红色 */}
+            <circle cx="150" cy="100" r="12" fill="url(#nodeGlowRed)" filter="url(#glow)" />
+            <text x="150" y="130" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">肥胖</text>
             
-            {/* 添加更多小节点，增加复杂性 */}
-            <circle cx="220" cy="120" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="400" cy="150" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="550" cy="160" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="480" cy="240" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="180" cy="220" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="260" cy="240" r="2" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="380" cy="270" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
-            <circle cx="580" cy="200" r="3" fill="url(#nodeGlow)" filter="url(#glow)" />
+            <circle cx="280" cy="140" r="15" fill="url(#nodeGlowRed)" filter="url(#glow)" />
+            <text x="280" y="170" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">高血压</text>
+            
+            {/* 中风险节点 - 黄色 */}
+            <circle cx="350" cy="220" r="12" fill="url(#nodeGlowYellow)" filter="url(#glow)" />
+            <text x="350" y="250" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">血脂异常</text>
+            
+            <circle cx="320" cy="300" r="14" fill="url(#nodeGlowYellow)" filter="url(#glow)" />
+            <text x="320" y="330" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">糖尿病前期</text>
+            
+            <circle cx="200" cy="280" r="12" fill="url(#nodeGlowYellow)" filter="url(#glow)" />
+            <text x="200" y="310" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">代谢综合征</text>
+            
+            {/* 低风险节点 - 蓝色 */}
+            <circle cx="150" cy="180" r="10" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <text x="150" y="210" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">缺乏运动</text>
+            
+            <circle cx="450" cy="90" r="13" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <text x="450" y="120" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">饮食不均衡</text>
+            
+            <circle cx="600" cy="130" r="14" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <text x="600" y="160" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">睡眠不足</text>
+            
+            <circle cx="650" cy="220" r="11" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <text x="650" y="250" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">压力过大</text>
+            
+            <circle cx="500" cy="300" r="13" fill="url(#nodeGlowYellow)" filter="url(#glow)" />
+            <text x="500" y="330" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">心血管风险</text>
+            
+            <circle cx="500" cy="180" r="16" fill="url(#nodeGlowRed)" filter="url(#glow)" />
+            <text x="500" y="210" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">脂肪肝</text>
+            
+            {/* 小节点不需要标签 */}
+            <circle cx="220" cy="120" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="400" cy="150" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="550" cy="160" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="480" cy="240" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="180" cy="220" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="260" cy="240" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="380" cy="270" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
+            <circle cx="580" cy="200" r="5" fill="url(#nodeGlowBlue)" filter="url(#glow)" />
           </svg>
 
           <div className="relative z-10">
