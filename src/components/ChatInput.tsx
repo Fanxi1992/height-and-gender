@@ -19,6 +19,7 @@ interface ChatInputProps {
   files: FilePreview[]; // 新增：文件列表状态
   setFiles: React.Dispatch<React.SetStateAction<FilePreview[]>>; // 新增：更新文件列表的函数
   filesLoading?: boolean; // (可选) 文件是否正在加载
+  assistantName?: string; // 新增：当前助手的名称
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -28,6 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   files = [], // 默认为空数组，避免 undefined
   setFiles,
   filesLoading = false, // 默认值
+  assistantName = '健康助手', // 默认值
 }) => {
   const [inputText, setInputText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -275,7 +277,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={inputText}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
-            placeholder={isListening ? "正在听你说话..." : "给 Healthbot 发送消息"} // --- 修改：根据状态改变 placeholder ---
+            placeholder={isListening ? "正在听你说话..." : `给${assistantName}发送消息`} // --- 修改：根据助手名称改变 placeholder ---
             className="flex-1 bg-transparent text-white border-none outline-none text-sm resize-none max-h-40 overflow-y-auto px-2 py-1.5 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
             rows={1}
             disabled={isSubmitting || filesLoading || isSpeechLoading} // --- 修改：语音加载时也禁用 ---
