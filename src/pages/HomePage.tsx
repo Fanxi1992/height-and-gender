@@ -8,108 +8,6 @@ import QRCodeScannerIcon from '../components/QRCodeScannerIcon';
 // WebSocket服务器地址
 const WS_URL = 'ws://localhost:8000/ws/audio';
 
-// 模拟语音数据的函数（仅用于测试）
-const MOCK_ENABLED = false; // 设置为false禁用模拟数据，部署时需要设置为false
-
-// 创建模拟的音频数据
-// 这里创建的是基本的正弦波音频，实际使用中应该替换为真实的音频数据
-const createMockAudioData = () => {
-  // 创建模拟的音频数据 (简单的正弦波)
-  const sampleRate = 44100;  // 44.1 kHz
-  const duration = 0.5;      // 0.5秒
-  const frequency = 440;     // 440 Hz (A4音符)
-
-  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-  const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
-  const data = buffer.getChannelData(0);
-
-  // 生成简单的正弦波
-  for (let i = 0; i < data.length; i++) {
-    data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate);
-  }
-
-  // 将AudioBuffer转换为ArrayBuffer
-  const offlineContext = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
-  const source = offlineContext.createBufferSource();
-  source.buffer = buffer;
-  source.connect(offlineContext.destination);
-  source.start(0);
-
-  return offlineContext.startRendering();
-};
-
-// 模拟WebSocket服务器
-class MockWebSocket extends EventTarget {
-  url: string;
-  readyState: number = WebSocket.CONNECTING;
-
-  constructor(url: string) {
-    super();
-    this.url = url;
-
-    // 模拟连接建立
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      this.dispatchEvent(new Event('open'));
-
-      // 模拟接收多个音频数据片段
-      this.mockStreamAudioChunks();
-    }, 500);
-  }
-
-  async mockStreamAudioChunks() {
-    console.log('MockWebSocket: 开始模拟音频数据流');
-    // 模拟服务器发送5段音频数据
-    for (let i = 0; i < 5; i++) {
-      // 等待一小段时间，模拟流式传输
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      try {
-        console.log(`MockWebSocket: 创建模拟音频数据 ${i + 1}`);
-        // 创建模拟音频数据
-        const audioBuffer = await createMockAudioData();
-
-        // 创建一个哑的ArrayBuffer作为替代，而不是直接发送AudioBuffer
-        // 在实际应用中，这应该是通过WAV编码器等方式编码的音频数据
-        const dummyArrayBuffer = new ArrayBuffer(1024 * (i + 1));
-        const view = new Uint8Array(dummyArrayBuffer);
-        // 填充一些随机数据，使其在音频解码时产生噪音
-        for (let j = 0; j < view.length; j++) {
-          view[j] = Math.floor(Math.random() * 256);
-        }
-
-        console.log(`MockWebSocket: 发送模拟音频数据 ${i + 1}`);
-        // 发送模拟音频数据，这次使用ArrayBuffer而不是AudioBuffer
-        const messageEvent = new MessageEvent('message', {
-          data: dummyArrayBuffer
-        });
-        this.dispatchEvent(messageEvent);
-      } catch (error) {
-        console.error('MockWebSocket: 创建或发送模拟音频时出错:', error);
-      }
-    }
-
-    // 模拟连接关闭
-    setTimeout(() => {
-      this.readyState = WebSocket.CLOSED;
-      this.dispatchEvent(new Event('close'));
-      console.log('MockWebSocket: 连接已关闭');
-    }, 2000);
-  }
-
-  send(data: any) {
-    // 模拟发送数据
-    console.log('MockWebSocket发送数据:', data);
-  }
-
-  close() {
-    if (this.readyState !== WebSocket.CLOSED) {
-      this.readyState = WebSocket.CLOSED;
-      this.dispatchEvent(new Event('close'));
-    }
-  }
-}
-
 // --- Web Speech API Polyfill ---
 // 确保在所有环境中 window 对象下有 SpeechRecognition 和 SpeechGrammarList
 const BrowserSpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -207,14 +105,14 @@ const HomePage: React.FC = () => {
     }
   }, []);
 
-  // 初始化WebSocket连接 (这部分代码与语音识别无关，保持不变)
+  // 初始化WebSocket连接
   const setupWebSocket = () => {
     if (wsRef.current) {
       wsRef.current.close();
     }
 
-    // 使用模拟WebSocket或真实WebSocket
-    const ws = MOCK_ENABLED ? new MockWebSocket(WS_URL) as unknown as WebSocket : new WebSocket(WS_URL);
+    // 创建新的WebSocket连接
+    const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -434,20 +332,13 @@ const HomePage: React.FC = () => {
     // 注意：音频处理逻辑已移至mediaRecorder.onstop事件处理器中
   };
 
-  // 发送音频数据到后端 (旧的逻辑，与 Web Speech API 无关，保持不变)
+  // 发送音频数据到后端
   const sendAudioToServer = async (audioBlob: Blob) => {
-    // ... (保持不变)
-        setIsLoading(true);
+    setIsLoading(true);
 
     try {
       // 1. 建立WebSocket连接
       setupWebSocket();
-
-      // 如果启用模拟模式，直接返回，不发送HTTP请求
-      if (MOCK_ENABLED) {
-        console.log('模拟模式：发送音频到后端');
-        return;
-      }
 
       // 2. 创建FormData对象发送音频数据
       const formData = new FormData();
