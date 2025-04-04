@@ -55,12 +55,12 @@ const groupSessionsByDate = (sessions: ChatSession[]): Record<string, ChatSessio
       }
   });
 
-  // 添加其他可能的分组（例如月份）
-  Object.keys(groups).forEach(key => {
-      if (!groupOrder.includes(key)) {
-          orderedGroups[key] = groups[key]; // 将未在 groupOrder 中的分组添加到末尾
-      }
-  });
+  // // 添加其他可能的分组（例如月份）
+  // Object.keys(groups).forEach(key => {
+  //     if (!groupOrder.includes(key)) {
+  //         orderedGroups[key] = groups[key]; // 将未在 groupOrder 中的分组添加到末尾
+  //     }
+  // });
 
   return orderedGroups;
 };
