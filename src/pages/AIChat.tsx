@@ -459,7 +459,7 @@ const AIChat: React.FC = () => {
           </SheetTrigger>
           <SheetContent side="left" className="bg-[#171717] text-white p-0 w-[85%] max-w-xs border-r border-gray-800 flex flex-col">
             <div className="p-4 flex justify-between items-center border-b border-gray-800 flex-shrink-0">
-              <h2 className="text-lg font-medium">聊天历史</h2>
+              <h2 className="text-lg font-medium">聊天模式</h2>
             </div>
             <div className="p-3 flex-shrink-0">
               <Button
