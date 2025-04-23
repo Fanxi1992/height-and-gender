@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室 - 健康管家</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .circle-tabs {
+            display: flex;
+            background-color: #fff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .circle-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            color: #8e8e93;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .circle-tab.active {
+            color: #007aff;
+            border-bottom-color: #007aff;
+        }
+        
+        .challenge-banner {
+            background: linear-gradient(135deg, #5e5ce6, #007aff);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .challenge-pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            background-image: url('https://i.imgur.com/JHkBUXX.png');
+            background-size: cover;
+        }
+        
+        .challenge-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .challenge-desc {
+            font-size: 14px;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+        
+        .challenge-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .challenge-stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .challenge-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .team-challenges {
+            margin-bottom: 24px;
+        }
+        
+        .challenge-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .challenge-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 16px;
+        }
+        
+        .challenge-info {
+            flex: 1;
+        }
+        
+        .challenge-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .challenge-period {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
+        .challenge-progress {
+            margin-bottom: 16px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-label {
+            color: #8e8e93;
+        }
+        
+        .progress-value {
+            font-weight: 500;
+        }
+        
+        .team-members {
+            display: flex;
+            margin-bottom: 16px;
+        }
+        
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-right: -8px;
+            object-fit: cover;
+        }
+        
+        .member-count {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f2f2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #8e8e93;
+            margin-left: 4px;
+        }
+        
+        .challenge-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .challenge-reward {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #ff9500;
+        }
+        
+        .reward-icon {
+            margin-right: 4px;
+        }
+        
+        .challenge-action {
+            color: #007aff;
+            font-size: 14px;
+        }
+        
+        .leaderboard {
+            margin-bottom: 24px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: #fff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #f2f2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 16px;
+        }
+        
+        .rank.top-1 {
+            background-color: #ffd700;
+            color: white;
+        }
+        
+        .rank.top-2 {
+            background-color: #c0c0c0;
+            color: white;
+        }
+        
+        .rank.top-3 {
+            background-color: #cd7f32;
+            color: white;
+        }
+        
+        .team-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .team-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        
+        .team-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .team-members-count {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
+        .team-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #007aff;
+        }
+        
+        .create-challenge {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background-color: #007aff;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+        }
+        
+        /* 动态页面样式 */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .post-composer {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .composer-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        
+        .composer-input {
+            flex: 1;
+            border: none;
+            background-color: #f2f2f7;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .composer-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .composer-tools {
+            display: flex;
+        }
+        
+        .composer-tool {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #8e8e93;
+            margin-right: 8px;
+        }
+        
+        .post-btn {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .post-btn:disabled {
+            background-color: #c7c7cc;
+        }
+        
+        .activity-banner {
+            background: linear-gradient(135deg, #ff9500, #ff2d55);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            background-image: url('https://i.imgur.com/JHkBUXX.png');
+            background-size: cover;
+        }
+        
+        .activity-cards {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding: 4px;
+            margin-bottom: 24px;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .activity-cards::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+        
+        .activity-card {
+            min-width: 200px;
+            background-color: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .activity-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .activity-content {
+            padding: 12px;
+        }
+        
+        .activity-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .activity-details {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activity-details i {
+            margin-right: 4px;
+        }
+        
+        .activity-time {
+            margin-right: 8px;
+        }
+        
+        .activity-signup {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            width: 100%;
+        }
+        
+        .feed-post {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .post-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-info {
+            margin-left: 12px;
+        }
+        
+        .author-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .post-time {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
+        .post-options {
+            color: #8e8e93;
+            font-size: 16px;
+        }
+        
+        .post-content {
+            margin-bottom: 16px;
+        }
+        
+        .post-text {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        
+        .post-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        
+        .post-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .post-stats {
+            display: flex;
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 12px;
+        }
+        
+        .post-stat {
+            margin-right: 16px;
+        }
+        
+        .post-actions {
+            display: flex;
+            border-top: 1px solid #e5e5ea;
+            padding-top: 12px;
+        }
+        
+        .post-action {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .post-action i {
+            margin-right: 6px;
+        }
+        
+        .post-action.liked {
+            color: #ff2d55;
+        }
+        
+        .premium-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ff9500;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+        
+        .premium-indicator i {
+            font-size: 8px;
+            margin-right: 2px;
+        }
+        
+        .create-post {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background-color: #ff2d55;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(255,45,85,0.3);
+            z-index: 10;
+        }
+        
+        /* 动态筛选选项 */
+        .feed-filter {
+            display: flex;
+            background-color: #fff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .filter-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .filter-option.active {
+            color: #007aff;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .filter-option.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background-color: #007aff;
+        }
+        
+        /* 专栏文章样式 */
+        .article-post {
+            background-color: #fff;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .article-header {
+            padding: 16px;
+        }
+        
+        .article-label {
+            display: inline-flex;
+            align-items: center;
+            background-color: #111111;
+            color: white;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+            top: -5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .article-label i {
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        
+        .article-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .article-intro {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .article-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .article-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .article-meta {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .article-read-more {
+            color: #007aff;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            padding: 8px 0;
+            margin-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .article-read-more i {
+            margin-left: 4px;
+        }
+        
+        /* 家人页面样式 */
+        .family-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .family-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .family-add-btn {
+            display: flex;
+            align-items: center;
+            background-color: #f2f2f7;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #007aff;
+        }
+        
+        .family-add-btn i {
+            margin-right: 6px;
+        }
+        
+        .family-members-container {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .family-member {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+        
+        .family-member:last-child {
+            border-bottom: none;
+        }
+        
+        .member-avatar-container {
+            position: relative;
+            margin-right: 16px;
+        }
+        
+        .member-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            object-fit: cover;
+        }
+        
+        .member-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+        
+        .member-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .member-status.online {
+            background-color: #34c759;
+        }
+        
+        .member-status.offline {
+            background-color: #8e8e93;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .member-role {
+            font-size: 12px;
+            background-color: #f2f2f7;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            color: #8e8e93;
+            font-weight: normal;
+        }
+        
+        .member-latest-activity {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .member-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background-color: #f2f2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff2d55;
+            font-size: 18px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .section-action {
+            color: #007aff;
+            font-size: 14px;
+        }
+        
+        .care-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .care-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .care-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            margin-right: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .care-icon.medicine {
+            background-color: #ff9500;
+        }
+        
+        .care-icon.appointment {
+            background-color: #5e5ce6;
+        }
+        
+        .care-icon.weather {
+            background-color: #34c759;
+        }
+        
+        .care-content {
+            flex: 1;
+        }
+        
+        .care-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .care-detail {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .care-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .care-action-btn {
+            border: none;
+            border-radius: 16px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .care-action-btn.remind {
+            background-color: #007aff;
+            color: white;
+        }
+        
+        .care-action-btn.check {
+            background-color: #34c759;
+            color: white;
+        }
+        
+        .care-action-btn.navigate {
+            background-color: #5e5ce6;
+            color: white;
+        }
+        
+        .care-action-btn.send {
+            background-color: #ff9500;
+            color: white;
+        }
+        
+        .stats-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .stats-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .stats-period {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .family-score {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34c759, #007aff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .score-value {
+            font-size: 32px;
+            font-weight: 600;
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .stats-details {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .stat-icon.exercise {
+            background-color: #ff9500;
+        }
+        
+        .stat-icon.sleep {
+            background-color: #5e5ce6;
+        }
+        
+        .stat-icon.diet {
+            background-color: #ff2d55;
+        }
+        
+        .stat-info {
+            flex: 1;
+            margin-right: 16px;
+        }
+        
+        .stat-name {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .stat-progress {
+            width: 80px;
+        }
+        
+        .family-challenge-section {
+            margin-bottom: 24px;
+        }
+        
+        .family-challenge-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .challenge-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #34c759;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .challenge-info {
+            margin-bottom: 16px;
+        }
+        
+        .challenge-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .challenge-goal {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .challenge-progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .challenge-progress-bar {
+            height: 8px;
+            background-color: #f2f2f7;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .challenge-members {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .challenge-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .member-contribution {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 6px;
+        }
+        
+        .challenge-reward {
+            border-top: 1px solid #f2f2f7;
+            padding-top: 16px;
+        }
+        
+        .reward-title {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+        }
+        
+        .reward-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ff9500;
+        }
+        
+        .family-meal-section {
+            margin-bottom: 24px;
+        }
+        
+        .meal-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .meal-card {
+            background-color: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .meal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+        }
+        
+        .meal-info {
+            margin-left: 12px;
+        }
+        
+        .meal-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .meal-time {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
+        .meal-images {
+            width: 100%;
+            height: 180px;
+        }
+        
+        .meal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .meal-description {
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .meal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #f2f2f7;
+        }
+        
+        .meal-nutrition {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .nutrition-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #8e8e93;
+        }
+        
+        .nutrition-item i {
+            margin-right: 6px;
+        }
+        
+        .meal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .meal-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background-color: #f2f2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #8e8e93;
+        }
+        
+        .family-benefits-section {
+            margin-bottom: 24px;
+        }
+        
+        .benefits-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+        
+        .benefit-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .benefit-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background-color: #ff9500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .benefit-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .benefit-content {
+            margin-bottom: 16px;
+        }
+        
+        .benefit-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        
+        .family-points {
+            display: flex;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .points-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background-color: #ffcc00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .points-info {
+            flex: 1;
+        }
+        
+        .points-label {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+        }
+        
+        .points-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ff9500;
+        }
+        
+        .points-distribution {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 16px;
+        }
+        
+        .points-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .member-points {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 6px;
+        }
+        
+        .benefit-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .benefit-action-btn {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .benefit-action-btn.transfer {
+            background-color: #f2f2f7;
+            color: #007aff;
+        }
+        
+        .benefit-action-btn.exchange {
+            background-color: #007aff;
+            color: white;
+        }
+        
+        .recommendation-card {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .recommendation-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .recommendation-products {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        
+        .recommendation-products::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .product-card {
+            min-width: 160px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            scroll-snap-align: start;
+        }
+        
+        .product-tag {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 12px;
+        }
+        
+        .product-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .product-price {
+            font-size: 14px;
+            color: #ff3b30;
+        }
+        
+        .product-points {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-header">
+        <div class="nav-title">聊天室</div>
+        <button class="nav-btn">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+    
+    <div class="content">
+        <div class="circle-tabs">
+            <div class="circle-tab active" data-tab="challenges">挑战</div>
+            <div class="circle-tab" data-tab="feed">动态</div>
+            <div class="circle-tab" data-tab="family">家人</div>
+        </div>
+        
+        <div class="tab-content active" id="challenges">
+            <div class="challenge-banner">
+                <div class="challenge-pattern"></div>
+                <div class="challenge-title">30天减脂挑战</div>
+                <div class="challenge-desc">和团队一起坚持30天，赢取丰厚积分奖励！</div>
+                <div class="challenge-stats">
+                    <div class="challenge-stat">
+                        <div class="stat-value">1,280</div>
+                        <div class="stat-label">参与人数</div>
+                    </div>
+                    <div class="challenge-stat">
+                        <div class="stat-value">320</div>
+                        <div class="stat-label">团队数量</div>
+                    </div>
+                    <div class="challenge-stat">
+                        <div class="stat-value">5,000</div>
+                        <div class="stat-label">积分奖池</div>
+                    </div>
+                </div>
+                <button class="challenge-btn">立即参与</button>
+            </div>
+            
+            <div class="section-title">我的挑战</div>
+            <div class="team-challenges">
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon" style="background-color: #34c759;">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <div class="challenge-name">每日万步行</div>
+                            <div class="challenge-period">10月1日 - 10月31日</div>
+                        </div>
+                    </div>
+                    <div class="challenge-progress">
+                        <div class="progress-info">
+                            <div class="progress-label">团队进度</div>
+                            <div class="progress-value">15/31天</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 48%;"></div>
+                        </div>
+                    </div>
+                    <div class="team-members">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <div class="member-count">+2</div>
+                    </div>
+                    <div class="challenge-footer">
+                        <div class="challenge-reward">
+                            <i class="fas fa-medal reward-icon"></i> 奖励: 1,000积分
+                        </div>
+                        <div class="challenge-action">查看详情</div>
+                    </div>
+                </div>
+                
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon" style="background-color: #ff9500;">
+                            <i class="fas fa-weight"></i>
+                        </div>
+                        <div class="challenge-info">
+                            <div class="challenge-name">21天减重挑战</div>
+                            <div class="challenge-period">10月10日 - 10月31日</div>
+                        </div>
+                    </div>
+                    <div class="challenge-progress">
+                        <div class="progress-info">
+                            <div class="progress-label">团队进度</div>
+                            <div class="progress-value">5/21天</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 24%;"></div>
+                        </div>
+                    </div>
+                    <div class="team-members">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar">
+                        <div class="member-count">+3</div>
+                    </div>
+                    <div class="challenge-footer">
+                        <div class="challenge-reward">
+                            <i class="fas fa-medal reward-icon"></i> 奖励: 1,500积分
+                        </div>
+                        <div class="challenge-action">查看详情</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">排行榜</div>
+            <div class="leaderboard">
+                <div class="leaderboard-item">
+                    <div class="rank top-1">1</div>
+                    <div class="team-info">
+                        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="团队头像" class="team-avatar">
+                        <div>
+                            <div class="team-name">减肥先锋队</div>
+                            <div class="team-members-count">8名成员</div>
+                        </div>
+                    </div>
+                    <div class="team-score">2,450</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="rank top-2">2</div>
+                    <div class="team-info">
+                        <img src="https://images.unsplash.com/photo-1522543558187-768b6df7c25c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="团队头像" class="team-avatar">
+                        <div>
+                            <div class="team-name">健康生活团</div>
+                            <div class="team-members-count">6名成员</div>
+                        </div>
+                    </div>
+                    <div class="team-score">2,180</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="rank top-3">3</div>
+                    <div class="team-info">
+                        <img src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="团队头像" class="team-avatar">
+                        <div>
+                            <div class="team-name">轻盈一族</div>
+                            <div class="team-members-count">5名成员</div>
+                        </div>
+                    </div>
+                    <div class="team-score">1,950</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="rank">4</div>
+                    <div class="team-info">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="团队头像" class="team-avatar">
+                        <div>
+                            <div class="team-name">我们都瘦了</div>
+                            <div class="team-members-count">7名成员</div>
+                        </div>
+                    </div>
+                    <div class="team-score">1,820</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="rank">5</div>
+                    <div class="team-info">
+                        <img src="https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="团队头像" class="team-avatar">
+                        <div>
+                            <div class="team-name">健康达人</div>
+                            <div class="team-members-count">6名成员</div>
+                        </div>
+                    </div>
+                    <div class="team-score">1,680</div>
+                </div>
+            </div>
+            
+            <div class="create-challenge">
+                <i class="fas fa-plus"></i>
+            </div>
+        </div>
+        
+        <!-- 动态页面 -->
+        <div class="tab-content" id="feed">
+            <div class="post-composer">
+                <div class="composer-header">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="用户头像" class="user-avatar">
+                    <input type="text" class="composer-input" placeholder="分享你的健康心得...">
+                </div>
+                <div class="composer-actions">
+                    <div class="composer-tools">
+                        <div class="composer-tool">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="composer-tool">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="composer-tool">
+                            <i class="fas fa-link"></i>
+                        </div>
+                    </div>
+                    <button class="post-btn" disabled>发布</button>
+                </div>
+            </div>
+            
+            <div class="feed-filter">
+                <div class="filter-option active">全部</div>
+                <div class="filter-option">文章</div>
+                <div class="filter-option">帖子</div>
+            </div>
+            
+            <div class="activity-banner">
+                <div class="activity-pattern"></div>
+                <div class="challenge-title">线下活动中心</div>
+                <div class="challenge-desc">参与线下健康活动，结交志同道合的朋友！</div>
+            </div>
+            
+            <div class="activity-cards">
+                <div class="activity-card">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="活动图片" class="activity-image">
+                    <div class="activity-content">
+                        <div class="activity-name">城市健步走</div>
+                        <div class="activity-details">
+                            <i class="fas fa-calendar"></i>
+                            <span class="activity-time">10月15日</span>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>中央公园</span>
+                        </div>
+                        <button class="activity-signup">报名参加</button>
+                    </div>
+                </div>
+                <div class="activity-card">
+                    <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="活动图片" class="activity-image">
+                    <div class="activity-content">
+                        <div class="activity-name">瑜伽工作坊</div>
+                        <div class="activity-details">
+                            <i class="fas fa-calendar"></i>
+                            <span class="activity-time">10月20日</span>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>阳光健身中心</span>
+                        </div>
+                        <button class="activity-signup">报名参加</button>
+                    </div>
+                </div>
+                <div class="activity-card">
+                    <img src="https://images.unsplash.com/photo-1555597673-b21d5c935865?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="活动图片" class="activity-image">
+                    <div class="activity-content">
+                        <div class="activity-name">健康饮食讲座</div>
+                        <div class="activity-details">
+                            <i class="fas fa-calendar"></i>
+                            <span class="activity-time">10月25日</span>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>社区中心</span>
+                        </div>
+                        <button class="activity-signup">报名参加</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">推荐专栏</div>
+            
+            <!-- 专栏文章1 -->
+            <div class="article-post">
+                <div class="article-header">
+                    <div class="post-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="用户头像" class="user-avatar">
+                        <div class="author-info">
+                            <div class="author-name">
+                                张健康
+                                <span class="premium-indicator">
+                                    <i class="fas fa-certificate"></i>
+                                    专栏作者
+                                </span>
+                            </div>
+                            <div class="post-time">今天 09:45</div>
+                        </div>
+                    </div>
+                    <div class="article-label">
+                        <i class="fas fa-file-alt"></i>
+                        文章
+                    </div>
+                    <div class="article-title">每日饮水指南：保持水分摄入的科学方法</div>
+                    <div class="article-intro">
+                        水是生命之源，保持充足的水分摄入对身体健康至关重要。本文将为您介绍科学的饮水方法和时间安排，以及如何养成良好的饮水习惯。
+                    </div>
+                </div>
+                <img src="https://images.unsplash.com/photo-1523362628745-0c100150b504?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="文章封面" class="article-cover">
+                <div class="article-footer">
+                    <div class="article-meta">
+                        <div class="post-stats">
+                            <div class="post-stat">128 赞</div>
+                            <div class="post-stat">36 评论</div>
+                            <div class="post-stat">15 分享</div>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action">
+                            <i class="far fa-heart"></i>
+                            <span>赞</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="far fa-comment"></i>
+                            <span>评论</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="far fa-share-square"></i>
+                            <span>分享</span>
+                        </div>
+                    </div>
+                    <div class="article-read-more">
+                        阅读全文
+                        <i class="fas fa-angle-right"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 专栏文章2 -->
+            <div class="article-post">
+                <div class="article-header">
+                    <div class="post-author">
+                        <img src="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="用户头像" class="user-avatar">
+                        <div class="author-info">
+                            <div class="author-name">
+                                王营养师
+                                <span class="premium-indicator">
+                                    <i class="fas fa-certificate"></i>
+                                    专栏作者
+                                </span>
+                            </div>
+                            <div class="post-time">昨天 14:30</div>
+                        </div>
+                    </div>
+                    <div class="article-label">
+                        <i class="fas fa-file-alt"></i>
+                        文章
+                    </div>
+                    <div class="article-title">跑步前后应该吃什么？科学饮食指南</div>
+                    <div class="article-intro">
+                        合理的饮食搭配可以提高跑步效果，减少受伤风险。本文详细解析跑步前后的饮食科学，帮助你更好地规划运动时的营养摄入。
+                    </div>
+                </div>
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="文章封面" class="article-cover">
+                <div class="article-footer">
+                    <div class="article-meta">
+                        <div class="post-stats">
+                            <div class="post-stat">196 赞</div>
+                            <div class="post-stat">42 评论</div>
+                            <div class="post-stat">28 分享</div>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action">
+                            <i class="far fa-heart"></i>
+                            <span>赞</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="far fa-comment"></i>
+                            <span>评论</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="far fa-share-square"></i>
+                            <span>分享</span>
+                        </div>
+                    </div>
+                    <div class="article-read-more">
+                        阅读全文
+                        <i class="fas fa-angle-right"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">动态</div>
+            
+            <!-- 普通帖子 -->
+            <div class="feed-post">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="用户头像" class="user-avatar">
+                        <div class="author-info">
+                            <div class="author-name">李瑜伽</div>
+                            <div class="post-time">昨天 18:30</div>
+                        </div>
+                    </div>
+                    <div class="post-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">
+                        今天完成了"每日万步行"挑战的第15天！走了12,568步，超额完成目标。感觉整个人都更有活力了，之前的膝盖问题也有所改善。坚持真的很重要！#健康生活 #每日万步行
+                    </div>
+                    <div class="post-images">
+                        <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="帖子图片" class="post-image">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="帖子图片" class="post-image">
+                        <img src="https://images.unsplash.com/photo-1461468611824-46457c0e11fd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="帖子图片" class="post-image">
+                    </div>
+                </div>
+                <div class="post-stats">
+                    <div class="post-stat">86 赞</div>
+                    <div class="post-stat">24 评论</div>
+                    <div class="post-stat">7 分享</div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action liked">
+                        <i class="fas fa-heart"></i>
+                        <span>已赞</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="far fa-comment"></i>
+                        <span>评论</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="far fa-share-square"></i>
+                        <span>分享</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feed-post">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="用户头像" class="user-avatar">
+                        <div class="author-info">
+                            <div class="author-name">王跑步</div>
+                            <div class="post-time">2天前</div>
+                        </div>
+                    </div>
+                    <div class="post-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">
+                        大家有没有什么推荐的跑步音乐？最近训练感觉有点枯燥，想找一些节奏感强的音乐提升训练效果，求推荐！
+                    </div>
+                </div>
+                <div class="post-stats">
+                    <div class="post-stat">42 赞</div>
+                    <div class="post-stat">53 评论</div>
+                    <div class="post-stat">2 分享</div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">
+                        <i class="far fa-heart"></i>
+                        <span>赞</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="far fa-comment"></i>
+                        <span>评论</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="far fa-share-square"></i>
+                        <span>分享</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="create-post">
+                <i class="fas fa-pen"></i>
+            </div>
+        </div>
+        
+        <!-- 家人页面 - 保留为空，后续开发 -->
+        <div class="tab-content" id="family">
+            <!-- 家庭成员管理板块 -->
+            <div class="family-header">
+                <div class="family-title">我的家庭</div>
+                <button class="family-add-btn">
+                    <i class="fas fa-user-plus"></i>
+                    <span>添加成员</span>
+                </button>
+            </div>
+            
+            <!-- 家庭成员列表 -->
+            <div class="family-members-container">
+                <div class="family-members-list">
+                    <div class="family-member">
+                        <div class="member-avatar-container">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="家庭成员头像" class="member-avatar-large">
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                爸爸
+                                <span class="member-role">家庭管理员</span>
+                            </div>
+                            <div class="member-latest-activity">刚刚完成了10000步</div>
+                        </div>
+                        <div class="member-action">
+                            <i class="fas fa-heart-pulse"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="family-member">
+                        <div class="member-avatar-container">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="家庭成员头像" class="member-avatar-large">
+                            <div class="member-status offline"></div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">妈妈</div>
+                            <div class="member-latest-activity">3小时前测量了血压</div>
+                        </div>
+                        <div class="member-action">
+                            <i class="fas fa-heart-pulse"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="family-member">
+                        <div class="member-avatar-container">
+                            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="家庭成员头像" class="member-avatar-large">
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">儿子</div>
+                            <div class="member-latest-activity">1小时前参加了篮球训练</div>
+                        </div>
+                        <div class="member-action">
+                            <i class="fas fa-heart-pulse"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 家庭健康关怀提醒 -->
+            <div class="family-care-section">
+                <div class="section-header">
+                    <div class="section-title">健康关怀</div>
+                    <div class="section-action">全部</div>
+                </div>
+                
+                <div class="care-cards">
+                    <div class="care-card">
+                        <div class="care-icon medicine">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="care-content">
+                            <div class="care-title">妈妈的药物提醒</div>
+                            <div class="care-detail">今天傍晚18:30需服用高血压药</div>
+                            <div class="care-actions">
+                                <button class="care-action-btn remind">提醒</button>
+                                <button class="care-action-btn check">已服用</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="care-card">
+                        <div class="care-icon appointment">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="care-content">
+                            <div class="care-title">爸爸的体检预约</div>
+                            <div class="care-detail">明天上午9:00需到市中心医院进行年度体检</div>
+                            <div class="care-actions">
+                                <button class="care-action-btn remind">提醒</button>
+                                <button class="care-action-btn navigate">导航</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="care-card">
+                        <div class="care-icon weather">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div class="care-content">
+                            <div class="care-title">天气变化提醒</div>
+                            <div class="care-detail">明天气温下降10°C，提醒家人增添衣物</div>
+                            <div class="care-actions">
+                                <button class="care-action-btn send">发送提醒</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 家庭健康统计 -->
+            <div class="family-stats-section">
+                <div class="section-header">
+                    <div class="section-title">家庭健康指数</div>
+                    <div class="section-action">详情</div>
+                </div>
+                
+                <div class="stats-card">
+                    <div class="stats-header">
+                        <div class="stats-title">本周总览</div>
+                        <div class="stats-period">10月15日-10月21日</div>
+                    </div>
+                    
+                    <div class="family-score">
+                        <div class="score-circle">
+                            <div class="score-value">86</div>
+                            <div class="score-label">优秀</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-details">
+                        <div class="stat-item">
+                            <div class="stat-icon exercise">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-name">运动总时长</div>
+                                <div class="stat-value">12.5小时</div>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 78%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon sleep">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-name">平均睡眠</div>
+                                <div class="stat-value">7.2小时/天</div>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-icon diet">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-name">健康饮食</div>
+                                <div class="stat-value">82分</div>
+                            </div>
+                            <div class="stat-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 82%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 家庭专属挑战 -->
+            <div class="family-challenge-section">
+                <div class="section-header">
+                    <div class="section-title">家庭挑战</div>
+                    <div class="section-action">创建</div>
+                </div>
+                
+                <div class="family-challenge-card active-challenge">
+                    <div class="challenge-badge">进行中</div>
+                    <div class="challenge-info">
+                        <div class="challenge-name">家庭步数挑战</div>
+                        <div class="challenge-goal">本周目标: 150,000步</div>
+                        <div class="challenge-progress-info">
+                            <span>已完成: 96,450步</span>
+                            <span>剩余: 53,550步</span>
+                        </div>
+                        <div class="challenge-progress-bar">
+                            <div class="progress-fill" style="width: 64%;"></div>
+                        </div>
+                        <div class="challenge-members">
+                            <div class="challenge-member">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-contribution">38,200步</div>
+                            </div>
+                            <div class="challenge-member">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-contribution">28,150步</div>
+                            </div>
+                            <div class="challenge-member">
+                                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-contribution">30,100步</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="challenge-reward">
+                        <div class="reward-title">奖励</div>
+                        <div class="reward-value">家庭电影之夜 + 500积分</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 家庭健康饮食分享 -->
+            <div class="family-meal-section">
+                <div class="section-header">
+                    <div class="section-title">今日饮食分享</div>
+                    <div class="section-action">分享</div>
+                </div>
+                
+                <div class="meal-cards">
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                            <div class="meal-info">
+                                <div class="meal-title">妈妈的健康午餐</div>
+                                <div class="meal-time">今天 12:30</div>
+                            </div>
+                        </div>
+                        <div class="meal-images">
+                            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="餐食图片" class="meal-image">
+                        </div>
+                        <div class="meal-description">
+                            鸡胸肉沙拉配藜麦，富含蛋白质和纤维，低脂低卡路里，健康又美味！
+                        </div>
+                        <div class="meal-footer">
+                            <div class="meal-nutrition">
+                                <div class="nutrition-item">
+                                    <i class="fas fa-fire"></i>
+                                    <span>380千卡</span>
+                                </div>
+                                <div class="nutrition-item">
+                                    <i class="fas fa-drumstick"></i>
+                                    <span>蛋白质: 28g</span>
+                                </div>
+                            </div>
+                            <div class="meal-actions">
+                                <div class="meal-action">
+                                    <i class="far fa-heart"></i>
+                                </div>
+                                <div class="meal-action">
+                                    <i class="far fa-comment"></i>
+                                </div>
+                                <div class="meal-action">
+                                    <i class="fas fa-share-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                            <div class="meal-info">
+                                <div class="meal-title">儿子的训练餐</div>
+                                <div class="meal-time">今天 17:45</div>
+                            </div>
+                        </div>
+                        <div class="meal-images">
+                            <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="餐食图片" class="meal-image">
+                        </div>
+                        <div class="meal-description">
+                            训练后的能量补充，全麦三明治配香蕉和蛋白奶昔，补充碳水和蛋白质！
+                        </div>
+                        <div class="meal-footer">
+                            <div class="meal-nutrition">
+                                <div class="nutrition-item">
+                                    <i class="fas fa-fire"></i>
+                                    <span>520千卡</span>
+                                </div>
+                                <div class="nutrition-item">
+                                    <i class="fas fa-drumstick"></i>
+                                    <span>蛋白质: 35g</span>
+                                </div>
+                            </div>
+                            <div class="meal-actions">
+                                <div class="meal-action">
+                                    <i class="far fa-heart"></i>
+                                </div>
+                                <div class="meal-action">
+                                    <i class="far fa-comment"></i>
+                                </div>
+                                <div class="meal-action">
+                                    <i class="fas fa-share-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 家庭专属福利 -->
+            <div class="family-benefits-section">
+                <div class="section-header">
+                    <div class="section-title">家庭专属福利</div>
+                    <div class="section-action">更多</div>
+                </div>
+                
+                <div class="benefits-card">
+                    <div class="benefit-header">
+                        <div class="benefit-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="benefit-title">家庭积分共享计划</div>
+                    </div>
+                    
+                    <div class="benefit-content">
+                        <div class="benefit-description">
+                            家庭成员可共享积分用于兑换奖励和商品，共同努力获得更多优惠！
+                        </div>
+                        
+                        <div class="family-points">
+                            <div class="points-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="points-info">
+                                <div class="points-label">家庭总积分</div>
+                                <div class="points-value">3,850</div>
+                            </div>
+                        </div>
+                        
+                        <div class="points-distribution">
+                            <div class="points-member">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-points">贡献: 1,450分</div>
+                            </div>
+                            <div class="points-member">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-points">贡献: 1,200分</div>
+                            </div>
+                            <div class="points-member">
+                                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="成员头像" class="member-avatar-small">
+                                <div class="member-points">贡献: 1,200分</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-actions">
+                        <button class="benefit-action-btn transfer">转赠积分</button>
+                        <button class="benefit-action-btn exchange">兑换礼品</button>
+                    </div>
+                </div>
+                
+                <div class="recommendation-card">
+                    <div class="recommendation-title">为家人推荐</div>
+                    <div class="recommendation-products">
+                        <div class="product-card">
+                            <div class="product-tag">适合爸爸</div>
+                            <img src="https://images.unsplash.com/photo-1610925868227-396927c87e55?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="产品图片" class="product-image">
+                            <div class="product-info">
+                                <div class="product-name">智能血压计</div>
+                                <div class="product-price">¥299 <span class="product-points">或 1,500积分</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-card">
+                            <div class="product-tag">适合妈妈</div>
+                            <img src="https://images.unsplash.com/photo-1592194780323-5a888b4a9432?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="产品图片" class="product-image">
+                            <div class="product-info">
+                                <div class="product-name">便携按摩仪</div>
+                                <div class="product-price">¥199 <span class="product-points">或 1,000积分</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-card">
+                            <div class="product-tag">适合全家</div>
+                            <img src="https://images.unsplash.com/photo-1528137825877-4a0dcb38a614?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="产品图片" class="product-image">
+                            <div class="product-info">
+                                <div class="product-name">家庭水果券</div>
+                                <div class="product-price">¥99 <span class="product-points">或 500积分</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="fas fa-home tab-icon"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-chart-line tab-icon"></i>
+            <span>健康</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-book-medical tab-icon"></i>
+            <span>知识库</span>
+        </div>
+        <div class="tab-item active">
+            <i class="fas fa-users tab-icon"></i>
+            <span>聊天室</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-shopping-bag tab-icon"></i>
+            <span>商城</span>
+        </div>
+        <div class="tab-item">
+            <i class="fas fa-user tab-icon"></i>
+            <span>我的</span>
+        </div>
+    </div>
+    
+    <script>
+        // 页面切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.circle-tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有标签的活跃状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 给当前点击的标签添加活跃状态
+                    this.classList.add('active');
+                    
+                    // 切换内容显示
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // 家人页面交互
+            initFamilyPageInteractions();
+        });
+        
+        // 初始化家人页面交互功能
+        function initFamilyPageInteractions() {
+            // 添加家庭成员按钮
+            const addMemberBtn = document.querySelector('.family-add-btn');
+            if (addMemberBtn) {
+                addMemberBtn.addEventListener('click', function() {
+                    alert('邀请家庭成员功能即将上线！');
+                });
+            }
+            
+            // 家庭成员健康状态按钮
+            const memberActions = document.querySelectorAll('.member-action');
+            memberActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    const memberName = this.closest('.family-member').querySelector('.member-name').textContent.trim().split('\n')[0];
+                    alert(`查看${memberName}的详细健康数据`);
+                });
+            });
+            
+            // 健康关怀按钮
+            const careButtons = document.querySelectorAll('.care-action-btn');
+            careButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.textContent.trim();
+                    const careTitle = this.closest('.care-card').querySelector('.care-title').textContent;
+                    alert(`已${action}：${careTitle}`);
+                });
+            });
+            
+            // 家庭挑战创建按钮
+            const createChallengeBtn = document.querySelector('.family-challenge-section .section-action');
+            if (createChallengeBtn) {
+                createChallengeBtn.addEventListener('click', function() {
+                    alert('创建家庭专属挑战');
+                });
+            }
+            
+            // 饮食分享按钮
+            const shareMealBtn = document.querySelector('.family-meal-section .section-action');
+            if (shareMealBtn) {
+                shareMealBtn.addEventListener('click', function() {
+                    alert('分享今日饮食');
+                });
+            }
+            
+            // 饮食互动按钮
+            const mealActions = document.querySelectorAll('.meal-action');
+            mealActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('fa-heart')) {
+                        if (icon.classList.contains('far')) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            this.style.color = '#ff2d55';
+                        } else {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            this.style.color = '#8e8e93';
+                        }
+                    } else if (icon.classList.contains('fa-comment')) {
+                        alert('评论功能即将上线');
+                    } else if (icon.classList.contains('fa-share-alt')) {
+                        alert('分享功能即将上线');
+                    }
+                });
+            });
+            
+            // 积分转赠和兑换按钮
+            const transferPointsBtn = document.querySelector('.benefit-action-btn.transfer');
+            if (transferPointsBtn) {
+                transferPointsBtn.addEventListener('click', function() {
+                    alert('转赠积分给家人');
+                });
+            }
+            
+            const exchangePointsBtn = document.querySelector('.benefit-action-btn.exchange');
+            if (exchangePointsBtn) {
+                exchangePointsBtn.addEventListener('click', function() {
+                    alert('前往积分兑换商城');
+                });
+            }
+            
+            // 产品推荐卡片点击
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const productName = this.querySelector('.product-name').textContent;
+                    alert(`查看${productName}详情`);
+                });
+            });
+        }
+    </script>
+</body>
+</html> 
